@@ -2,7 +2,6 @@ import { mockCards } from "@/data/mockCards";
 import { mockListings } from "@/data/mockListings";
 import { mockMarketplaces } from "@/data/mockMarketplaces";
 import { mockWatchlists } from "@/data/mockWatchlists";
-import { getOpportunityScoreDetails } from "@/lib/scoring/getOpportunityScoreDetails";
 import type { Opportunity } from "@/types/opportunity";
 
 type OpportunityCardProps = {
@@ -30,7 +29,6 @@ export default function OpportunityCard({
   const sellMarketplace = sellListing
     ? findById(mockMarketplaces, sellListing.marketplaceId)
     : undefined;
-  const scoreDetails = getOpportunityScoreDetails(opportunity.score);
 
   return (
     <article className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 shadow-lg shadow-black/10 transition hover:-translate-y-1 hover:border-cyan-400/50 hover:bg-zinc-900/80">
@@ -48,8 +46,8 @@ export default function OpportunityCard({
           </p>
         </div>
 
-        <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-medium text-amber-300">
-          {scoreDetails.stars}
+        <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-semibold text-amber-300">
+          Grade {opportunity.ranking.grade}
         </span>
       </div>
 
@@ -127,12 +125,14 @@ export default function OpportunityCard({
           <p className="mt-1 font-medium text-amber-300">
             {opportunity.score}
           </p>
-          <p className="mt-1 font-medium text-amber-300">
-            {scoreDetails.stars}
-          </p>
           <p className="mt-1 font-medium text-zinc-300">
-            {scoreDetails.label} Opportunity
+            Grade {opportunity.ranking.grade}
           </p>
+          <ul className="mt-3 space-y-1 text-xs text-zinc-400">
+            {opportunity.ranking.explanation.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
         </div>
         <div>
           <p className="text-xs text-zinc-500">Last Updated</p>

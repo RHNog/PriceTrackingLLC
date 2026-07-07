@@ -23,7 +23,7 @@ export const mockCards: Card[] = [
   },
   {
     id: "store-championship-urzas-saga-textless",
-    name: "Store Championship Urza's Saga Textless",
+    name: "Store Championship Urza's Saga Textless Foil",
     game: "Magic",
     set: "Store Championship",
     number: "000",

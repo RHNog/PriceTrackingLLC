@@ -1,3 +1,9 @@
+export interface OpportunityRanking {
+  score: number;
+  grade: "S" | "A" | "B" | "C" | "D";
+  explanation: string[];
+}
+
 export interface Opportunity {
   id: string;
   cardId: string;
@@ -11,5 +17,6 @@ export interface Opportunity {
   totalCosts: number;
   roi: number;
   score: number;
+  ranking: OpportunityRanking;
   detectedAt: string;
 }

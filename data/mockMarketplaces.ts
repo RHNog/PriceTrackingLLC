@@ -25,4 +25,10 @@ export const mockMarketplaces: Marketplace[] = [
     country: "United States",
     currency: "USD",
   },
+  {
+    id: "cardtrader",
+    name: "CardTrader",
+    country: "Italy",
+    currency: "EUR",
+  },
 ];

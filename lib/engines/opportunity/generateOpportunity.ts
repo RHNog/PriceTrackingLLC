@@ -1,0 +1,75 @@
+import { calculateNetProfit } from "@/lib/engines/profit/calculateNetProfit";
+import { calculateOpportunityRanking } from "@/lib/engines/ranking/calculateOpportunityRanking";
+import type { Opportunity } from "@/types/opportunity";
+import type { Listing } from "@/types/listing";
+import type { MarketplaceProvider } from "@/types/provider";
+
+const DEFAULT_MARKETPLACE_FEES = 46;
+const DEFAULT_SHIPPING_COST = 18;
+const DEFAULT_WATCHLIST_ID = "cards-to-watch";
+
+function sortByLowestPrice(first: Listing, second: Listing) {
+  return first.price - second.price;
+}
+
+function sortByHighestPrice(first: Listing, second: Listing) {
+  return second.price - first.price;
+}
+
+function calculateRoi(profit: number, purchasePrice: number) {
+  if (purchasePrice <= 0) {
+    return 0;
+  }
+
+  return Math.round((profit / purchasePrice) * 1000) / 10;
+}
+
+export async function generateOpportunity(
+  provider: MarketplaceProvider,
+  cardId: string,
+): Promise<Opportunity | null> {
+  const card = await provider.getCard(cardId);
+
+  if (!card) {
+    return null;
+  }
+
+  const listings = await provider.getListings(cardId);
+  const recentSales = await provider.getRecentSales(cardId);
+  const buyListing = [...listings].sort(sortByLowestPrice)[0];
+  const sellListing = [...recentSales].sort(sortByHighestPrice)[0];
+
+  if (!buyListing || !sellListing) {
+    return null;
+  }
+
+  const profit = calculateNetProfit({
+    purchasePrice: buyListing.price,
+    sellPrice: sellListing.price,
+    marketplaceFees: DEFAULT_MARKETPLACE_FEES,
+    shippingCost: DEFAULT_SHIPPING_COST,
+  });
+  const roi = calculateRoi(profit.netProfit, buyListing.price);
+  const ranking = calculateOpportunityRanking({
+    roi,
+    profit: profit.netProfit,
+    confidence: 80,
+  });
+
+  return {
+    id: `${provider.id}-${card.id}`,
+    cardId: card.id,
+    buyListingId: buyListing.id,
+    sellListingId: sellListing.id,
+    watchlistId: DEFAULT_WATCHLIST_ID,
+    estimatedFees: DEFAULT_MARKETPLACE_FEES,
+    shippingCost: DEFAULT_SHIPPING_COST,
+    profit: profit.netProfit,
+    paymentFee: profit.paymentFee,
+    totalCosts: profit.totalCosts,
+    roi,
+    score: ranking.score,
+    ranking,
+    detectedAt: "Now",
+  };
+}
