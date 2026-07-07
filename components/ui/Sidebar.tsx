@@ -6,6 +6,10 @@ const navigationItems = [
     href: "/",
   },
   {
+    label: "Purchase Evaluation",
+    href: "/evaluate",
+  },
+  {
     label: "Watchlists",
     href: "/watchlists",
   },
