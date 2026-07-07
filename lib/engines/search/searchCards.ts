@@ -5,7 +5,7 @@ import type { Card } from "@/types/card";
 import type { SearchQuery } from "@/types/searchQuery";
 import type { SearchResult } from "@/types/searchResult";
 
-function createSearchQuery(raw: string): SearchQuery {
+export function createSearchQuery(raw: string): SearchQuery {
   const normalized = normalizeQuery(raw);
 
   return {
@@ -15,10 +15,14 @@ function createSearchQuery(raw: string): SearchQuery {
   };
 }
 
-function getCardSearchText(card: Card) {
+export function getCardSearchText(card: Card) {
   return normalizeQuery(
     `${card.name} ${card.game} ${card.set} ${card.number} ${card.rarity} ${card.finish}`,
   );
+}
+
+export function getCardExactText(card: Card) {
+  return normalizeQuery(card.name);
 }
 
 export function searchCards(raw: string, cards: Card[]): SearchResult<Card>[] {
@@ -32,6 +36,7 @@ export function searchCards(raw: string, cards: Card[]): SearchResult<Card>[] {
 
   return scoreSearchResults({
     candidates: cards,
+    getExactText: getCardExactText,
     getSearchText: getCardSearchText,
     query,
   });

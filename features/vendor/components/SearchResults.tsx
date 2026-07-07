@@ -1,10 +1,10 @@
-import type { Card } from "@/types/card";
+import type { CardIdentity } from "@/types/cardIdentity";
 import type { SearchResult } from "@/types/searchResult";
 
 type SearchResultsProps = {
-  results: SearchResult<Card>[];
+  results: SearchResult<CardIdentity>[];
   selectedCardId: string;
-  onSelectCard: (card: Card) => void;
+  onSelectCard: (identity: CardIdentity) => void;
 };
 
 export default function SearchResults({
@@ -33,14 +33,14 @@ export default function SearchResults({
             }`}
           >
             <span>
-              <span className="block text-sm font-semibold">
-                {result.item.name}
-              </span>
+              <span className="block text-sm font-semibold">{result.item.name}</span>
               <span className="mt-1 block text-xs opacity-75">
-                {result.item.game} / {result.item.set} / {result.item.finish}
+                {result.item.game} / {result.item.printings.length} printings
               </span>
             </span>
-            <span className="text-xs opacity-70">{result.item.rarity}</span>
+            <span className="text-xs opacity-70">
+              Score {result.score}
+            </span>
           </button>
         ))
       ) : (

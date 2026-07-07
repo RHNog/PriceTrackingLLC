@@ -6,6 +6,7 @@ export function normalizeQuery(raw: string) {
   return raw
     .toLowerCase()
     .trim()
+    .replace(/['’]/g, "")
     .replace(/[^\w\s]/g, " ")
     .replace(/\s+/g, " ");
 }

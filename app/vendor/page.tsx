@@ -8,15 +8,24 @@ import {
 import VendorWorkspace, {
   type VendorMarketSnapshot,
 } from "@/features/vendor/components/VendorWorkspace";
-import { MockMarketplaceProvider } from "@/lib/providers/MockMarketplaceProvider";
+import { ScryfallProvider } from "@/lib/providers/identity/ScryfallProvider";
+import { MockMarketProvider } from "@/lib/providers/market/MockMarketProvider";
+
+async function getIdentityCards() {
+  const identityProvider = new ScryfallProvider();
+  const cards = await identityProvider.searchCards("urza saga textless");
+
+  return cards.length > 0 ? cards : mockCards;
+}
 
 export default async function VendorPage() {
-  const provider = new MockMarketplaceProvider();
+  const cards = await getIdentityCards();
+  const marketProvider = new MockMarketProvider();
   const marketSnapshots: VendorMarketSnapshot[] = await Promise.all(
-    mockCards.map(async (card) => ({
+    cards.map(async (card) => ({
       cardId: card.id,
-      listings: await provider.getListings(card.id),
-      recentSales: await provider.getRecentSales(card.id),
+      listings: await marketProvider.getListings(card.id),
+      recentSales: await marketProvider.getRecentSales(card.id),
     })),
   );
 
@@ -33,7 +42,7 @@ export default async function VendorPage() {
         </header>
 
         <VendorWorkspace
-          cards={mockCards}
+          cards={cards}
           defaultStrategyId={defaultStrategyId}
           marketSnapshots={marketSnapshots}
           strategies={seedStrategies}

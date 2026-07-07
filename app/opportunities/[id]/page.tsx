@@ -12,7 +12,7 @@ import { mockWatchlists } from "@/data/mockWatchlists";
 import OpportunityDetails from "@/features/opportunities/components/OpportunityDetails";
 import { generateOpportunity } from "@/lib/engines/opportunity/generateOpportunity";
 import { applyStrategy } from "@/lib/engines/strategy/applyStrategy";
-import { MockMarketplaceProvider } from "@/lib/providers/MockMarketplaceProvider";
+import { MockMarketProvider } from "@/lib/providers/market/MockMarketProvider";
 
 type OpportunityDetailsPageProps = {
   params: Promise<{
@@ -28,7 +28,7 @@ export default async function OpportunityDetailsPage({
   params,
 }: OpportunityDetailsPageProps) {
   const { id } = await params;
-  const provider = new MockMarketplaceProvider();
+  const provider = new MockMarketProvider();
   const selectedStrategy =
     findById(seedStrategies, defaultStrategyId) ?? seedStrategies[0];
   const selectedStrategyProfile = selectedStrategy

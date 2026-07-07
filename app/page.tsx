@@ -7,10 +7,10 @@ import {
   seedStrategyProfiles,
 } from "@/data/seedStrategies";
 import { generateOpportunity } from "@/lib/engines/opportunity/generateOpportunity";
-import { MockMarketplaceProvider } from "@/lib/providers/MockMarketplaceProvider";
+import { MockMarketProvider } from "@/lib/providers/market/MockMarketProvider";
 
 export default async function Home() {
-  const provider = new MockMarketplaceProvider();
+  const provider = new MockMarketProvider();
   const opportunity = await generateOpportunity(
     provider,
     "store-championship-urzas-saga-textless",

@@ -1,12 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CardSearchPalette from "@/features/vendor/components/CardSearchPalette";
+import PrintingResults from "@/features/vendor/components/PrintingResults";
 import PurchasePanel from "@/features/vendor/components/PurchasePanel";
 import type { PurchaseEvaluation } from "@/lib/engines/evaluation/evaluatePurchase";
-import { searchCards } from "@/lib/engines/search/searchCards";
+import { searchPrintings } from "@/lib/engines/search/searchPrintings";
 import type { Card } from "@/types/card";
+import type { CardIdentity } from "@/types/cardIdentity";
 import type { Listing } from "@/types/listing";
+import type { ResolvedIntent } from "@/types/resolvedIntent";
+import type { SearchResult } from "@/types/searchResult";
 import type { Strategy } from "@/types/strategy";
 import type { StrategyProfile } from "@/types/strategyProfile";
 
@@ -44,6 +48,19 @@ function findRecentSale(snapshot?: VendorMarketSnapshot) {
   return snapshot?.recentSales[0] ?? findHighestListing(snapshot?.listings ?? []);
 }
 
+function createInitialResults(cards: Card[]): SearchResult<CardIdentity>[] {
+  return cards.map((card) => ({
+    item: {
+      id: card.name.toLowerCase(),
+      name: card.name,
+      game: card.game,
+      printings: [card],
+    },
+    matchedTerms: [],
+    score: 1,
+  }));
+}
+
 export default function VendorWorkspace({
   cards,
   defaultStrategyId,
@@ -52,13 +69,87 @@ export default function VendorWorkspace({
   strategyProfiles,
 }: VendorWorkspaceProps) {
   const [query, setQuery] = useState("");
-  const [selectedCardId, setSelectedCardId] = useState(cards[0]?.id ?? "");
+  const [selectedCardId, setSelectedCardId] = useState(
+    cards[0]?.name.toLowerCase() ?? "",
+  );
+  const [selectedPrintingId, setSelectedPrintingId] = useState("");
+  const [printingQuery, setPrintingQuery] = useState("");
   const [askingPrice, setAskingPrice] = useState("");
   const [strategyId, setStrategyId] = useState(defaultStrategyId);
   const [evaluation, setEvaluation] = useState<PurchaseEvaluation | null>(null);
+  const [providerResults, setProviderResults] = useState<
+    SearchResult<CardIdentity>[]
+  >([]);
+  const [resolvedIntent, setResolvedIntent] = useState<ResolvedIntent>();
+  const initialResults = useMemo(() => createInitialResults(cards), [cards]);
+  const searchResults = query.trim() ? providerResults : initialResults;
 
-  const searchResults = useMemo(() => searchCards(query, cards), [cards, query]);
-  const selectedCard = findById(cards, selectedCardId) ?? searchResults[0]?.item;
+  useEffect(() => {
+    const normalizedQuery = query.trim();
+
+    if (!normalizedQuery) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    async function runIdentitySearch() {
+      const response = await fetch(
+        `/api/identity/search?q=${encodeURIComponent(normalizedQuery)}`,
+        { signal: controller.signal },
+      );
+      const payload = (await response.json()) as {
+        intent?: ResolvedIntent;
+        results?: SearchResult<CardIdentity>[];
+      };
+
+      setResolvedIntent(payload.intent);
+      setProviderResults(payload.results ?? []);
+      setSelectedPrintingId(
+        payload.intent?.printingResolution?.selectedPrinting?.id ??
+          (payload.intent?.printingResolution?.shouldAutoCommit
+            ? payload.intent?.printingResolution?.printingCandidates[0]?.printing.id
+            : "") ??
+          "",
+      );
+    }
+
+    runIdentitySearch().catch((error) => {
+      if (!controller.signal.aborted) {
+        console.error(error);
+        setResolvedIntent(undefined);
+        setProviderResults([]);
+      }
+    });
+
+    return () => controller.abort();
+  }, [query]);
+
+  const selectedIdentity =
+    searchResults.find((result) => result.item.id === selectedCardId)?.item ??
+    (query.trim() ? resolvedIntent?.selectedIdentity : undefined) ??
+    searchResults[0]?.item;
+  const printingResults = selectedIdentity
+    ? searchPrintings(printingQuery, selectedIdentity.printings)
+    : [];
+  const constraintPrintingCandidates =
+    resolvedIntent?.printingResolution?.printingCandidates ?? [];
+  const selectedConstraintPrinting =
+    constraintPrintingCandidates.find(
+      (candidate) => candidate.printing.id === selectedPrintingId,
+    )?.printing ??
+    (resolvedIntent?.printingResolution?.shouldAutoCommit
+      ? resolvedIntent?.printingResolution?.selectedPrinting
+      : undefined) ??
+    (resolvedIntent?.printingResolution?.shouldAutoCommit
+      ? constraintPrintingCandidates[0]?.printing
+      : undefined);
+  const selectedCard = printingQuery.trim()
+    ? printingResults[0]?.item
+    : selectedConstraintPrinting ??
+      (resolvedIntent?.printingResolution?.shouldAutoCommit
+        ? printingResults[0]?.item
+        : undefined);
   const selectedStrategy = findById(strategies, strategyId) ?? strategies[0];
   const selectedProfile = selectedStrategy
     ? findById(strategyProfiles, selectedStrategy.profileId)
@@ -66,17 +157,21 @@ export default function VendorWorkspace({
   const selectedSnapshot = selectedCard
     ? findMarketSnapshot(marketSnapshots, selectedCard.id)
     : undefined;
+  const marketSnapshot = selectedSnapshot ?? marketSnapshots[0];
   const currentMarketListing = findHighestListing(
-    selectedSnapshot?.listings ?? [],
+    marketSnapshot?.listings ?? [],
   );
-  const lowestListing = findLowestListing(selectedSnapshot?.listings ?? []);
-  const recentSale = findRecentSale(selectedSnapshot);
+  const lowestListing = findLowestListing(marketSnapshot?.listings ?? []);
+  const recentSale = findRecentSale(marketSnapshot);
 
-  function handleSelectCard(card: Card) {
-    const snapshot = findMarketSnapshot(marketSnapshots, card.id);
+  function handleSelectCard(identity: CardIdentity) {
+    const firstPrinting = identity.printings[0];
+    const snapshot = findMarketSnapshot(marketSnapshots, firstPrinting.id);
     const lowestPrice = findLowestListing(snapshot?.listings ?? [])?.price;
 
-    setSelectedCardId(card.id);
+    setSelectedCardId(identity.id);
+    setSelectedPrintingId(firstPrinting.id);
+    setPrintingQuery("");
     setAskingPrice(lowestPrice ? String(lowestPrice) : "");
     setEvaluation(null);
   }
@@ -89,9 +184,12 @@ export default function VendorWorkspace({
   return (
     <div className="space-y-6">
       <CardSearchPalette
+        interpretationSummary={
+          query.trim() ? resolvedIntent?.resolutionExplanation : undefined
+        }
         query={query}
         results={searchResults}
-        selectedCardId={selectedCard?.id ?? ""}
+        selectedCardId={selectedIdentity?.id ?? ""}
         onQueryChange={setQuery}
         onSelectCard={handleSelectCard}
       />
@@ -112,6 +210,30 @@ export default function VendorWorkspace({
           ))}
         </select>
       </label>
+
+      {selectedIdentity ? (
+        <div className="space-y-4">
+          <label className="block max-w-xs space-y-2">
+            <span className="block text-sm font-medium text-zinc-300">
+              Filter printings...
+            </span>
+            <input
+              type="search"
+              value={printingQuery}
+              onChange={(event) => setPrintingQuery(event.target.value)}
+              placeholder="Filter printings..."
+              className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/30"
+            />
+          </label>
+          {printingQuery.trim() ? null : (
+            <PrintingResults
+              candidates={constraintPrintingCandidates}
+              selectedPrintingId={selectedCard?.id ?? ""}
+              onSelectPrinting={setSelectedPrintingId}
+            />
+          )}
+        </div>
+      ) : null}
 
       {selectedCard ? (
         <PurchasePanel

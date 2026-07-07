@@ -1,1 +1,1 @@
-export type { MarketplaceProvider } from "@/types/provider";
+export type { MarketProvider } from "@/types/marketProvider";

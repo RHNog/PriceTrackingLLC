@@ -3,6 +3,7 @@ import type { SearchResult } from "@/types/searchResult";
 
 type ScoreSearchResultsInput<T> = {
   candidates: T[];
+  getExactText?: (candidate: T) => string;
   getSearchText: (candidate: T) => string;
   query: SearchQuery;
 };
@@ -15,12 +16,16 @@ function getMatchedTerms(tokens: string[], candidateText: string) {
   );
 }
 
-function scoreCandidate(query: SearchQuery, candidateText: string) {
+function scoreCandidate(
+  query: SearchQuery,
+  candidateText: string,
+  exactText?: string,
+) {
   if (!query.normalized) {
     return 1;
   }
 
-  if (candidateText === query.normalized) {
+  if (exactText === query.normalized || candidateText === query.normalized) {
     return 1000;
   }
 
@@ -58,19 +63,21 @@ function scoreCandidate(query: SearchQuery, candidateText: string) {
 
 export function scoreSearchResults<T>({
   candidates,
+  getExactText,
   getSearchText,
   query,
 }: ScoreSearchResultsInput<T>): SearchResult<T>[] {
   return candidates
     .map((candidate) => {
       const candidateText = getSearchText(candidate);
+      const exactText = getExactText?.(candidate);
       const matchedTerms = query.normalized
         ? getMatchedTerms(query.tokens, candidateText)
         : [];
 
       return {
         item: candidate,
-        score: scoreCandidate(query, candidateText),
+        score: scoreCandidate(query, candidateText, exactText),
         matchedTerms,
       };
     })

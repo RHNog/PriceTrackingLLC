@@ -2,18 +2,20 @@
 
 import { useEffect, useRef } from "react";
 import SearchResults from "@/features/vendor/components/SearchResults";
-import type { Card } from "@/types/card";
+import type { CardIdentity } from "@/types/cardIdentity";
 import type { SearchResult } from "@/types/searchResult";
 
 type CardSearchPaletteProps = {
+  interpretationSummary?: string[];
   query: string;
-  results: SearchResult<Card>[];
+  results: SearchResult<CardIdentity>[];
   selectedCardId: string;
   onQueryChange: (query: string) => void;
-  onSelectCard: (card: Card) => void;
+  onSelectCard: (identity: CardIdentity) => void;
 };
 
 export default function CardSearchPalette({
+  interpretationSummary = [],
   query,
   results,
   selectedCardId,
@@ -38,6 +40,14 @@ export default function CardSearchPalette({
         aria-label="Search cards"
         className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-5 py-4 text-lg text-zinc-100 shadow-lg shadow-black/10 outline-none placeholder:text-zinc-500 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30"
       />
+
+      {interpretationSummary.length > 0 ? (
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 text-sm text-zinc-300">
+          {interpretationSummary.map((item) => (
+            <p key={item}>{item}</p>
+          ))}
+        </div>
+      ) : null}
 
       <SearchResults
         results={results}

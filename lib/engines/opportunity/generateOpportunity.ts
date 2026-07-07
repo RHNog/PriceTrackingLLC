@@ -1,7 +1,7 @@
 import { calculateNetProfit } from "@/lib/engines/profit/calculateNetProfit";
 import type { Opportunity } from "@/types/opportunity";
 import type { Listing } from "@/types/listing";
-import type { MarketplaceProvider } from "@/types/provider";
+import type { MarketProvider } from "@/types/marketProvider";
 
 const DEFAULT_MARKETPLACE_FEES = 46;
 const DEFAULT_SHIPPING_COST = 18;
@@ -24,15 +24,9 @@ function calculateRoi(profit: number, purchasePrice: number) {
 }
 
 export async function generateOpportunity(
-  provider: MarketplaceProvider,
+  provider: MarketProvider,
   cardId: string,
 ): Promise<Opportunity | null> {
-  const card = await provider.getCard(cardId);
-
-  if (!card) {
-    return null;
-  }
-
   const listings = await provider.getListings(cardId);
   const recentSales = await provider.getRecentSales(cardId);
   const buyListing = [...listings].sort(sortByLowestPrice)[0];
@@ -50,8 +44,8 @@ export async function generateOpportunity(
   });
   const roi = calculateRoi(profit.netProfit, buyListing.price);
   return {
-    id: `${provider.id}-${card.id}`,
-    cardId: card.id,
+    id: `${provider.id}-${cardId}`,
+    cardId,
     buyListingId: buyListing.id,
     sellListingId: sellListing.id,
     watchlistId: DEFAULT_WATCHLIST_ID,
