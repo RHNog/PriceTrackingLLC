@@ -6,6 +6,10 @@ const navigationItems = [
     href: "/",
   },
   {
+    label: "Vendor Workspace",
+    href: "/vendor",
+  },
+  {
     label: "Purchase Evaluation",
     href: "/evaluate",
   },

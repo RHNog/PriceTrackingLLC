@@ -47,6 +47,18 @@ export default function PurchaseEvaluationResult({
           </p>
         </div>
         <div className="rounded-md bg-zinc-950/60 p-4">
+          <p className="text-xs text-zinc-500">Negotiation Margin</p>
+          <p
+            className={`mt-1 text-lg font-semibold ${
+              decision.negotiationMargin >= 0
+                ? "text-emerald-400"
+                : "text-amber-300"
+            }`}
+          >
+            {formatCurrency(decision.negotiationMargin)}
+          </p>
+        </div>
+        <div className="rounded-md bg-zinc-950/60 p-4">
           <p className="text-xs text-zinc-500">ROI</p>
           <p className="mt-1 text-lg font-semibold text-cyan-300">
             {decision.roi}%

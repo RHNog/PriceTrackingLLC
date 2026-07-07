@@ -114,12 +114,14 @@ export function evaluatePurchase(
     input.purchasePrice,
     maximumPurchasePrice,
   );
+  const negotiationMargin = maximumPurchasePrice - input.purchasePrice;
 
   return {
     decision: {
       action,
       confidence: ranking.score,
       maximumPurchasePrice,
+      negotiationMargin,
       expectedProfit: profit.netProfit,
       roi,
       explanation: [
@@ -128,6 +130,11 @@ export function evaluatePurchase(
           : "The offer does not fit the selected strategy constraints.",
         `The ranking engine scored this offer ${ranking.score}.`,
         `The recommended maximum purchase price is $${maximumPurchasePrice}.`,
+        negotiationMargin >= 0
+          ? `Negotiation margin is $${negotiationMargin} below the maximum.`
+          : `Negotiation margin is $${Math.abs(
+              negotiationMargin,
+            )} above the maximum.`,
         ...ranking.explanation,
       ],
     },
