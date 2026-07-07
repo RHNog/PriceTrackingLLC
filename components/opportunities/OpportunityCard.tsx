@@ -2,6 +2,7 @@ import { mockCards } from "@/data/mockCards";
 import { mockListings } from "@/data/mockListings";
 import { mockMarketplaces } from "@/data/mockMarketplaces";
 import { mockWatchlists } from "@/data/mockWatchlists";
+import { getOpportunityScoreDetails } from "@/lib/scoring/getOpportunityScoreDetails";
 import type { Opportunity } from "@/types/opportunity";
 
 type OpportunityCardProps = {
@@ -10,24 +11,6 @@ type OpportunityCardProps = {
 
 function formatCurrency(value: number) {
   return `$${value.toLocaleString()}`;
-}
-
-function getConfidenceStars(confidence: number) {
-  let activeStars = 1;
-
-  if (confidence >= 95) {
-    activeStars = 5;
-  } else if (confidence >= 85) {
-    activeStars = 4;
-  } else if (confidence >= 70) {
-    activeStars = 3;
-  } else if (confidence >= 50) {
-    activeStars = 2;
-  }
-
-  return Array.from({ length: 5 }, (_, index) =>
-    index < activeStars ? "★" : "☆",
-  ).join("");
 }
 
 function findById<T extends { id: string }>(items: T[], id: string) {
@@ -47,7 +30,7 @@ export default function OpportunityCard({
   const sellMarketplace = sellListing
     ? findById(mockMarketplaces, sellListing.marketplaceId)
     : undefined;
-  const confidenceStars = getConfidenceStars(opportunity.confidence);
+  const scoreDetails = getOpportunityScoreDetails(opportunity.score);
 
   return (
     <article className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 shadow-lg shadow-black/10 transition hover:-translate-y-1 hover:border-cyan-400/50 hover:bg-zinc-900/80">
@@ -66,7 +49,7 @@ export default function OpportunityCard({
         </div>
 
         <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-medium text-amber-300">
-          {confidenceStars}
+          {scoreDetails.stars}
         </span>
       </div>
 
@@ -79,7 +62,7 @@ export default function OpportunityCard({
 
       <div className="mt-5 grid grid-cols-2 gap-3 border-t border-zinc-800 pt-5 text-sm">
         <div className="rounded-md bg-zinc-950/60 p-3">
-          <p className="text-xs text-zinc-500">Buy Price</p>
+          <p className="text-xs text-zinc-500">Purchase Price</p>
           <p className="mt-1 font-semibold text-white">
             {formatCurrency(buyListing?.price ?? 0)}
           </p>
@@ -91,9 +74,13 @@ export default function OpportunityCard({
           </p>
         </div>
         <div className="rounded-md bg-zinc-950/60 p-3">
-          <p className="text-xs text-zinc-500">Expected Profit</p>
-          <p className="mt-1 font-semibold text-emerald-400">
-            {formatCurrency(opportunity.expectedProfit)}
+          <p className="text-xs text-zinc-500">Net Profit</p>
+          <p
+            className={`mt-1 text-lg font-semibold ${
+              opportunity.profit >= 0 ? "text-emerald-400" : "text-red-400"
+            }`}
+          >
+            {formatCurrency(opportunity.profit)}
           </p>
         </div>
         <div className="rounded-md bg-zinc-950/60 p-3">
@@ -103,7 +90,7 @@ export default function OpportunityCard({
           </p>
         </div>
         <div className="rounded-md bg-zinc-950/60 p-3">
-          <p className="text-xs text-zinc-500">Estimated Fees</p>
+          <p className="text-xs text-zinc-500">Marketplace Fees</p>
           <p className="mt-1 font-semibold text-white">
             {formatCurrency(opportunity.estimatedFees)}
           </p>
@@ -112,6 +99,12 @@ export default function OpportunityCard({
           <p className="text-xs text-zinc-500">Shipping</p>
           <p className="mt-1 font-semibold text-white">
             {formatCurrency(opportunity.shippingCost)}
+          </p>
+        </div>
+        <div className="rounded-md bg-zinc-950/60 p-3">
+          <p className="text-xs text-zinc-500">Payment Fee</p>
+          <p className="mt-1 font-semibold text-white">
+            {formatCurrency(opportunity.paymentFee)}
           </p>
         </div>
       </div>
@@ -130,9 +123,15 @@ export default function OpportunityCard({
           </p>
         </div>
         <div>
-          <p className="text-xs text-zinc-500">Confidence</p>
+          <p className="text-xs text-zinc-500">Opportunity Score</p>
           <p className="mt-1 font-medium text-amber-300">
-            {confidenceStars}
+            {opportunity.score}
+          </p>
+          <p className="mt-1 font-medium text-amber-300">
+            {scoreDetails.stars}
+          </p>
+          <p className="mt-1 font-medium text-zinc-300">
+            {scoreDetails.label} Opportunity
           </p>
         </div>
         <div>

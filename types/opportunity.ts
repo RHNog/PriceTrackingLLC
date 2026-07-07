@@ -6,8 +6,10 @@ export interface Opportunity {
   watchlistId: string;
   estimatedFees: number;
   shippingCost: number;
-  expectedProfit: number;
+  profit: number;
+  paymentFee: number;
+  totalCosts: number;
   roi: number;
-  confidence: number;
+  score: number;
   detectedAt: string;
 }

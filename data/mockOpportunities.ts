@@ -1,4 +1,27 @@
+import { calculateNetProfit } from "@/lib/engines/profit/calculateNetProfit";
+import { calculateOpportunityScore } from "@/lib/scoring/calculateOpportunityScore";
 import type { Opportunity } from "@/types/opportunity";
+
+const urzasSagaProfit = calculateNetProfit({
+  purchasePrice: 645,
+  sellPrice: 812,
+  marketplaceFees: 42,
+  shippingCost: 18,
+});
+
+const moxOpalProfit = calculateNetProfit({
+  purchasePrice: 520,
+  sellPrice: 640,
+  marketplaceFees: 35,
+  shippingCost: 15,
+});
+
+const storeChampionshipProfit = calculateNetProfit({
+  purchasePrice: 725,
+  sellPrice: 895,
+  marketplaceFees: 46,
+  shippingCost: 18,
+});
 
 export const mockOpportunities: Opportunity[] = [
   {
@@ -9,9 +32,16 @@ export const mockOpportunities: Opportunity[] = [
     watchlistId: "arbitrage-br-usa",
     estimatedFees: 42,
     shippingCost: 18,
-    expectedProfit: 107,
+    profit: urzasSagaProfit.netProfit,
+    paymentFee: urzasSagaProfit.paymentFee,
+    totalCosts: urzasSagaProfit.totalCosts,
     roi: 16.6,
-    confidence: 98,
+    score: calculateOpportunityScore({
+      roi: 16.6,
+      profit: urzasSagaProfit.netProfit,
+      shippingCost: 18,
+      estimatedFees: 42,
+    }),
     detectedAt: "Now",
   },
   {
@@ -22,9 +52,16 @@ export const mockOpportunities: Opportunity[] = [
     watchlistId: "spikes",
     estimatedFees: 35,
     shippingCost: 15,
-    expectedProfit: 70,
+    profit: moxOpalProfit.netProfit,
+    paymentFee: moxOpalProfit.paymentFee,
+    totalCosts: moxOpalProfit.totalCosts,
     roi: 13.4,
-    confidence: 89,
+    score: calculateOpportunityScore({
+      roi: 13.4,
+      profit: moxOpalProfit.netProfit,
+      shippingCost: 15,
+      estimatedFees: 35,
+    }),
     detectedAt: "Now",
   },
   {
@@ -35,9 +72,16 @@ export const mockOpportunities: Opportunity[] = [
     watchlistId: "cards-to-watch",
     estimatedFees: 46,
     shippingCost: 18,
-    expectedProfit: 106,
+    profit: storeChampionshipProfit.netProfit,
+    paymentFee: storeChampionshipProfit.paymentFee,
+    totalCosts: storeChampionshipProfit.totalCosts,
     roi: 14.6,
-    confidence: 96,
+    score: calculateOpportunityScore({
+      roi: 14.6,
+      profit: storeChampionshipProfit.netProfit,
+      shippingCost: 18,
+      estimatedFees: 46,
+    }),
     detectedAt: "Now",
   },
 ];
