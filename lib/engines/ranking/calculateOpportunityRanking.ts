@@ -1,7 +1,4 @@
-import {
-  DefaultRankingWeights,
-  type RankingWeights,
-} from "@/lib/engines/ranking/RankingWeights";
+import type { RankingWeights } from "@/lib/engines/ranking/RankingWeights";
 import type { OpportunityRanking } from "@/types/opportunity";
 
 type OpportunityRankingInput = {
@@ -10,7 +7,7 @@ type OpportunityRankingInput = {
   confidence: number;
   liquidity?: number;
   risk?: number;
-  weights?: RankingWeights;
+  weights: RankingWeights;
 };
 
 function clampScore(score: number) {
@@ -48,7 +45,7 @@ function getGrade(score: number): OpportunityRanking["grade"] {
 export function calculateOpportunityRanking(
   input: OpportunityRankingInput,
 ): OpportunityRanking {
-  const weights = input.weights ?? DefaultRankingWeights;
+  const weights = input.weights;
   const liquidity = input.liquidity ?? 50;
   const risk = input.risk ?? 50;
   const profitScore = normalizeProfit(input.profit);

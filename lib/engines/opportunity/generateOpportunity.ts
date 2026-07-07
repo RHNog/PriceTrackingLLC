@@ -1,5 +1,4 @@
 import { calculateNetProfit } from "@/lib/engines/profit/calculateNetProfit";
-import { calculateOpportunityRanking } from "@/lib/engines/ranking/calculateOpportunityRanking";
 import type { Opportunity } from "@/types/opportunity";
 import type { Listing } from "@/types/listing";
 import type { MarketplaceProvider } from "@/types/provider";
@@ -50,12 +49,6 @@ export async function generateOpportunity(
     shippingCost: DEFAULT_SHIPPING_COST,
   });
   const roi = calculateRoi(profit.netProfit, buyListing.price);
-  const ranking = calculateOpportunityRanking({
-    roi,
-    profit: profit.netProfit,
-    confidence: 80,
-  });
-
   return {
     id: `${provider.id}-${card.id}`,
     cardId: card.id,
@@ -68,8 +61,6 @@ export async function generateOpportunity(
     paymentFee: profit.paymentFee,
     totalCosts: profit.totalCosts,
     roi,
-    score: ranking.score,
-    ranking,
     detectedAt: "Now",
   };
 }

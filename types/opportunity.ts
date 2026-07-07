@@ -16,7 +16,10 @@ export interface Opportunity {
   paymentFee: number;
   totalCosts: number;
   roi: number;
+  detectedAt: string;
+}
+
+export interface RankedOpportunity extends Opportunity {
   score: number;
   ranking: OpportunityRanking;
-  detectedAt: string;
 }

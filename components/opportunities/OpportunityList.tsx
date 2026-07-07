@@ -1,8 +1,8 @@
 import OpportunityCard from "@/components/opportunities/OpportunityCard";
-import type { Opportunity } from "@/types/opportunity";
+import type { RankedOpportunity } from "@/types/opportunity";
 
 type OpportunityListProps = {
-  opportunities: Opportunity[];
+  opportunities: RankedOpportunity[];
 };
 
 export default function OpportunityList({

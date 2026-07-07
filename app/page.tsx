@@ -1,7 +1,11 @@
 import AppShell from "@/components/ui/AppShell";
-import OpportunityFilters from "@/components/opportunities/OpportunityFilters";
+import HotOpportunitiesWorkspace from "@/components/opportunities/HotOpportunitiesWorkspace";
 import OpportunityHeader from "@/components/opportunities/OpportunityHeader";
-import OpportunityList from "@/components/opportunities/OpportunityList";
+import {
+  defaultStrategyId,
+  seedStrategies,
+  seedStrategyProfiles,
+} from "@/data/seedStrategies";
 import { generateOpportunity } from "@/lib/engines/opportunity/generateOpportunity";
 import { MockMarketplaceProvider } from "@/lib/providers/MockMarketplaceProvider";
 
@@ -17,8 +21,12 @@ export default async function Home() {
     <AppShell>
       <div className="w-full space-y-6">
         <OpportunityHeader />
-        <OpportunityFilters />
-        <OpportunityList opportunities={opportunities} />
+        <HotOpportunitiesWorkspace
+          opportunities={opportunities}
+          strategies={seedStrategies}
+          strategyProfiles={seedStrategyProfiles}
+          defaultStrategyId={defaultStrategyId}
+        />
       </div>
     </AppShell>
   );
