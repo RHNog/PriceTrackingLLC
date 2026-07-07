@@ -1,15 +1,19 @@
 import type { ReactNode } from "react";
-import Sidebar from "@/components/ui/Sidebar";
+import Sidebar, { type NavItemLabel } from "@/components/ui/Sidebar";
 import Topbar from "@/components/ui/Topbar";
 
 type AppShellProps = {
   children: ReactNode;
+  selectedNavItem?: NavItemLabel;
 };
 
-export default function AppShell({ children }: AppShellProps) {
+export default function AppShell({
+  children,
+  selectedNavItem = "Dashboard",
+}: AppShellProps) {
   return (
     <div className="flex min-h-screen bg-zinc-950 text-white">
-      <Sidebar />
+      <Sidebar selectedItem={selectedNavItem} />
 
       {/* The right side contains the topbar and the current page content. */}
       <div className="flex min-w-0 flex-1 flex-col">

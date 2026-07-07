@@ -1,15 +1,39 @@
 import NavItem from "@/components/ui/NavItem";
 
 const navigationItems = [
-  "Dashboard",
-  "Watchlists",
-  "Cards",
-  "Alerts",
-  "Analytics",
-  "Settings",
+  {
+    label: "Dashboard",
+    href: "/",
+  },
+  {
+    label: "Watchlists",
+    href: "/watchlists",
+  },
+  {
+    label: "Cards",
+    href: "#",
+  },
+  {
+    label: "Alerts",
+    href: "#",
+  },
+  {
+    label: "Analytics",
+    href: "#",
+  },
+  {
+    label: "Settings",
+    href: "#",
+  },
 ];
 
-export default function Sidebar() {
+export type NavItemLabel = (typeof navigationItems)[number]["label"];
+
+type SidebarProps = {
+  selectedItem?: NavItemLabel;
+};
+
+export default function Sidebar({ selectedItem = "Dashboard" }: SidebarProps) {
   return (
     <aside className="flex min-h-screen w-[260px] flex-none flex-col border-r border-zinc-800 bg-zinc-950 text-zinc-100">
       {/* App title area at the top of the sidebar. */}
@@ -21,11 +45,11 @@ export default function Sidebar() {
       <nav aria-label="Primary navigation" className="flex-1 px-4 py-6">
         <ul className="space-y-2">
           {navigationItems.map((item) => (
-            <li key={item}>
+            <li key={item.label}>
               <NavItem
-                href="#"
-                label={item}
-                isSelected={item === "Dashboard"}
+                href={item.href}
+                label={item.label}
+                isSelected={item.label === selectedItem}
               />
             </li>
           ))}
