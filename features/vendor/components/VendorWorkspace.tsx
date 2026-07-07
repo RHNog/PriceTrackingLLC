@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import CardSearchPalette from "@/features/vendor/components/CardSearchPalette";
 import PurchasePanel from "@/features/vendor/components/PurchasePanel";
 import type { PurchaseEvaluation } from "@/lib/engines/evaluation/evaluatePurchase";
+import { searchCards } from "@/lib/engines/search/searchCards";
 import type { Card } from "@/types/card";
 import type { Listing } from "@/types/listing";
 import type { Strategy } from "@/types/strategy";
@@ -56,20 +57,8 @@ export default function VendorWorkspace({
   const [strategyId, setStrategyId] = useState(defaultStrategyId);
   const [evaluation, setEvaluation] = useState<PurchaseEvaluation | null>(null);
 
-  const filteredCards = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-
-    if (!normalizedQuery) {
-      return cards;
-    }
-
-    return cards.filter((card) =>
-      `${card.name} ${card.game} ${card.set}`
-        .toLowerCase()
-        .includes(normalizedQuery),
-    );
-  }, [cards, query]);
-  const selectedCard = findById(cards, selectedCardId) ?? filteredCards[0];
+  const searchResults = useMemo(() => searchCards(query, cards), [cards, query]);
+  const selectedCard = findById(cards, selectedCardId) ?? searchResults[0]?.item;
   const selectedStrategy = findById(strategies, strategyId) ?? strategies[0];
   const selectedProfile = selectedStrategy
     ? findById(strategyProfiles, selectedStrategy.profileId)
@@ -101,7 +90,7 @@ export default function VendorWorkspace({
     <div className="space-y-6">
       <CardSearchPalette
         query={query}
-        results={filteredCards}
+        results={searchResults}
         selectedCardId={selectedCard?.id ?? ""}
         onQueryChange={setQuery}
         onSelectCard={handleSelectCard}

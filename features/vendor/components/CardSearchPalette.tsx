@@ -3,10 +3,11 @@
 import { useEffect, useRef } from "react";
 import SearchResults from "@/features/vendor/components/SearchResults";
 import type { Card } from "@/types/card";
+import type { SearchResult } from "@/types/searchResult";
 
 type CardSearchPaletteProps = {
   query: string;
-  results: Card[];
+  results: SearchResult<Card>[];
   selectedCardId: string;
   onQueryChange: (query: string) => void;
   onSelectCard: (card: Card) => void;
@@ -39,7 +40,7 @@ export default function CardSearchPalette({
       />
 
       <SearchResults
-        cards={results}
+        results={results}
         selectedCardId={selectedCardId}
         onSelectCard={onSelectCard}
       />
