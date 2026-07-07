@@ -1,0 +1,58 @@
+import type { Listing } from "@/types/listing";
+
+export const mockListings: Listing[] = [
+  {
+    id: "buy-urzas-saga-ligamagic",
+    marketplaceId: "ligamagic",
+    cardId: "urzas-saga-textless-foil",
+    price: 645,
+    quantity: 1,
+    url: "#",
+    updatedAt: "Now",
+  },
+  {
+    id: "sell-urzas-saga-tcgplayer",
+    marketplaceId: "tcgplayer",
+    cardId: "urzas-saga-textless-foil",
+    price: 812,
+    quantity: 1,
+    url: "#",
+    updatedAt: "Now",
+  },
+  {
+    id: "buy-mox-opal-tcgplayer",
+    marketplaceId: "tcgplayer",
+    cardId: "mox-opal-judge-foil",
+    price: 520,
+    quantity: 1,
+    url: "#",
+    updatedAt: "Now",
+  },
+  {
+    id: "sell-mox-opal-card-kingdom",
+    marketplaceId: "card-kingdom",
+    cardId: "mox-opal-judge-foil",
+    price: 640,
+    quantity: 1,
+    url: "#",
+    updatedAt: "Now",
+  },
+  {
+    id: "buy-store-championship-urzas-saga-ebay",
+    marketplaceId: "ebay",
+    cardId: "store-championship-urzas-saga-textless",
+    price: 725,
+    quantity: 1,
+    url: "#",
+    updatedAt: "Now",
+  },
+  {
+    id: "sell-store-championship-urzas-saga-tcgplayer",
+    marketplaceId: "tcgplayer",
+    cardId: "store-championship-urzas-saga-textless",
+    price: 895,
+    quantity: 1,
+    url: "#",
+    updatedAt: "Now",
+  },
+];

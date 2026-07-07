@@ -2,7 +2,7 @@ import NavItem from "@/components/ui/NavItem";
 
 const navigationItems = [
   {
-    label: "Dashboard",
+    label: "🔥 Hot Opportunities",
     href: "/",
   },
   {
@@ -33,7 +33,9 @@ type SidebarProps = {
   selectedItem?: NavItemLabel;
 };
 
-export default function Sidebar({ selectedItem = "Dashboard" }: SidebarProps) {
+export default function Sidebar({
+  selectedItem = "🔥 Hot Opportunities",
+}: SidebarProps) {
   return (
     <aside className="flex min-h-screen w-[260px] flex-none flex-col border-r border-zinc-800 bg-zinc-950 text-zinc-100">
       {/* App title area at the top of the sidebar. */}

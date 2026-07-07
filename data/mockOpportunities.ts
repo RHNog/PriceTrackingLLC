@@ -1,0 +1,43 @@
+import type { Opportunity } from "@/types/opportunity";
+
+export const mockOpportunities: Opportunity[] = [
+  {
+    id: "urzas-saga-textless-foil",
+    cardId: "urzas-saga-textless-foil",
+    buyListingId: "buy-urzas-saga-ligamagic",
+    sellListingId: "sell-urzas-saga-tcgplayer",
+    watchlistId: "arbitrage-br-usa",
+    estimatedFees: 42,
+    shippingCost: 18,
+    expectedProfit: 107,
+    roi: 16.6,
+    confidence: 98,
+    detectedAt: "Now",
+  },
+  {
+    id: "mox-opal-judge-foil",
+    cardId: "mox-opal-judge-foil",
+    buyListingId: "buy-mox-opal-tcgplayer",
+    sellListingId: "sell-mox-opal-card-kingdom",
+    watchlistId: "spikes",
+    estimatedFees: 35,
+    shippingCost: 15,
+    expectedProfit: 70,
+    roi: 13.4,
+    confidence: 89,
+    detectedAt: "Now",
+  },
+  {
+    id: "store-championship-urzas-saga-textless",
+    cardId: "store-championship-urzas-saga-textless",
+    buyListingId: "buy-store-championship-urzas-saga-ebay",
+    sellListingId: "sell-store-championship-urzas-saga-tcgplayer",
+    watchlistId: "cards-to-watch",
+    estimatedFees: 46,
+    shippingCost: 18,
+    expectedProfit: 106,
+    roi: 14.6,
+    confidence: 96,
+    detectedAt: "Now",
+  },
+];

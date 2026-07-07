@@ -9,7 +9,7 @@ type AppShellProps = {
 
 export default function AppShell({
   children,
-  selectedNavItem = "Dashboard",
+  selectedNavItem = "🔥 Hot Opportunities",
 }: AppShellProps) {
   return (
     <div className="flex min-h-screen bg-zinc-950 text-white">
@@ -18,7 +18,7 @@ export default function AppShell({
       {/* The right side contains the topbar and the current page content. */}
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar />
-        <main className="flex flex-1 items-center justify-center px-6 py-10">
+        <main className="flex flex-1 justify-center px-6 py-10">
           {children}
         </main>
       </div>
