@@ -9,6 +9,7 @@ The format is inspired by "Keep a Changelog".
 ## [Unreleased]
 
 ### Added
+- Printing finish variants for multi-finish Scryfall printings.
 - Visual card images in Vendor Workspace identity results.
 - Printing candidate thumbnails with image fallbacks.
 - Selected printing image display in the purchase panel.
@@ -19,10 +20,15 @@ The format is inspired by "Keep a Changelog".
 - Architecture, roadmap, decision, product spec, prompt history, and documentation changelog files.
 
 ### Changed
+- Vendor Workspace now treats a printing and its purchasable finish variant as separate selections.
+- Scryfall adapter now preserves all available finishes instead of collapsing multi-finish printings to foil.
 - Scryfall adapter now maps image data into normalized domain card objects.
 - README now describes PriceTrackingLLC instead of the default Next.js template.
 
 ### Fixed
+- Multi-finish printings no longer auto-select foil when the query does not specify a finish.
+- `foil` constraints no longer match `Nonfoil` variants.
+- Special foil treatments such as Halo, Surge, Galaxy, and Confetti are normalized as distinct finish variants.
 - Missing card images now render a clean fallback instead of disappearing from the workflow.
 - Apostrophe and punctuation-heavy card names now receive a normalization boost during identity scoring.
 - `urza's saga textless`, `urzas saga textless`, and `urza saga textless` now resolve to Urza's Saga and load printing candidates.

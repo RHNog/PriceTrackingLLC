@@ -11,6 +11,24 @@ function formatList(values: string[]) {
   return values.length > 0 ? values.join(", ") : "None";
 }
 
+function getFinishStatus(candidate: PrintingMatchCandidate) {
+  const finishMatch = candidate.matchedConstraints.find(
+    (match) => match.constraint.type === "finish",
+  );
+
+  if (finishMatch) {
+    return `✓ Finish: ${finishMatch.constraint.value}`;
+  }
+
+  if (candidate.finishVariants.length > 1) {
+    return "Finish required";
+  }
+
+  return candidate.finishVariants[0]
+    ? `Only ${candidate.finishVariants[0].finish}`
+    : "Finish unavailable";
+}
+
 export default function PrintingResults({
   candidates,
   selectedPrintingId,
@@ -58,6 +76,10 @@ export default function PrintingResults({
                   {printing.finish}
                 </p>
                 <p className="mt-1 text-xs opacity-75">
+                  Available finishes:{" "}
+                  {formatList(candidate.availableFinishes)}
+                </p>
+                <p className="mt-1 text-xs opacity-75">
                   Treatment: {printing.treatment || "Standard"} / Frame:{" "}
                   {printing.frame || "Default"} / Promo:{" "}
                   {formatList(printing.promoTypes ?? [])}
@@ -69,7 +91,7 @@ export default function PrintingResults({
                 </div>
               </div>
               <span className="text-xs font-semibold">
-                Match {candidate.confidence}
+                {getFinishStatus(candidate)} / Match {candidate.confidence}
               </span>
             </div>
             <div className="mt-2 grid gap-1 text-xs opacity-80 md:grid-cols-2">

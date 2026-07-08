@@ -8,7 +8,7 @@ It helps trading-card buyers discover opportunities, evaluate in-person purchase
 
 ## Current Development Phase
 
-Current sprint: Sprint 13, Visual Printing Confirmation and Documentation Recovery.
+Current sprint: Sprint 13 plus targeted Vendor Workspace printing variant fix.
 
 The app has a strong interpretation architecture but still uses mocked market pricing.
 
@@ -23,6 +23,7 @@ The app has a strong interpretation architecture but still uses mocked market pr
 - Scryfall Identity Provider
 - Developer Identity Explorer
 - Visual card confirmation in Vendor Workspace
+- Printing finish variants with unresolved finish blocking in Vendor Workspace
 
 ## What Should Not Be Changed Casually?
 
@@ -32,6 +33,7 @@ The app has a strong interpretation architecture but still uses mocked market pr
 - Canonical, intent, entity, and constraint pipeline order
 - Condition and grading preservation rules
 - Domain-model image adaptation rules
+- Printing-vs-finish-variant separation
 
 ## Important Architectural Rules
 
@@ -40,6 +42,7 @@ The app has a strong interpretation architecture but still uses mocked market pr
 - Business engines must not call providers directly.
 - Provider data must be normalized before entering domain objects.
 - Query and constraint logic must stay deterministic and explainable.
+- Multi-finish printings must not default to Foil or Nonfoil.
 - Tailwind CSS only.
 - No external libraries unless explicitly requested.
 

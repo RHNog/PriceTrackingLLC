@@ -6,6 +6,7 @@ import type { Card } from "@/types/card";
 import type { ParsedQuery } from "@/types/parsedQuery";
 import type { PrintingCandidate } from "@/types/printingCandidate";
 import type { PrintingResolution } from "@/types/printingResolution";
+import type { PrintingVariant } from "@/types/printingVariant";
 
 export interface ResolvedIntent {
   confidence: IntentConfidence;
@@ -21,4 +22,5 @@ export interface ResolvedIntent {
   resolvedConstraints: Constraint[];
   selectedIdentity?: CardIdentity;
   selectedPrinting?: Card;
+  selectedVariant?: PrintingVariant | null;
 }

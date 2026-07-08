@@ -71,6 +71,14 @@ function getResolutionExplanation(
     ];
   }
 
+  const variantExplanation =
+    printingResolution?.selectedVariant
+      ? [`✓ Finish: ${printingResolution.selectedVariant.finish}`]
+      : printingResolution?.shouldAutoCommitPrinting &&
+          !printingResolution.shouldAutoCommitVariant
+        ? ["Finish required before evaluation."]
+        : [];
+
   return [
     "Interpreting your search as:",
     `✓ Card: ${selectedIdentity.name}`,
@@ -91,6 +99,7 @@ function getResolutionExplanation(
     selectedPrinting
       ? `Best matching printing: ${selectedPrinting.set} #${selectedPrinting.number}`
       : "Searching available printings...",
+    ...variantExplanation,
   ];
 }
 
@@ -130,6 +139,9 @@ export function resolveIntent(
     })) ?? [];
   const selectedPrinting = selectedIdentity
     ? printingResolution?.selectedPrinting
+    : undefined;
+  const selectedVariant = selectedIdentity
+    ? printingResolution?.selectedVariant
     : undefined;
   const identityConfidence = identityCandidates[0]?.confidence ?? 0;
   const printingConfidence =
@@ -181,5 +193,6 @@ export function resolveIntent(
     resolvedConstraints,
     selectedIdentity,
     selectedPrinting,
+    selectedVariant,
   };
 }

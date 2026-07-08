@@ -9,11 +9,13 @@ import {
 import type { Card } from "@/types/card";
 import type { FormEvent } from "react";
 import type { Listing } from "@/types/listing";
+import type { PrintingVariant } from "@/types/printingVariant";
 import type { Strategy } from "@/types/strategy";
 import type { StrategyProfile } from "@/types/strategyProfile";
 
 type PurchasePanelProps = {
   askingPrice: string;
+  availableVariants: PrintingVariant[];
   card: Card;
   currentMarketListing?: Listing;
   lowestListing?: Listing;
@@ -23,6 +25,8 @@ type PurchasePanelProps = {
   evaluation: PurchaseEvaluation | null;
   onAskingPriceChange: (price: string) => void;
   onEvaluationChange: (evaluation: PurchaseEvaluation) => void;
+  onVariantChange: (variantId: string) => void;
+  selectedVariant: PrintingVariant | null;
 };
 
 function formatCurrency(value?: number) {
@@ -42,6 +46,7 @@ function MarketStat({ label, value }: MarketStatProps) {
 
 export default function PurchasePanel({
   askingPrice,
+  availableVariants,
   card,
   currentMarketListing,
   lowestListing,
@@ -51,9 +56,16 @@ export default function PurchasePanel({
   evaluation,
   onAskingPriceChange,
   onEvaluationChange,
+  onVariantChange,
+  selectedVariant,
 }: PurchasePanelProps) {
-  const canEvaluate =
-    currentMarketListing && selectedStrategyProfile && Number(askingPrice) > 0;
+  const canEvaluate = Boolean(
+    currentMarketListing &&
+    selectedStrategyProfile &&
+    Number(askingPrice) > 0 &&
+    selectedVariant,
+  );
+  const requiresFinishSelection = availableVariants.length > 1 && !selectedVariant;
   const marketStats = [
     {
       label: "Current Market Price",
@@ -72,7 +84,7 @@ export default function PurchasePanel({
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!currentMarketListing || !selectedStrategyProfile) {
+    if (!currentMarketListing || !selectedStrategyProfile || !selectedVariant) {
       return;
     }
 
@@ -103,7 +115,8 @@ export default function PurchasePanel({
               <p className="text-xs text-zinc-500">Selected Card</p>
               <h3 className="mt-1 text-xl font-semibold text-white">{card.name}</h3>
               <p className="mt-1 text-sm text-zinc-400">
-                {card.game} / {card.set} / {card.finish}
+                {card.game} / {card.set} /{" "}
+                {selectedVariant?.finish ?? card.finish}
               </p>
               <p className="mt-2 text-sm text-zinc-500">
                 #{card.number} / {card.language ?? "English"} /{" "}
@@ -128,6 +141,39 @@ export default function PurchasePanel({
             />
           ))}
         </div>
+
+        {availableVariants.length > 0 ? (
+          <div className="mt-5 border-t border-zinc-800 pt-5">
+            <p className="text-sm font-medium text-zinc-300">
+              {requiresFinishSelection ? "Finish required" : "Selected Finish"}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {availableVariants.map((variant) => {
+                const isSelected = variant.id === selectedVariant?.id;
+
+                return (
+                  <button
+                    key={variant.id}
+                    type="button"
+                    onClick={() => onVariantChange(variant.id)}
+                    className={`rounded-md border px-3 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
+                      isSelected
+                        ? "border-cyan-400 bg-cyan-400 text-zinc-950"
+                        : "border-zinc-700 bg-zinc-950 text-zinc-200 hover:border-zinc-500"
+                    }`}
+                  >
+                    {variant.finish}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-2 text-xs text-zinc-500">
+              {requiresFinishSelection
+                ? "Choose Foil or Nonfoil before evaluation."
+                : `✓ Finish: ${selectedVariant?.finish}`}
+            </p>
+          </div>
+        ) : null}
 
         <div className="mt-5 flex flex-col gap-3 border-t border-zinc-800 pt-5 sm:flex-row">
           <label className="flex-1 space-y-2">

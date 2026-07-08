@@ -29,6 +29,8 @@ function getSearchablePrintingText(printing: Card) {
     printing.number,
     printing.rarity,
     printing.finish,
+    ...(printing.availableFinishes ?? []),
+    ...(printing.finishVariants?.map((variant) => variant.finish) ?? []),
     printing.frame,
     printing.treatment,
     printing.productFamily,
@@ -39,12 +41,22 @@ function getSearchablePrintingText(printing: Card) {
   ].join(" ");
 }
 
+function hasExactFinish(printing: Card, value: string) {
+  const finishes = [
+    printing.finish,
+    ...(printing.availableFinishes ?? []),
+    ...(printing.finishVariants?.map((variant) => variant.finish) ?? []),
+  ];
+
+  return finishes.some((finish) => normalize(finish) === normalize(value));
+}
+
 function matchesConstraint(printing: Card, constraint: PrintingConstraint) {
   switch (constraint.type) {
     case "collectorNumber":
       return normalize(printing.number) === normalize(constraint.value);
     case "finish":
-      return contains(printing.finish, constraint.value);
+      return hasExactFinish(printing, constraint.value);
     case "frame":
       return contains(
         [printing.frame, printing.treatment, ...(printing.frameEffects ?? [])].join(
@@ -161,10 +173,21 @@ export function scorePrintingAgainstConstraints(
     maximumScore > 0
       ? Math.max(0, Math.round((score / maximumScore) * 100 - penalty))
       : 50;
+  const finishVariants = printing.finishVariants ?? [];
+  const availableFinishes =
+    printing.availableFinishes?.length
+      ? printing.availableFinishes
+      : finishVariants.length
+        ? finishVariants.map((variant) => variant.finish)
+        : printing.finish
+          ? [printing.finish]
+          : [];
 
   return {
+    availableFinishes,
     confidence,
     explanation: [],
+    finishVariants,
     matchedConstraints: matches.filter((match) => match.matched),
     printing,
     relaxedConstraints: constraints.filter(

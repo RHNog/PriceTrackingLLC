@@ -24,7 +24,11 @@
 
 11. Images belong to domain objects, not UI-specific provider calls.
 
-12. Future adaptive systems should learn vocabulary and behavior without changing core parser logic.
+12. A printing is not always the final purchasable object. Multi-finish printings require explicit finish variant resolution before evaluation.
+
+13. Vendor Workspace must not auto-select a finish unless the query or source data makes the finish unambiguous.
+
+14. Future adaptive systems should learn vocabulary and behavior without changing core parser logic.
 
 ## Documentation Rule
 

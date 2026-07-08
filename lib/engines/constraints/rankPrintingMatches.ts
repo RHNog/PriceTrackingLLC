@@ -11,10 +11,17 @@ export function rankPrintingMatches(
   return printings
     .map((printing) => {
       const candidate = scorePrintingAgainstConstraints(printing, constraints);
+      const finishVariants = printing.finishVariants ?? [];
+      const availableFinishes =
+        printing.availableFinishes ??
+        finishVariants.map((variant) => variant.finish) ??
+        (printing.finish ? [printing.finish] : []);
 
       return {
         ...candidate,
+        availableFinishes,
         explanation: explainPrintingMatch(candidate),
+        finishVariants,
       };
     })
     .sort((first, second) => second.confidence - first.confidence)

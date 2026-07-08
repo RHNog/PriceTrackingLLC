@@ -13,6 +13,7 @@ import type { ResolvedIntent } from "@/types/resolvedIntent";
 import type { SearchResult } from "@/types/searchResult";
 import type { Strategy } from "@/types/strategy";
 import type { StrategyProfile } from "@/types/strategyProfile";
+import type { PrintingVariant } from "@/types/printingVariant";
 
 export type VendorMarketSnapshot = {
   cardId: string;
@@ -48,6 +49,20 @@ function findRecentSale(snapshot?: VendorMarketSnapshot) {
   return snapshot?.recentSales[0] ?? findHighestListing(snapshot?.listings ?? []);
 }
 
+function getVariants(card?: Card) {
+  return card?.finishVariants ?? [];
+}
+
+function getOnlyVariant(card?: Card) {
+  const variants = getVariants(card);
+
+  return variants.length === 1 ? variants[0] : undefined;
+}
+
+function findVariant(variants: PrintingVariant[], variantId: string) {
+  return variants.find((variant) => variant.id === variantId);
+}
+
 function createInitialResults(cards: Card[]): SearchResult<CardIdentity>[] {
   return cards.map((card) => ({
     item: {
@@ -73,6 +88,7 @@ export default function VendorWorkspace({
     cards[0]?.name.toLowerCase() ?? "",
   );
   const [selectedPrintingId, setSelectedPrintingId] = useState("");
+  const [selectedVariantId, setSelectedVariantId] = useState("");
   const [printingQuery, setPrintingQuery] = useState("");
   const [askingPrice, setAskingPrice] = useState("");
   const [strategyId, setStrategyId] = useState(defaultStrategyId);
@@ -112,6 +128,11 @@ export default function VendorWorkspace({
             : "") ??
           "",
       );
+      setSelectedVariantId(
+        payload.intent?.printingResolution?.shouldAutoCommitVariant
+          ? payload.intent?.printingResolution?.selectedVariant?.id ?? ""
+          : "",
+      );
     }
 
     runIdentitySearch().catch((error) => {
@@ -150,6 +171,15 @@ export default function VendorWorkspace({
       (resolvedIntent?.printingResolution?.shouldAutoCommit
         ? printingResults[0]?.item
         : undefined);
+  const availableVariants = getVariants(selectedCard);
+  const resolvedSelectedVariant =
+    resolvedIntent?.printingResolution?.selectedVariant;
+  const selectedVariant =
+    findVariant(availableVariants, selectedVariantId) ??
+    (resolvedSelectedVariant?.printingId === selectedCard?.id
+      ? resolvedSelectedVariant
+      : undefined) ??
+    getOnlyVariant(selectedCard);
   const selectedStrategy = findById(strategies, strategyId) ?? strategies[0];
   const selectedProfile = selectedStrategy
     ? findById(strategyProfiles, selectedStrategy.profileId)
@@ -171,8 +201,21 @@ export default function VendorWorkspace({
 
     setSelectedCardId(identity.id);
     setSelectedPrintingId(firstPrinting.id);
+    setSelectedVariantId(getOnlyVariant(firstPrinting)?.id ?? "");
     setPrintingQuery("");
     setAskingPrice(lowestPrice ? String(lowestPrice) : "");
+    setEvaluation(null);
+  }
+
+  function handleSelectPrinting(printingId: string) {
+    const printing =
+      constraintPrintingCandidates.find(
+        (candidate) => candidate.printing.id === printingId,
+      )?.printing ??
+      printingResults.find((result) => result.item.id === printingId)?.item;
+
+    setSelectedPrintingId(printingId);
+    setSelectedVariantId(getOnlyVariant(printing)?.id ?? "");
     setEvaluation(null);
   }
 
@@ -229,7 +272,7 @@ export default function VendorWorkspace({
             <PrintingResults
               candidates={constraintPrintingCandidates}
               selectedPrintingId={selectedCard?.id ?? ""}
-              onSelectPrinting={setSelectedPrintingId}
+              onSelectPrinting={handleSelectPrinting}
             />
           )}
         </div>
@@ -239,6 +282,7 @@ export default function VendorWorkspace({
         <PurchasePanel
           askingPrice={askingPrice}
           card={selectedCard}
+          availableVariants={availableVariants}
           currentMarketListing={currentMarketListing}
           lowestListing={lowestListing}
           recentSale={recentSale}
@@ -247,6 +291,11 @@ export default function VendorWorkspace({
           evaluation={evaluation}
           onAskingPriceChange={setAskingPrice}
           onEvaluationChange={setEvaluation}
+          onVariantChange={(variantId) => {
+            setSelectedVariantId(variantId);
+            setEvaluation(null);
+          }}
+          selectedVariant={selectedVariant ?? null}
         />
       ) : null}
     </div>

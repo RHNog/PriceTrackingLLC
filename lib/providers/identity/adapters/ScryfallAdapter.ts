@@ -1,6 +1,7 @@
 import { normalizeCard } from "@/lib/providers/identity/normalizers/CardNormalizer";
 import { classifyRelationship } from "@/lib/engines/entity/classifyRelationship";
 import type { Card, CardImageUrls } from "@/types/card";
+import type { PrintingVariant } from "@/types/printingVariant";
 
 type ScryfallImageUris = {
   art_crop?: string;
@@ -36,17 +37,69 @@ export type ScryfallCardResponse = {
   card_faces?: ScryfallCardFace[];
 };
 
-function getFinish(card: ScryfallCardResponse) {
-  if (card.finishes?.includes("foil")) {
-    return "Foil";
-  }
+function formatFinish(finish: string) {
+  const normalized = finish.toLowerCase().replace(/[^a-z0-9]+/g, "");
 
-  if (card.foil) {
-    return "Foil";
-  }
-
-  if (card.nonfoil) {
+  if (normalized === "nonfoil") {
     return "Nonfoil";
+  }
+
+  if (normalized === "foil") {
+    return "Foil";
+  }
+
+  if (normalized === "etched") {
+    return "Etched";
+  }
+
+  return finish.replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
+function getSpecialFinish(card: ScryfallCardResponse) {
+  const promoTypes = card.promo_types ?? [];
+  const specialFinishes: Record<string, string> = {
+    confettifoil: "Confetti",
+    galaxyfoil: "Galaxy",
+    halofoil: "Halo",
+    surgefoil: "Surge",
+  };
+  const matchedPromoType = promoTypes.find((promoType) => specialFinishes[promoType]);
+
+  return matchedPromoType ? specialFinishes[matchedPromoType] : undefined;
+}
+
+function getAvailableFinishes(card: ScryfallCardResponse) {
+  const specialFinish = getSpecialFinish(card);
+
+  if (specialFinish) {
+    return [specialFinish];
+  }
+
+  const finishes = card.finishes?.length
+    ? card.finishes
+    : [
+        card.nonfoil ? "nonfoil" : undefined,
+        card.foil ? "foil" : undefined,
+      ];
+
+  return Array.from(
+    new Set(
+      finishes
+        .filter((finish): finish is string => Boolean(finish))
+        .map(formatFinish),
+    ),
+  );
+}
+
+function getFinish(card: ScryfallCardResponse) {
+  const finishes = getAvailableFinishes(card);
+
+  if (finishes.length === 1) {
+    return finishes[0];
+  }
+
+  if (finishes.length > 1) {
+    return "Multiple";
   }
 
   return "Unknown";
@@ -71,6 +124,24 @@ function getImageUrl(card: ScryfallCardResponse) {
   const imageUrls = getPrimaryImageUrls(card);
 
   return imageUrls.normal ?? imageUrls.small ?? imageUrls.large ?? "";
+}
+
+function createFinishVariants(card: ScryfallCardResponse): PrintingVariant[] {
+  const finishes = getAvailableFinishes(card);
+  const imageUrls = getPrimaryImageUrls(card);
+
+  return finishes.map((finish) => ({
+    id: `${card.id}:${finish.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+    printingId: card.id ?? "",
+    finish,
+    imageUrls,
+    isAvailable: true,
+    source: "Scryfall",
+    metadata: {
+      rawFinishes: card.finishes?.join(", "),
+      // TODO: Marketplace-specific finish images when providers expose them.
+    },
+  }));
 }
 
 function getCardFaces(card: ScryfallCardResponse) {
@@ -156,6 +227,8 @@ export function adaptScryfallCard(card: ScryfallCardResponse): Card | null {
     setName: card.set_name,
     typeLine: card.type_line,
   });
+  const availableFinishes = getAvailableFinishes(card);
+  const finishVariants = createFinishVariants(card);
 
   return {
     id: card.id,
@@ -166,6 +239,7 @@ export function adaptScryfallCard(card: ScryfallCardResponse): Card | null {
     number: normalized.collectorNumber,
     rarity: card.rarity ?? "Unknown",
     finish: normalized.finish,
+    availableFinishes,
     frame: card.frame,
     frameEffects: normalized.frameEffects,
     cardFaces: getCardFaces(card),
@@ -187,6 +261,9 @@ export function adaptScryfallCard(card: ScryfallCardResponse): Card | null {
     productFamily: card.set_name,
     promoTypes: card.promo_types ?? [],
     releaseYear: card.released_at?.slice(0, 4),
+    selectedFinish:
+      availableFinishes.length === 1 ? availableFinishes[0] : undefined,
     treatment: getTreatment(card),
+    finishVariants,
   };
 }

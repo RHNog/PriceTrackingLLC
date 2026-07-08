@@ -4,6 +4,7 @@
 
 ### Added
 
+- Printing variant architecture notes for multi-finish printings.
 - Product specification for the current decision-operating-system positioning.
 - Architecture overview covering routes, features, engines, providers, and data flow.
 - Roadmap with completed work, current sprint, near-term sprints, and future milestones.
@@ -18,6 +19,7 @@
 
 ### Fixed
 
+- Documented targeted Vendor Workspace fix for unresolved finish variants.
 - Documented targeted Vendor Workspace fix for apostrophe normalization, Textless constraints, and low-confidence printing candidate loading.
 
 ### Documented

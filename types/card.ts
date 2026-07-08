@@ -1,4 +1,5 @@
 import type { IdentityRelationship } from "@/types/identityRelationship";
+import type { PrintingVariant } from "@/types/printingVariant";
 
 export interface CardImageUrls {
   artCrop?: string;
@@ -21,6 +22,7 @@ export interface Card {
   number: string;
   rarity: string;
   finish: string;
+  availableFinishes?: string[];
   frame?: string;
   frameEffects?: string[];
   cardFaces?: CardFaceImage[];
@@ -34,5 +36,7 @@ export interface Card {
   productFamily?: string;
   promoTypes?: string[];
   releaseYear?: string;
+  selectedFinish?: string;
   treatment?: string;
+  finishVariants?: PrintingVariant[];
 }

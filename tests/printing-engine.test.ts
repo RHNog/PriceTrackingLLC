@@ -118,3 +118,202 @@ test("prefers promotional Urza's Saga printings for textless constraints", () =>
 
   assert.equal(resolution.printingCandidates[0]?.printing.id, "store-championship");
 });
+
+function createVariant(printingId: string, finish: string) {
+  return {
+    id: `${printingId}:${finish.toLowerCase()}`,
+    printingId,
+    finish,
+    isAvailable: true,
+    source: "Test",
+  };
+}
+
+function createMultiFinishPrinting(overrides: Partial<Card> = {}) {
+  const id = overrides.id ?? "secret-lair-countdown";
+
+  return {
+    id,
+    name: "Urza's Saga",
+    game: "Magic",
+    set: "Secret Lair Countdown Kit",
+    setCode: "SLD",
+    number: "21",
+    rarity: "Rare",
+    finish: "Multiple",
+    availableFinishes: ["Nonfoil", "Foil"],
+    finishVariants: [
+      createVariant(id, "Nonfoil"),
+      createVariant(id, "Foil"),
+    ],
+    imageUrl: "https://example.com/secret-lair.jpg",
+    productFamily: "Secret Lair Countdown Kit",
+    promoTypes: ["secretlair"],
+    ...overrides,
+  } as Card;
+}
+
+test("keeps finish unresolved when a matching printing has multiple finishes", () => {
+  const parsedQuery = parseQuery("urza's saga secret lair");
+  const identity = {
+    id: "urzas-saga",
+    name: "Urza's Saga",
+    game: "Magic",
+  } as CardIdentity;
+
+  const resolution = satisfyPrintingConstraints(
+    identity,
+    [createMultiFinishPrinting()],
+    resolveConstraints(parsedQuery),
+  );
+
+  assert.equal(resolution.selectedPrinting?.id, "secret-lair-countdown");
+  assert.equal(resolution.shouldAutoCommitPrinting, true);
+  assert.equal(resolution.selectedVariant, null);
+  assert.equal(resolution.shouldAutoCommitVariant, false);
+  assert.deepEqual(
+    resolution.availableVariants.map((variant) => variant.finish),
+    ["Nonfoil", "Foil"],
+  );
+});
+
+test("selects foil when a multi-finish printing satisfies a foil constraint", () => {
+  const parsedQuery = parseQuery("urza's saga secret lair foil");
+  const identity = {
+    id: "urzas-saga",
+    name: "Urza's Saga",
+    game: "Magic",
+  } as CardIdentity;
+
+  const resolution = satisfyPrintingConstraints(
+    identity,
+    [createMultiFinishPrinting()],
+    resolveConstraints(parsedQuery),
+  );
+
+  assert.equal(resolution.selectedPrinting?.id, "secret-lair-countdown");
+  assert.equal(resolution.selectedVariant?.finish, "Foil");
+  assert.equal(resolution.shouldAutoCommitVariant, true);
+});
+
+test("selects nonfoil when a multi-finish printing satisfies a nonfoil constraint", () => {
+  const parsedQuery = parseQuery("urza's saga secret lair nonfoil");
+  const identity = {
+    id: "urzas-saga",
+    name: "Urza's Saga",
+    game: "Magic",
+  } as CardIdentity;
+
+  const resolution = satisfyPrintingConstraints(
+    identity,
+    [createMultiFinishPrinting()],
+    resolveConstraints(parsedQuery),
+  );
+
+  assert.equal(resolution.selectedPrinting?.id, "secret-lair-countdown");
+  assert.equal(resolution.selectedVariant?.finish, "Nonfoil");
+  assert.equal(resolution.shouldAutoCommitVariant, true);
+});
+
+test("auto-selects a single available finish for unambiguous promo printings", () => {
+  const parsedQuery = parseQuery("urza's saga store");
+  const identity = {
+    id: "urzas-saga",
+    name: "Urza's Saga",
+    game: "Magic",
+  } as CardIdentity;
+  const printing = {
+    id: "store-championship",
+    name: "Urza's Saga",
+    game: "Magic",
+    set: "Store Championship Promos",
+    setCode: "SCH",
+    number: "1",
+    rarity: "Rare",
+    finish: "Foil",
+    availableFinishes: ["Foil"],
+    finishVariants: [createVariant("store-championship", "Foil")],
+    imageUrl: "https://example.com/store.jpg",
+    productFamily: "Store Championship Promos",
+    promoTypes: ["storechampionship"],
+  } as Card;
+
+  const resolution = satisfyPrintingConstraints(
+    identity,
+    [printing],
+    resolveConstraints(parsedQuery),
+  );
+
+  assert.equal(resolution.selectedPrinting?.id, "store-championship");
+  assert.equal(resolution.selectedVariant?.finish, "Foil");
+  assert.equal(resolution.shouldAutoCommitVariant, true);
+});
+
+test("keeps judge promo finish unresolved until foil is requested", () => {
+  const identity = {
+    id: "lightning-bolt",
+    name: "Lightning Bolt",
+    game: "Magic",
+  } as CardIdentity;
+  const printing = createMultiFinishPrinting({
+    id: "bolt-judge",
+    name: "Lightning Bolt",
+    set: "Judge Gift Cards",
+    setCode: "JDG",
+    number: "1",
+    productFamily: "Judge Gift Cards",
+    promoTypes: ["judge"],
+  });
+
+  const unresolved = satisfyPrintingConstraints(
+    identity,
+    [printing],
+    resolveConstraints(parseQuery("bolt judge")),
+  );
+  const foil = satisfyPrintingConstraints(
+    identity,
+    [printing],
+    resolveConstraints(parseQuery("bolt judge foil")),
+  );
+
+  assert.equal(unresolved.selectedPrinting?.id, "bolt-judge");
+  assert.equal(unresolved.selectedVariant, null);
+  assert.equal(unresolved.shouldAutoCommitVariant, false);
+  assert.equal(foil.selectedVariant?.finish, "Foil");
+  assert.equal(foil.shouldAutoCommitVariant, true);
+});
+
+test("selects only unambiguous finish variants for invocation printings", () => {
+  const parsedQuery = parseQuery("counterspell invocation");
+  const identity = {
+    id: "counterspell",
+    name: "Counterspell",
+    game: "Magic",
+  } as CardIdentity;
+  const printing = {
+    id: "counterspell-invocation",
+    name: "Counterspell",
+    game: "Magic",
+    set: "Amonkhet Invocations",
+    setCode: "MP2",
+    number: "9",
+    rarity: "Mythic Rare",
+    finish: "Foil",
+    availableFinishes: ["Foil"],
+    finishVariants: [createVariant("counterspell-invocation", "Foil")],
+    frame: "2015",
+    imageUrl: "https://example.com/counterspell.jpg",
+    productFamily: "Amonkhet Invocations",
+    treatment: "Invocation",
+  } as Card;
+
+  const resolution = satisfyPrintingConstraints(
+    identity,
+    [printing],
+    resolveConstraints(parsedQuery),
+  );
+
+  assert.equal(resolution.selectedPrinting?.id, "counterspell-invocation");
+  assert.equal(resolution.selectedVariant?.finish, "Foil");
+  assert.equal(resolution.shouldAutoCommitVariant, true);
+});

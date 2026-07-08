@@ -93,12 +93,12 @@ export const mtgKnowledgeBase: KnowledgeEntry[] = [
   },
   {
     canonical: "Foil",
-    aliases: ["foil"],
+    aliases: ["foil", "foiled"],
     category: "finish",
   },
   {
     canonical: "Nonfoil",
-    aliases: ["nonfoil", "non foil"],
+    aliases: ["nonfoil", "non foil", "non-foil", "nf", "regular"],
     category: "finish",
   },
   {

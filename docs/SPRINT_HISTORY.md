@@ -91,3 +91,7 @@ Added domain image URL support, Scryfall image adaptation, image fallbacks, Vend
 ### Targeted Vendor Workspace Fix
 
 Improved punctuation normalization, Textless knowledge recognition, and low-confidence identity handling so queries such as `urza's saga textless`, `urzas saga textless`, and `urza saga textless` resolve to Urza's Saga and show printing candidates.
+
+### Targeted Printing Variant Fix
+
+Introduced explicit printing finish variants. Multi-finish printings now keep finish selection unresolved until the query or user selects a finish, while explicit queries such as `urza's saga secret lair foil` and `urza's saga secret lair nonfoil` select the correct variant.

@@ -9,9 +9,11 @@ import type {
   PrintingConstraintType,
 } from "@/types/printingConstraint";
 import type { PrintingResolution } from "@/types/printingResolution";
+import type { PrintingVariant } from "@/types/printingVariant";
 
 const mandatoryTypes: PrintingConstraintType[] = [
   "collectorNumber",
+  "finish",
   "game",
   "product",
   "promo",
@@ -19,6 +21,10 @@ const mandatoryTypes: PrintingConstraintType[] = [
   "setCode",
 ];
 const informationalTypes: PrintingConstraintType[] = ["condition", "grading"];
+
+function normalize(value?: string) {
+  return value?.toLowerCase().replace(/[^a-z0-9]+/g, "") ?? "";
+}
 
 function getPriority(type: PrintingConstraintType): PrintingConstraintPriority {
   if (mandatoryTypes.includes(type)) {
@@ -69,6 +75,40 @@ export function toPrintingConstraints(constraints: Constraint[]) {
     .filter((constraint): constraint is PrintingConstraint => Boolean(constraint));
 }
 
+function getFinishVariants(printing: Card): PrintingVariant[] {
+  if (printing.finishVariants?.length) {
+    return printing.finishVariants;
+  }
+
+  if (printing.finish && printing.finish !== "Unknown" && printing.finish !== "Multiple") {
+    return [
+      {
+        id: `${printing.id}:${normalize(printing.finish)}`,
+        printingId: printing.id,
+        finish: printing.finish,
+        imageUrls: printing.imageUrls,
+        isAvailable: true,
+        source: "Normalized Card",
+      },
+    ];
+  }
+
+  return [];
+}
+
+function findVariantForFinish(
+  variants: PrintingVariant[],
+  finishConstraint: PrintingConstraint | undefined,
+) {
+  if (!finishConstraint) {
+    return undefined;
+  }
+
+  return variants.find(
+    (variant) => normalize(variant.finish) === normalize(finishConstraint.value),
+  );
+}
+
 export function satisfyPrintingConstraints(
   identity: CardIdentity,
   printings: Card[],
@@ -86,6 +126,38 @@ export function satisfyPrintingConstraints(
     printingConstraints,
   );
   const bestCandidate = selectedCandidate ?? printingCandidates[0];
+  const finishConstraint = printingConstraints.find(
+    (constraint) => constraint.type === "finish",
+  );
+  const availableVariants = selectedCandidate
+    ? getFinishVariants(selectedCandidate.printing)
+    : [];
+  const selectedVariant = finishConstraint
+    ? findVariantForFinish(availableVariants, finishConstraint) ?? null
+    : availableVariants.length === 1
+      ? availableVariants[0]
+      : null;
+  const shouldAutoCommitVariant = Boolean(
+    selectedVariant &&
+      (finishConstraint || availableVariants.length === 1),
+  );
+  const variantExplanation = selectedCandidate
+    ? finishConstraint
+      ? selectedVariant
+        ? [`Selected finish variant ${selectedVariant.finish}.`]
+        : [
+            `Finish ${finishConstraint.value} is not available for the selected printing.`,
+            "Variant was left unresolved to avoid choosing a different finish.",
+          ]
+      : availableVariants.length > 1
+        ? [
+            "Finish required: this printing has multiple available finishes.",
+            "Choose a finish before purchase evaluation.",
+          ]
+        : selectedVariant
+          ? [`Only ${selectedVariant.finish} is available, so the finish was selected.`]
+          : ["No finish variant data is available for this printing."]
+    : [];
   const fallbackExplanation =
     bestCandidate && bestCandidate.confidence > 0
       ? [
@@ -98,10 +170,12 @@ export function satisfyPrintingConstraints(
         ];
 
   return {
+    availableVariants,
     explanation: selectedCandidate
       ? [
           `Selected ${selectedCandidate.printing.set} #${selectedCandidate.printing.number}.`,
           "All mandatory printing constraints were satisfied.",
+          ...variantExplanation,
         ]
       : fallbackExplanation,
     matchedConstraints: bestCandidate?.matchedConstraints ?? [],
@@ -111,7 +185,12 @@ export function satisfyPrintingConstraints(
     ),
     selectedPrinting: selectedCandidate?.printing,
     selectedPrintingConfidence: selectedCandidate?.confidence ?? 0,
+    selectedVariant,
+    selectedVariantConfidence: selectedVariant ? selectedCandidate?.confidence ?? 0 : 0,
     shouldAutoCommit: Boolean(selectedCandidate),
+    shouldAutoCommitPrinting: Boolean(selectedCandidate),
+    shouldAutoCommitVariant,
     unmatchedConstraints: bestCandidate?.unmatchedConstraints ?? [],
+    variantCandidates: availableVariants,
   };
 }

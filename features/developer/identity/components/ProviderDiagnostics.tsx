@@ -12,6 +12,7 @@ const pipelineStages = [
   "Identity Selected",
   "Printing Candidates Ranked",
   "Printing Selected",
+  "Finish Variant Resolved",
 ];
 
 export default function ProviderDiagnostics({
@@ -23,6 +24,7 @@ export default function ProviderDiagnostics({
   const selectedPrinting =
     printingResolution?.selectedPrinting ??
     printingResolution?.printingCandidates[0]?.printing;
+  const selectedVariant = printingResolution?.selectedVariant;
   const selectedCandidate =
     response.intent.identityCandidates.find(
       (candidate) =>
@@ -331,6 +333,47 @@ export default function ProviderDiagnostics({
             selectedPrinting
               ? `${selectedPrinting.set} #${selectedPrinting.number}`
               : "Not committed"
+          }
+        />
+        <Diagnostic
+          label="Scryfall Finishes Field"
+          value={
+            selectedPrinting?.availableFinishes?.join(", ") ??
+            selectedPrinting?.finish ??
+            "None"
+          }
+        />
+        <Diagnostic
+          label="Available Finish Variants"
+          value={
+            printingResolution?.availableVariants
+              .map((variant) => variant.finish)
+              .join(", ") || "None"
+          }
+        />
+        <Diagnostic
+          label="Selected Variant"
+          value={selectedVariant?.finish ?? "Unresolved"}
+        />
+        <Diagnostic
+          label="Variant Confidence"
+          value={String(printingResolution?.selectedVariantConfidence ?? 0)}
+        />
+        <Diagnostic
+          label="Variant Auto-Committed"
+          value={printingResolution?.shouldAutoCommitVariant ? "Yes" : "No"}
+        />
+        <Diagnostic
+          label="Variant Selection Explanation"
+          value={printingResolution?.explanation.join(" ") ?? "None"}
+        />
+        <Diagnostic
+          label="Evaluation Blocked by Finish"
+          value={
+            printingResolution?.shouldAutoCommitPrinting &&
+            !printingResolution.shouldAutoCommitVariant
+              ? "Yes"
+              : "No"
           }
         />
         <Diagnostic

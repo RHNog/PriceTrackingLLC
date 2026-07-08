@@ -109,9 +109,32 @@ The Scryfall adapter maps provider image data into:
 
 UI components render images from domain objects only. They must not fetch Scryfall image data directly.
 
+## Printing Variant Architecture
+
+A card identity is not a purchasable object, and a printing is not always the final purchasable object.
+
+The selection model is:
+
+Card Identity
+
+↓
+
+Printing
+
+↓
+
+Printing Finish Variant
+
+Scryfall can return one printing with multiple available finishes, such as Nonfoil and Foil. The adapter preserves those finishes as `PrintingVariant` objects on the normalized `Card`.
+
+Constraint Satisfaction may auto-commit a printing while leaving the finish variant unresolved. Vendor Workspace must block purchase evaluation until a finish variant is selected unless the query or source data makes the finish unambiguous.
+
+Special foil treatments such as Halo, Surge, Galaxy, and Confetti are modeled as distinct finish variants instead of plain Foil.
+
 ## Engine Rules
 
 - Business engines must remain provider-independent.
 - Query, canonical, intent, entity, and constraint engines must remain independent from React.
 - UI components render data and user controls; they do not calculate business values.
 - Dictionaries and config files should evolve before parser logic is rewritten.
+- Finish selection must be resolved by domain data and constraints, not by UI defaults.
