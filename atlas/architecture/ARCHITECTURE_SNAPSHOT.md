@@ -55,11 +55,12 @@ Intelligence model evidence -> Evidence Sufficiency -> Asset Assessment Engine -
 ## Providers
 
 - Provider SDK lifecycle for metadata, health, coverage, evidence, diagnostics, caching hooks, retry hooks, validation hooks, and normalization.
+- TCGplayer Market Intelligence Provider as the first active SDK-backed market provider.
 - Scryfall Identity Provider.
 - Scryfall Market Provider.
 - Mock Marketplace Provider.
-- TCGplayer, eBay, CardTrader, LigaMagic provider placeholders or abstractions.
-- Planned SDK metadata for EDHREC, PSA, BGS, CGC, Cardmarket, TCGplayer, Melee, MTGO, LigaMagic, and eBay.
+- eBay, CardTrader, LigaMagic provider placeholders or abstractions.
+- Planned SDK metadata for EDHREC, PSA, BGS, CGC, Cardmarket, Melee, MTGO, LigaMagic, and eBay.
 
 Provider rule: providers supply data only. SDK infrastructure owns lifecycle behavior, and provider data must be adapted into domain objects before engines or UI consume it.
 
@@ -92,6 +93,8 @@ Evidence sufficiency rule: required evidence gates grades. Unknown is not failur
 Provider adapter rule: future playability providers normalize evidence into the Playability Profile instead of changing downstream consumers.
 
 Provider SDK rule: future providers must expose metadata, health, coverage, evidence contribution, diagnostics, cache hooks, retry hooks, validation hooks, and normalization through SDK contracts.
+
+TCGplayer rule: raw provider responses stay inside the provider adapter. Downstream layers consume only normalized `MarketSnapshot` and Market Intelligence evidence.
 
 Knowledge graph rule: semantic relationships are shared infrastructure. Relationship Registry and Relationship Resolver enrich Intelligence reasoning without changing production UI contracts.
 

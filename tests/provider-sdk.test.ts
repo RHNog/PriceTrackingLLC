@@ -28,7 +28,15 @@ test("Provider SDK registers planned future providers", () => {
     assert.ok(ids.includes(providerId));
   }
 
-  assert.ok(metadata.every((provider) => provider.lifecycleStatus === "PLANNED"));
+  assert.equal(
+    metadata.find((provider) => provider.id === "tcgplayer")?.lifecycleStatus,
+    "ACTIVE",
+  );
+  assert.ok(
+    metadata
+      .filter((provider) => provider.id !== "tcgplayer")
+      .every((provider) => provider.lifecycleStatus === "PLANNED"),
+  );
   assert.ok(metadata.every((provider) => provider.supportedInputs.length > 0));
   assert.ok(metadata.every((provider) => provider.supportedOutputs.length > 0));
 });
@@ -41,14 +49,18 @@ test("Provider SDK generates health, coverage, and evidence contribution", () =>
   assert.equal(snapshot.coverage.length, requiredProviders.length);
   assert.ok(snapshot.evidence.length >= requiredProviders.length);
   assert.ok(
-    snapshot.health.every(
+    snapshot.health.some((health) => health.status === "HEALTHY"),
+  );
+  assert.ok(
+    snapshot.health.some(
       (health) => health.status === "WAITING_FOR_INTEGRATION",
     ),
   );
-  assert.ok(snapshot.coverage.every((coverage) => coverage.gaps.length > 0));
+  assert.ok(snapshot.coverage.some((coverage) => coverage.gaps.length === 0));
+  assert.ok(snapshot.coverage.some((coverage) => coverage.gaps.length > 0));
   assert.ok(
-    snapshot.evidence.every(
-      (evidence) => evidence.status === "WAITING_FOR_PROVIDER",
+    snapshot.evidence.every((evidence) =>
+      ["UNAVAILABLE", "WAITING_FOR_PROVIDER"].includes(evidence.status),
     ),
   );
 });

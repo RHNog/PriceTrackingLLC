@@ -2,41 +2,43 @@
 
 ## Sprint
 
-Sprint 29 - Intelligence Provider SDK
+Sprint 30 - TCGplayer Market Intelligence Provider
 
 ## Summary
 
-Introduced the reusable Intelligence Provider SDK for future provider lifecycle consistency.
+Integrated TCGplayer as the first SDK-backed Market Intelligence provider.
 
 ## Goal
 
-Create SDK infrastructure for normalization, health, caching hooks, diagnostics, evidence mapping, confidence contribution, metadata, retry hooks, and validation hooks.
+Convert TCGplayer market data into normalized Market Intelligence evidence without exposing raw provider responses.
 
 ## Files Added
 
-- `lib/providers/sdk/ProviderAdapter.ts`
-- `lib/providers/sdk/ProviderCache.ts`
-- `lib/providers/sdk/ProviderClient.ts`
-- `lib/providers/sdk/ProviderCoverage.ts`
-- `lib/providers/sdk/ProviderDiagnostics.ts`
-- `lib/providers/sdk/ProviderEvidence.ts`
-- `lib/providers/sdk/ProviderHealth.ts`
-- `lib/providers/sdk/ProviderMetadata.ts`
-- `lib/providers/sdk/ProviderRegistry.ts`
-- `lib/providers/sdk/ProviderResult.ts`
-- `tests/provider-sdk.test.ts`
+- `lib/providers/market/TCGplayerIntelligenceProvider.ts`
+- `tests/tcgplayer-market-intelligence.test.ts`
 
 ## Files Modified
 
+- `app/api/market/snapshot/route.ts`
 - `features/vendor/components/AtlasInspector.tsx`
+- `features/vendor/components/PurchasePanel.tsx`
+- `features/vendor/components/VendorWorkspace.tsx`
+- `lib/engines/cardIntelligence/SignalFactory.ts`
+- `lib/engines/market/createConditionMarketSnapshot.ts`
+- `lib/engines/negotiation/OfferCalculator.ts`
+- `lib/providers/TCGplayerProvider.ts`
+- `lib/providers/sdk/ProviderRegistry.ts`
+- `tests/provider-sdk.test.ts`
+- `types/conditionMarketSnapshot.ts`
+- `types/marketSnapshot.ts`
 - Sprint documentation and Atlas files.
 
 ## Architecture Changes
 
-- Added generic provider lifecycle contracts.
-- Registered metadata-only planned providers for EDHREC, PSA, BGS, CGC, Cardmarket, TCGplayer, Melee, MTGO, LigaMagic, and eBay.
-- Atlas Inspector consumes Provider SDK metadata, health, coverage, evidence contribution, lifecycle status, and gaps.
-- No live provider integrations were added.
+- TCGplayer is primary in the market snapshot API with Scryfall fallback.
+- Normalized market intelligence evidence flows into signals, Asset Assessment, and Offer Ladder.
+- Atlas Provider Trace tracks provider coverage, health, latency, evidence coverage, last synchronization, and API status.
+- Raw provider-shaped data is not exposed outside the provider adapter.
 
 ## Documentation Updated
 
@@ -52,8 +54,8 @@ Create SDK infrastructure for normalization, health, caching hooks, diagnostics,
 
 ## Technical Debt
 
-- Existing Scryfall providers still use legacy provider contracts and should migrate gradually.
-- Planned providers are metadata-only until approved integration paths exist.
+- TCGplayer credentialed API access remains future operational work.
+- Provider-backed fixture coverage is limited to Sprint 30 verification assets.
 
 ## Known Issues
 
@@ -61,7 +63,8 @@ Create SDK infrastructure for normalization, health, caching hooks, diagnostics,
 
 ## Tests Added
 
-- Provider SDK tests verify planned provider registration, metadata, health, coverage, evidence contribution, diagnostics, caching, normalization, and validation lifecycle.
+- TCGplayer Market Intelligence tests verify Chrome Mox, Mox Opal, Lightning Bolt, Collected Company, and Urza's Saga.
+- Tests verify provider-backed Liquidity, Market Confidence, Asset Assessment evidence, and negotiation lift.
 
 ## Build Status
 
@@ -71,4 +74,4 @@ Create SDK infrastructure for normalization, health, caching hooks, diagnostics,
 
 ## Suggested Next Sprint
 
-Migrate Scryfall providers into the Provider SDK lifecycle.
+Configure credentialed TCGplayer API access and broaden provider-backed market coverage.

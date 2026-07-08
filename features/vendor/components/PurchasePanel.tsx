@@ -66,6 +66,10 @@ function MarketTextStat({ label, value }: { label: string; value: string }) {
   );
 }
 
+function formatOptionalCurrency(value?: number | null) {
+  return typeof value === "number" ? formatCurrency(value) : "Unavailable";
+}
+
 export default function PurchasePanel({
   askingPrice,
   assetContext,
@@ -107,8 +111,12 @@ export default function PurchasePanel({
       return null;
     }
 
-    return createConditionMarketSnapshot(marketPrice, condition);
-  }, [condition, marketPrice]);
+    return createConditionMarketSnapshot(
+      marketPrice,
+      condition,
+      marketSnapshot?.marketIntelligence,
+    );
+  }, [condition, marketPrice, marketSnapshot?.marketIntelligence]);
   const conditionMarketPrice = conditionMarketSnapshot?.selectedPrice;
   const cardProfilePreview = useMemo(() => {
     if (!conditionMarketSnapshot || !selectedVariant) {
@@ -173,6 +181,11 @@ export default function PurchasePanel({
       value: conditionMarketPrice?.price,
     },
   ];
+  const marketIntelligence = marketSnapshot?.marketIntelligence;
+  const averageRecentSale =
+    marketIntelligence && marketIntelligence.recentSalesCount > 0
+      ? marketIntelligence.marketPrice
+      : null;
 
   useEffect(() => {
     if (
@@ -254,11 +267,11 @@ export default function PurchasePanel({
           ))}
           <MarketTextStat
             label="Lowest Listing"
-            value="Live marketplace listings coming soon"
+            value={formatOptionalCurrency(marketIntelligence?.lowestListing)}
           />
           <MarketTextStat
             label="Recent Sale Price"
-            value="Recent sales coming soon"
+            value={formatOptionalCurrency(averageRecentSale)}
           />
         </div>
 
@@ -271,8 +284,8 @@ export default function PurchasePanel({
             <p>Select a finish variant to load a market estimate.</p>
           ) : marketPrice ? (
             <p>
-              Daily market estimate for {marketPrice.finish}. Live availability
-              may differ.
+              {marketIntelligence?.providerName ?? "Daily market estimate"} for{" "}
+              {marketPrice.finish}. Live availability may differ.
             </p>
           ) : (
             <p>

@@ -311,6 +311,7 @@ export default function VendorWorkspace({
           marketContextSnapshot: createConditionMarketSnapshot(
             marketPrice,
             selectedCondition,
+            activeMarketSnapshot.marketIntelligence,
           ),
           printing: selectedCard,
           variant: selectedVariant,

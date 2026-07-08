@@ -4,6 +4,8 @@
 
 ### Added
 
+- Sprint 30 TCGplayer Market Intelligence Provider documentation.
+- Provider-backed market evidence, normalized MarketSnapshot intelligence, Atlas provider trace, and negotiation benefit documentation.
 - Sprint 29 Intelligence Provider SDK documentation.
 - Provider lifecycle, metadata, health, coverage, diagnostics, evidence mapping, confidence contribution, retry hooks, validation hooks, cache hooks, and planned provider documentation.
 - Sprint 28 Asset Assessment Engine documentation.
@@ -69,6 +71,8 @@
 
 ### Changed
 
+- Current sprint updated to Sprint 30.
+- Documentation now treats TCGplayer as the first active SDK-backed Market Intelligence provider.
 - Current sprint updated to Sprint 29.
 - Documentation now treats future providers as SDK lifecycle participants that supply data only.
 - Current sprint updated to Sprint 28.

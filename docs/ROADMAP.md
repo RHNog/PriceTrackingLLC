@@ -52,6 +52,8 @@
 - Intelligence Provider SDK
 - Provider SDK Registry
 - Provider SDK Diagnostics
+- TCGplayer Market Intelligence Provider
+- Provider-backed Market Intelligence evidence
 - Certification Provider Registry
 - Placeholder PSA, BGS, and CGC certification provider coverage
 - Marketplace Profile templates
@@ -70,15 +72,15 @@
 
 ## Current Sprint
 
-Sprint 29: Intelligence Provider SDK
+Sprint 30: TCGplayer Market Intelligence Provider
 
 Goals:
 
-- Introduce a reusable provider lifecycle contract.
-- Keep providers responsible for supplying data only.
-- Move normalization, health, cache hooks, diagnostics, evidence mapping, confidence contribution, metadata, retry hooks, and validation hooks into SDK infrastructure.
-- Prepare planned adapters for EDHREC, PSA, BGS, CGC, Cardmarket, TCGplayer, Melee, MTGO, LigaMagic, and eBay.
-- Avoid live integrations until approved provider paths exist.
+- Integrate TCGplayer as the primary Market Intelligence provider.
+- Convert TCGplayer data into normalized market evidence without exposing raw API responses.
+- Generate Liquidity, Inventory Health, Sales Velocity, Spread, Market Confidence, Volatility, Market Stability, and Demand Momentum evidence.
+- Feed provider-backed market evidence into Asset Assessment without modifying Assessment architecture.
+- Let Offer Ladder benefit from real liquidity, spread, and market confidence.
 
 ## Near-Term Roadmap
 
@@ -90,7 +92,7 @@ Sprint 27: Printing Descriptor Engine
 
 ## Future Roadmap
 
-- Market Provider integrations
+- Additional Market Provider integrations through the Provider SDK
 - Provider SDK migration for existing Scryfall identity and market providers
 - Pricing normalization
 - Currency engine

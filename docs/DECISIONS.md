@@ -2,6 +2,8 @@
 
 ## Major Product And Architecture Decisions
 
+0.9. TCGplayer is the primary Market Intelligence provider. Its data must enter through the Provider SDK and normalized MarketSnapshot evidence; raw provider responses must never reach UI, Assessment, Strategy, Business Profile, Negotiation, or Decision layers.
+
 0.8. Future providers must follow the Provider SDK lifecycle. Providers supply data; SDK infrastructure owns normalization, health, cache hooks, diagnostics, evidence mapping, confidence contribution, metadata, retry hooks, and validation hooks.
 
 0.7. Asset Assessment is the canonical interpretation layer for asset evidence. Intelligence models provide evidence; Assessment interprets it; Business Profiles and Strategies consume Assessment.

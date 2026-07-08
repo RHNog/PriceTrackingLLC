@@ -1,1 +1,5 @@
-// TODO: Implement TCGplayer marketplace synchronization for cards, listings, and recent sales.
+export {
+  TCGplayerIntelligenceProvider as TCGplayerProvider,
+  TCGplayerIntelligenceProvider,
+  TCGplayerIntelligenceProviderAdapter,
+} from "@/lib/providers/market/TCGplayerIntelligenceProvider";

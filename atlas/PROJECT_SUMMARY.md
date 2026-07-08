@@ -40,6 +40,10 @@ Sprint 29 introduces the Intelligence Provider SDK.
 
 `lib/providers/sdk/` now defines the provider lifecycle for future integrations. Providers supply data only; SDK contracts own normalization, health, caching hooks, diagnostics, evidence mapping, confidence contribution, provider metadata, retry hooks, and validation hooks. EDHREC, PSA, BGS, CGC, Cardmarket, TCGplayer, Melee, MTGO, LigaMagic, and eBay are registered as planned metadata-only providers.
 
+Sprint 30 integrates TCGplayer Market Intelligence.
+
+`TCGplayerIntelligenceProvider` is now the first SDK-backed Market Intelligence provider. It normalizes TCGplayer-shaped market data into `MarketSnapshot.marketIntelligence`, including market price, direct low, lowest listing, listing count, recent sales, trend, price history, liquidity, inventory health, sales velocity, spread, confidence, volatility, stability, and demand momentum. Raw provider responses remain private to the provider layer.
+
 ## Current Architecture
 
 PriceTrackingLLC is a Next.js, TypeScript, and Tailwind CSS application for professional trading-card buying decisions.
@@ -64,11 +68,11 @@ Atlas is not part of this runtime architecture. It is an internal companion syst
 
 ## Current Sprint
 
-Sprint 29: Intelligence Provider SDK
+Sprint 30: TCGplayer Market Intelligence Provider
 
 ## Current Milestone
 
-Reusable provider lifecycle infrastructure.
+Provider-backed Market Intelligence evidence.
 
 ## Open Issues
 
@@ -79,6 +83,7 @@ Reusable provider lifecycle infrastructure.
 - Knowledge Graph relationship coverage is configured for known examples and should be provider-enriched later.
 - Assessment driver weights are deterministic and should be calibrated with future outcome history.
 - Provider SDK adapters are metadata-only until approved integration paths exist.
+- TCGplayer evidence is currently normalized through provider-backed fixture records for verified Sprint 30 assets until credentialed API access is configured.
 
 ## Technical Debt
 
@@ -90,7 +95,8 @@ Reusable provider lifecycle infrastructure.
 - Relationship confidence calibration remains future work.
 - Assessment source weighting remains configuration-ready future work.
 - Existing Scryfall providers still use their current local provider contracts and should migrate gradually.
+- TCGplayer API credentials and live endpoint configuration remain future operational work.
 
 ## Next Recommended Sprint
 
-Migrate existing Scryfall providers into the Provider SDK lifecycle without changing domain outputs.
+Configure credentialed TCGplayer API access and expand provider-backed market coverage.

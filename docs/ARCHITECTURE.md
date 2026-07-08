@@ -56,6 +56,44 @@ Prepared SDK provider metadata:
 
 These adapters are metadata-only and waiting for approved integration paths. They do not scrape, do not call unofficial APIs, and do not change existing provider behavior.
 
+## TCGplayer Market Intelligence Provider
+
+`TCGplayerIntelligenceProvider` is the first SDK-backed Market Intelligence provider.
+
+Location:
+
+- `lib/providers/market/TCGplayerIntelligenceProvider.ts`
+
+Provider responsibilities:
+
+- Accept provider-shaped market records.
+- Normalize data into domain `MarketSnapshot` and `MarketIntelligenceEvidence`.
+- Hide raw provider responses from UI, business logic, assessment, strategy, and negotiation.
+
+Normalized evidence:
+
+- Market Price
+- Direct Low
+- Lowest Listing
+- Listing Count
+- Recent Sales
+- Market Trend
+- Price History
+- Liquidity
+- Inventory Health
+- Sales Velocity
+- Spread
+- Market Confidence
+- Volatility
+- Market Stability
+- Demand Momentum
+
+Flow:
+
+TCGplayer provider data -> Provider SDK adapter -> normalized Market Intelligence evidence -> Card Intelligence signals -> Asset Assessment -> Strategy -> Negotiation Ladder.
+
+Scryfall remains a fallback market estimate source when TCGplayer evidence is unavailable for the requested asset.
+
 ## Asset Knowledge Graph
 
 The Asset Knowledge Graph is the semantic relationship layer shared by Intelligence models.

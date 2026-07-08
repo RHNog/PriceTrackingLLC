@@ -8,7 +8,7 @@ It helps trading-card buyers discover opportunities, evaluate in-person purchase
 
 ## Current Development Phase
 
-Current sprint: Sprint 29, Intelligence Provider SDK.
+Current sprint: Sprint 30, TCGplayer Market Intelligence Provider.
 
 The app now evaluates a selected card through deterministic Vendor Workflow states, Card Profile, Asset Intelligence models, condition-adjusted market context, strategy-weighted signals, Negotiation Ladder, and deterministic Decision Resolver output.
 
@@ -19,6 +19,10 @@ Sprint 28 adds Asset Assessment as the canonical interpretation layer. Intellige
 Sprint 29 adds `lib/providers/sdk/` as the reusable provider lifecycle layer. Providers should supply data only; SDK contracts own normalization, health, cache hooks, diagnostics, evidence mapping, confidence contribution, metadata, retry hooks, and validation hooks.
 
 Planned SDK providers are metadata-only for EDHREC, PSA, BGS, CGC, Cardmarket, TCGplayer, Melee, MTGO, LigaMagic, and eBay. No live integrations, scraping, or unofficial APIs were added.
+
+Sprint 30 promotes TCGplayer to the first SDK-backed Market Intelligence provider. TCGplayer data is normalized into `MarketSnapshot.marketIntelligence`; raw provider-shaped data must not leave the provider adapter.
+
+Provider-backed market evidence now feeds Liquidity, Market Confidence, Demand, Volatility, Asset Assessment, and Offer Ladder spread/liquidity behavior.
 
 Playability Intelligence now measures why a card has play demand. It is registered in the Asset Intelligence Framework, backed first by Scryfall legalities, exposed on `CardProfile.playabilityProfile`, and consumed by strategies through configurable `Playability` signal weights.
 
@@ -80,6 +84,7 @@ Asset Assessment must not decide BUY/PASS. It synthesizes evidence into asset un
 - Asset Knowledge Graph
 - Asset Assessment Engine
 - Intelligence Provider SDK
+- TCGplayer Market Intelligence Provider
 - Certification Provider Registry
 - Placeholder Certification Provider
 - Offer Policy

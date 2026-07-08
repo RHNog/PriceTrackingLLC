@@ -2,6 +2,17 @@
 
 This file records logical product milestones. Sprint numbers may not perfectly match commit history.
 
+## Sprint 30
+
+Integrated TCGplayer as the primary Market Intelligence provider.
+
+- Added `TCGplayerIntelligenceProvider` using the Provider SDK.
+- Converted provider-shaped market data into normalized Market Intelligence evidence.
+- Produced evidence for Liquidity, Inventory Health, Sales Velocity, Spread, Market Confidence, Volatility, Market Stability, and Demand Momentum.
+- Fed provider-backed market evidence into signals and Asset Assessment without changing Assessment architecture.
+- Improved negotiation through provider-backed liquidity, spread, and market confidence.
+- Added Atlas tracking for provider coverage, health, latency, evidence coverage, last synchronization, and API status.
+
 ## Sprint 29
 
 Introduced the reusable Intelligence Provider SDK.

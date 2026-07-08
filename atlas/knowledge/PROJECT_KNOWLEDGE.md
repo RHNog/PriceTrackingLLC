@@ -27,6 +27,7 @@ Decision Resolver should remain deterministic after receiving a validated Offer 
 - Provider responses must be normalized before entering engines or UI.
 - Future providers must follow the Provider SDK lifecycle.
 - Providers supply data only; SDK infrastructure owns normalization, health, caching hooks, diagnostics, evidence mapping, confidence contribution, metadata, retry hooks, and validation hooks.
+- TCGplayer is the primary Market Intelligence provider and must expose only normalized Market Intelligence evidence.
 - Variant Resolution Policy owns automatic finish defaults.
 - Workflow Command Processor owns Vendor Workspace context progression.
 - Asset Context protects downstream state from stale upstream selections.
@@ -130,14 +131,14 @@ Core contracts:
 - `ProviderCache`
 - `ProviderResult`
 
-Prepared metadata-only providers:
+Prepared providers:
 
 - EDHREC
 - PSA
 - BGS
 - CGC
 - Cardmarket
-- TCGplayer
+- TCGplayer active for Market Intelligence
 - Melee
 - MTGO
 - LigaMagic
@@ -149,10 +150,44 @@ Providers supply data only. The SDK owns normalization, health, caching hooks, d
 
 Current state:
 
-- Planned providers are metadata-only.
-- No live integrations were added.
+- TCGplayer is active through `TCGplayerIntelligenceProvider`.
+- Remaining SDK providers are metadata-only.
 - No scraping or unofficial APIs were added.
 - Atlas Inspector consumes Provider SDK metadata for developer diagnostics.
+
+## TCGplayer Market Intelligence Knowledge
+
+TCGplayer provider files:
+
+- `lib/providers/market/TCGplayerIntelligenceProvider.ts`
+- `lib/providers/TCGplayerProvider.ts`
+
+Normalized evidence:
+
+- Market Price
+- Direct Low
+- Lowest Listing
+- Listing Count
+- Recent Sales
+- Market Trend
+- Price History
+- Liquidity
+- Inventory Health
+- Sales Velocity
+- Spread
+- Market Confidence
+- Volatility
+- Market Stability
+- Demand Momentum
+
+Integration rules:
+
+- `MarketSnapshot.marketIntelligence` carries provider-backed evidence.
+- Raw provider-shaped data remains inside the provider adapter.
+- Signals consume normalized market evidence.
+- Asset Assessment consumes normalized signals and market evidence.
+- Business Profiles do not call TCGplayer.
+- Negotiation benefits from normalized liquidity and spread only.
 
 ## Permanent Rules
 

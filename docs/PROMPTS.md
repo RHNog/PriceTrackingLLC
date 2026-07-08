@@ -2,6 +2,16 @@
 
 This file summarizes major prompts and architectural instructions. It intentionally avoids copying every prompt in full.
 
+## Sprint 30
+
+Purpose: integrate the first real Intelligence Provider.
+
+Core instruction: integrate TCGplayer as the primary Market Intelligence Provider through the Provider SDK, convert provider data into evidence, and never expose raw API responses.
+
+Major files affected: TCGplayer market provider, market snapshot contracts, market signal generation, offer ladder spread/liquidity logic, Atlas Provider Trace, tests, and documentation.
+
+Result: provider-backed Market Intelligence evidence for liquidity, inventory health, sales velocity, spread, confidence, volatility, stability, and demand momentum.
+
 ## Sprint 29
 
 Purpose: create a reusable Intelligence Provider SDK.

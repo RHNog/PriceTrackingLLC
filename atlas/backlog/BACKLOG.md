@@ -3,9 +3,11 @@
 ## High Priority
 
 - Add official-provider Certification population ingestion once permitted sources are selected.
+- Configure credentialed TCGplayer API access for live marketplace synchronization.
+- Expand TCGplayer provider coverage beyond Sprint 30 verification assets.
 - Migrate Scryfall Identity Provider to the Provider SDK lifecycle.
 - Migrate Scryfall Market Provider to the Provider SDK lifecycle.
-- Add approved live SDK adapters for EDHREC, PSA, BGS, CGC, Cardmarket, TCGplayer, Melee, MTGO, LigaMagic, and eBay.
+- Add approved live SDK adapters for EDHREC, PSA, BGS, CGC, Cardmarket, Melee, MTGO, LigaMagic, and eBay.
 - Add provider-backed relationship enrichment for the Asset Knowledge Graph.
 - Add Assessment driver calibration from Evaluation History outcomes.
 - Add Atlas Assessment diagnostics for drivers, risk factors, and evidence coverage.

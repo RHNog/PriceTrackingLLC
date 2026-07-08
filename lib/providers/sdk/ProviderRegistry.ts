@@ -1,4 +1,5 @@
 import type { ProviderAdapter } from "@/lib/providers/sdk/ProviderAdapter";
+import { TCGplayerIntelligenceProviderAdapter } from "@/lib/providers/market/TCGplayerIntelligenceProvider";
 import { createPlannedCoverage } from "@/lib/providers/sdk/ProviderCoverage";
 import { createProviderDiagnostics } from "@/lib/providers/sdk/ProviderDiagnostics";
 import { createWaitingEvidence } from "@/lib/providers/sdk/ProviderEvidence";
@@ -90,10 +91,12 @@ class PlannedProviderAdapter
   }
 }
 
-export class ProviderRegistry {
-  private adapters: ProviderAdapter<unknown, unknown, unknown>[] = [];
+type RegisteredProviderAdapter = ProviderAdapter<unknown, unknown, unknown>;
 
-  register(adapter: ProviderAdapter<unknown, unknown, unknown>) {
+export class ProviderRegistry {
+  private adapters: RegisteredProviderAdapter[] = [];
+
+  register(adapter: RegisteredProviderAdapter) {
     this.adapters = [
       ...this.adapters.filter((item) => item.metadata.id !== adapter.metadata.id),
       adapter,
@@ -250,8 +253,14 @@ const plannedProviders: PlannedProviderDefinition[] = [
 
 export const providerRegistry = new ProviderRegistry();
 
-plannedProviders.forEach((definition) =>
-  providerRegistry.register(new PlannedProviderAdapter(definition)),
+plannedProviders
+  .filter((definition) => definition.id !== "tcgplayer")
+  .forEach((definition) =>
+    providerRegistry.register(new PlannedProviderAdapter(definition)),
+  );
+
+providerRegistry.register(
+  new TCGplayerIntelligenceProviderAdapter() as RegisteredProviderAdapter,
 );
 
 export function getProviderSdkSnapshot() {

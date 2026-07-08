@@ -452,6 +452,34 @@ export default function AtlasInspector({
           label="Market Snapshot"
           value={assetContext.marketSnapshotId || "Not loaded"}
         />
+        <KeyValue
+          label="API Status"
+          value={marketSnapshot?.marketIntelligence?.apiStatus}
+        />
+        <KeyValue
+          label="Provider Health"
+          value={marketSnapshot?.marketIntelligence?.healthStatus}
+        />
+        <KeyValue
+          label="Provider Latency"
+          value={
+            typeof marketSnapshot?.marketIntelligence?.latencyMs === "number"
+              ? `${marketSnapshot.marketIntelligence.latencyMs}ms`
+              : undefined
+          }
+        />
+        <KeyValue
+          label="Evidence Coverage"
+          value={
+            typeof marketSnapshot?.marketIntelligence?.evidenceCoverage === "number"
+              ? `${marketSnapshot.marketIntelligence.evidenceCoverage}%`
+              : undefined
+          }
+        />
+        <KeyValue
+          label="Last Synchronization"
+          value={marketSnapshot?.marketIntelligence?.lastSynchronizedAt}
+        />
       </InspectorSection>
 
       <InspectorSection title="Provider SDK">

@@ -104,6 +104,7 @@ function scoreSignal(
   const conditionScore = getConditionScore(input.condition);
   const marketConfidence = input.marketContextSnapshot.selectedPrice.confidence;
   const marketPrice = input.marketContextSnapshot.selectedPrice.price;
+  const marketIntelligence = input.marketContextSnapshot.marketIntelligence;
 
   const scores: Record<SignalName, number> = {
     InvestmentPotential:
@@ -113,15 +114,16 @@ function scoreSignal(
     FlipPotential: 70 * 0.45 + marketConfidence * 0.35 + conditionScore * 0.2,
     GradingPotential: conditionScore * 0.65 + collectorScore * 0.35,
     CollectorAppeal: collectorIntelligenceScore,
-    Liquidity: marketPrice >= 25 ? 72 : 56,
-    Volatility: 50,
+    Liquidity:
+      marketIntelligence?.liquidity ?? (marketPrice >= 25 ? 72 : 56),
+    Volatility: marketIntelligence?.volatility ?? 50,
     Scarcity: rarityScore * 0.5 + collectorIntelligenceScore * 0.5,
-    Demand: 68,
+    Demand: marketIntelligence?.demandMomentum ?? 68,
     Playability:
       input.playabilityProfile?.overall.score ??
       (input.printing.game === "Magic" ? 45 : 0),
     ReprintRisk: collectorScore >= 90 ? 25 : 55,
-    MarketConfidence: marketConfidence,
+    MarketConfidence: marketIntelligence?.marketConfidence ?? marketConfidence,
     HistoricalStability: 50,
   };
 
@@ -140,6 +142,25 @@ function explainSignal(definition: SignalDefinition, score: number) {
   return score >= 75
     ? "Strong signal from current card, printing, condition, and market context."
     : "Moderate signal from current card, printing, condition, and market context.";
+}
+
+function explainProviderBackedSignal(
+  definition: SignalDefinition,
+  input: SignalFactoryInput,
+  score: number,
+) {
+  const marketIntelligence = input.marketContextSnapshot.marketIntelligence;
+
+  if (
+    marketIntelligence &&
+    ["Demand", "Liquidity", "MarketConfidence", "Volatility"].includes(
+      definition.name,
+    )
+  ) {
+    return `${definition.label} is provider-backed by ${marketIntelligence.providerName} normalized market intelligence.`;
+  }
+
+  return explainSignal(definition, score);
 }
 
 function getContributingFactors(
@@ -162,9 +183,23 @@ function getContributingFactors(
         ? `${input.certificationProfile.modelName} ${input.certificationProfile.tier}`
         : "Certification Intelligence unavailable",
     ],
-    Liquidity: [input.marketContext.country, input.marketContext.currency],
+    Demand: input.marketContextSnapshot.marketIntelligence
+      ? [
+          `${input.marketContextSnapshot.marketIntelligence.trend} market trend`,
+          `${input.marketContextSnapshot.marketIntelligence.recentSalesCount} recent sales`,
+        ]
+      : [],
+    Liquidity: input.marketContextSnapshot.marketIntelligence
+      ? [
+          `${input.marketContextSnapshot.marketIntelligence.listingCount} active listings`,
+          `${input.marketContextSnapshot.marketIntelligence.salesVelocity}% sales velocity`,
+        ]
+      : [input.marketContext.country, input.marketContext.currency],
     MarketConfidence: [
-      `${input.marketContextSnapshot.selectedPrice.confidence}% market confidence`,
+      `${input.marketContextSnapshot.marketIntelligence?.marketConfidence ?? input.marketContextSnapshot.selectedPrice.confidence}% market confidence`,
+      input.marketContextSnapshot.marketIntelligence
+        ? `${input.marketContextSnapshot.marketIntelligence.evidenceCoverage}% evidence coverage`
+        : "",
     ],
     Playability: [
       input.playabilityProfile?.tier ?? "Unknown playability tier",
@@ -189,6 +224,12 @@ export function createSignal(
   const score = scoreSignal(definition.name, input);
   const isPlayability = definition.name === "Playability";
   const playabilityProfile = input.playabilityProfile;
+  const marketIntelligence = input.marketContextSnapshot.marketIntelligence;
+  const isProviderBackedMarketSignal =
+    Boolean(marketIntelligence) &&
+    ["Demand", "Liquidity", "MarketConfidence", "Volatility"].includes(
+      definition.name,
+    );
 
   return {
     name: definition.name,
@@ -197,6 +238,8 @@ export function createSignal(
     confidence:
       isPlayability && playabilityProfile
         ? playabilityProfile.overall.confidence
+        : isProviderBackedMarketSignal
+          ? marketIntelligence?.marketConfidence ?? input.marketContextSnapshot.selectedPrice.confidence
         : definition.status === "future"
         ? 10
         : definition.status === "placeholder"
@@ -207,16 +250,20 @@ export function createSignal(
     supportingDataSources:
       isPlayability && playabilityProfile
         ? [playabilityProfile.overall.dataSource]
+        : isProviderBackedMarketSignal && marketIntelligence
+          ? [marketIntelligence.providerName]
         : definition.supportingDataSources,
     generatedAt: new Date().toISOString(),
     source: definition.source,
     explanation:
       isPlayability && playabilityProfile
         ? playabilityProfile.explanation
-        : explainSignal(definition, score),
+        : explainProviderBackedSignal(definition, input, score),
     status:
       isPlayability && playabilityProfile?.overall.availability === "LIVE"
         ? "live"
+        : isProviderBackedMarketSignal
+          ? "live"
         : definition.status,
   };
 }

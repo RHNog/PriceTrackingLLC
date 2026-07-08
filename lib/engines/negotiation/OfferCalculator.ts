@@ -30,12 +30,17 @@ function getMaximumModifier(cardProfile: CardProfile) {
   const collectorAppeal = getSignalScore(cardProfile, "CollectorAppeal", 50);
   const scarcity = getSignalScore(cardProfile, "Scarcity", 50);
   const reprintRisk = getSignalScore(cardProfile, "ReprintRisk", 50);
+  const spread = cardProfile.marketContextSnapshot.marketIntelligence?.spread ?? 0;
 
   const collectorPremium = (collectorAppeal - 50) / 1000;
   const scarcityPremium = (scarcity - 50) / 1200;
   const reprintPenalty = reprintRisk / 1000;
+  const spreadPremium = Math.max(0, Math.min(0.05, spread / 1000));
 
-  return Math.max(0.75, 1 + collectorPremium + scarcityPremium - reprintPenalty);
+  return Math.max(
+    0.75,
+    1 + collectorPremium + scarcityPremium + spreadPremium - reprintPenalty,
+  );
 }
 
 export function calculateMaximumBuyPrice(input: OfferCalculatorInput) {

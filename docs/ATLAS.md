@@ -2,6 +2,39 @@
 
 Atlas is the permanent project knowledge base for PriceTrackingLLC.
 
+## Sprint 30 Synchronization
+
+TCGplayer Market Intelligence:
+
+- Primary Market Intelligence provider
+- SDK-backed adapter
+- Normalized `MarketSnapshot.marketIntelligence`
+- Raw provider responses remain private to the provider layer
+
+Tracked Atlas fields:
+
+- Provider Coverage
+- Provider Health
+- Provider Latency
+- Evidence Coverage
+- Last Synchronization
+- API Status
+
+Generated evidence:
+
+- Liquidity
+- Inventory Health
+- Sales Velocity
+- Spread
+- Market Confidence
+- Volatility
+- Market Stability
+- Demand Momentum
+
+Rule:
+
+TCGplayer evidence can feed Market Intelligence and Asset Assessment. Business Profiles continue consuming Assessment only, and Negotiation consumes strategy/card-profile outputs without provider coupling.
+
 ## Sprint 29 Synchronization
 
 Provider SDK architecture:

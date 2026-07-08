@@ -4,6 +4,7 @@ import {
 } from "@/types/conditionProfile";
 import type { ConditionMarketSnapshot } from "@/types/conditionMarketSnapshot";
 import type { MarketPrice } from "@/types/marketPrice";
+import type { MarketIntelligenceEvidence } from "@/types/marketSnapshot";
 
 function roundCurrency(value: number) {
   return Math.round(value * 100) / 100;
@@ -31,6 +32,7 @@ function createConditionPrice(
 export function createConditionMarketSnapshot(
   basePrice: MarketPrice,
   selectedCondition: CardConditionCode,
+  marketIntelligence?: MarketIntelligenceEvidence,
 ): ConditionMarketSnapshot {
   const pricesByCondition = conditionProfiles.reduce(
     (prices, condition) => ({
@@ -41,6 +43,7 @@ export function createConditionMarketSnapshot(
   );
 
   return {
+    marketIntelligence,
     selectedCondition,
     selectedPrice: pricesByCondition[selectedCondition],
     pricesByCondition,

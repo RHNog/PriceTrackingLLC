@@ -9,6 +9,11 @@ The format is inspired by "Keep a Changelog".
 ## [Unreleased]
 
 ### Added
+- Sprint 30 TCGplayer Market Intelligence provider integration.
+- `TCGplayerIntelligenceProvider` using the Provider SDK as the primary market intelligence source with Scryfall fallback when provider-backed evidence is unavailable.
+- Normalized Market Intelligence evidence for market price, direct low, lowest listing, listing count, recent sales, market trend, price history, liquidity, inventory health, sales velocity, spread, market confidence, volatility, market stability, and demand momentum.
+- TCGplayer-backed Liquidity, Market Confidence, Demand, and Volatility signal support.
+- Offer Ladder spread and liquidity improvements from normalized market evidence.
 - Sprint 29 reusable Intelligence Provider SDK.
 - `lib/providers/sdk/` with generic provider client, adapter, evidence, health, coverage, metadata, registry, diagnostics, cache, and result contracts.
 - Planned SDK adapter metadata for EDHREC, PSA, BGS, CGC, Cardmarket, TCGplayer, Melee, MTGO, LigaMagic, and eBay without live integrations.
