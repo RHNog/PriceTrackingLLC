@@ -9,6 +9,12 @@ The format is inspired by "Keep a Changelog".
 ## [Unreleased]
 
 ### Added
+- Sprint 25.1 Evidence Sufficiency Framework.
+- `EvidenceSufficiencyEngine`, `EvidenceRequirement`, `EvidenceScore`, `EvidenceStatus`, and `EvidenceReport` framework contracts.
+- Evidence requirements for every registered Intelligence model.
+- Unknown grade display when required evidence is insufficient.
+- Atlas Inspector evidence diagnostics for evidence status, missing evidence, and evidence explanation.
+- Regression coverage for Playability without EDHREC, Certification without PSA/BGS/CGC, Collector with sufficient evidence, and mocked sufficient Playability evidence.
 - Sprint 25 Playability Intelligence Level 2.
 - Configurable Playability format weights and demand hints in `config/playability.ts`.
 - Playability Profile demand fields for legality, importance, demand level, competitive relevance, casual relevance, confidence, trend, status, and provider.
@@ -120,6 +126,9 @@ The format is inspired by "Keep a Changelog".
 - Architecture, roadmap, decision, product spec, prompt history, and documentation changelog files.
 
 ### Changed
+- Intelligence confidence now reflects evidence quality before producing a conclusion.
+- Playability and Certification now return Unknown instead of a failing grade when required providers are missing.
+- Missing evidence is no longer treated as negative evidence.
 - Playability Intelligence now measures weighted player demand instead of reporting legality as the primary signal.
 - Playability tile conclusions, key signals, and supporting evidence now use Playability Profile demand intelligence.
 - Playability provider roadmap now records EDHREC, MTGGoldfish, Melee, MTGO, and Tournament APIs.
@@ -217,6 +226,7 @@ The format is inspired by "Keep a Changelog".
 - Clear low-confidence identity candidates can now load printing candidates instead of leaving Vendor Workspace stuck at an identity row.
 
 ### Documented
+- Sprint 25.1 Evidence Sufficiency philosophy, Unknown state, model evidence requirements, and future provider dependencies.
 - Sprint 25 Playability maturity increase from Level 1 Framework to Level 2 Meaningful Intelligence.
 - Sprint 24.2 final Intelligence Console UI contract, confidence explanation rules, expansion memory, and redundancy removal.
 - Sprint 24.1 layered information architecture, Vendor Information Model, Atlas Information Model, and responsibility split.

@@ -36,6 +36,8 @@ Decision Resolver should remain deterministic after receiving a validated Offer 
 - Collector Intelligence consumes Certification Intelligence before strategies interpret collector value.
 - Playability Intelligence measures player demand, not legality alone.
 - Playability format weights live in configuration.
+- Evidence Sufficiency determines whether Intelligence models may issue grades.
+- Unknown means missing evidence, not poor quality.
 - Vendor Workspace owns Intelligence layers 1-3: Decision, Explanation, and Evidence.
 - Atlas Inspector owns Intelligence layer 4: Implementation.
 - Final Intelligence Console panels use Grade/Confidence, Business Conclusion, Key Signals, and Supporting Evidence only.
@@ -149,3 +151,26 @@ Future providers:
 - Melee.
 - MTGO.
 - Tournament APIs.
+
+## Sprint 25.1 Knowledge
+
+Evidence Sufficiency Framework:
+
+- EvidenceRequirement
+- EvidenceStatus
+- EvidenceScore
+- EvidenceReport
+- EvidenceSufficiencyEngine
+
+Rules:
+
+- Evidence precedes conclusion.
+- Confidence reflects evidence quality.
+- Missing evidence is not negative evidence.
+- Unknown blocks definitive conclusions.
+- Future providers improve evidence sufficiency automatically.
+
+Initial insufficient examples:
+
+- Playability without EDHREC or equivalent demand providers.
+- Certification without PSA, BGS, or CGC provider-backed population data.

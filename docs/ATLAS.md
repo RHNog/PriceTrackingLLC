@@ -2,6 +2,37 @@
 
 Atlas is the permanent project knowledge base for PriceTrackingLLC.
 
+## Sprint 25.1 Synchronization
+
+Evidence Sufficiency Framework:
+
+- EvidenceRequirement
+- EvidenceStatus
+- EvidenceScore
+- EvidenceReport
+- EvidenceSufficiencyEngine
+
+Unknown state:
+
+- Unknown is not failure.
+- Unknown means required evidence is insufficient.
+- Missing evidence must not become negative evidence.
+
+Evidence status values:
+
+- SUFFICIENT
+- PARTIAL
+- INSUFFICIENT
+- UNKNOWN
+- WAITING_FOR_PROVIDER
+
+Atlas owns evidence diagnostics:
+
+- Missing evidence.
+- Future provider dependencies.
+- Evidence explanation.
+- Evidence status.
+
 ## Sprint 25 Synchronization
 
 Playability Intelligence maturity:

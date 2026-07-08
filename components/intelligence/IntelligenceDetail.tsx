@@ -1,5 +1,6 @@
 import {
   getConfidenceLabel,
+  getEvidenceAwareGrade,
   getIntelligenceGrade,
 } from "@/components/intelligence/IntelligenceGrade";
 import type { CardProfile } from "@/lib/engines/cardIntelligence/models/CardProfile";
@@ -61,6 +62,13 @@ function getBusinessConclusion(
   score: number,
 ) {
   if (model.id === "certification-intelligence") {
+    if (model.evidenceReport.status === "INSUFFICIENT") {
+      return [
+        "The platform does not yet have sufficient evidence to evaluate certification reliably.",
+        "Population, gem rate, and certified premium evidence are required before issuing a certification assessment.",
+      ];
+    }
+
     const tier = cardProfile.certificationProfile.tier.toLowerCase();
 
     return [
@@ -71,6 +79,13 @@ function getBusinessConclusion(
   }
 
   if (model.id === "playability-intelligence") {
+    if (model.evidenceReport.status === "INSUFFICIENT") {
+      return [
+        "Current provider data is insufficient to accurately determine player demand.",
+        "Initial signals indicate format relevance, but dedicated playability providers are required before issuing a reliable playability assessment.",
+      ];
+    }
+
     return [cardProfile.playabilityProfile.businessConclusion];
   }
 
@@ -132,6 +147,10 @@ function getConfidenceReason(
 
   if (model.indicators.every((indicator) => indicator.confidence === 0)) {
     return "Connected data is not available for this intelligence model yet.";
+  }
+
+  if (model.evidenceReport.status === "INSUFFICIENT") {
+    return model.evidenceReport.explanation;
   }
 
   return "Some supporting data is still waiting for provider connection.";
@@ -247,7 +266,10 @@ export default function IntelligenceDetail({
   return (
     <div className="rounded-md border border-zinc-800 bg-zinc-900 px-3 py-3">
       <div className="grid gap-2 sm:grid-cols-2">
-        <DetailRow label="Grade" value={getIntelligenceGrade(score)} />
+        <DetailRow
+          label="Grade"
+          value={getEvidenceAwareGrade(score, model.evidenceReport.status)}
+        />
         <div className="rounded-md bg-zinc-950/60 px-3 py-2">
           <p className="text-xs text-zinc-500">
             {modelDisplayName} Confidence

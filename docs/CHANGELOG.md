@@ -4,6 +4,8 @@
 
 ### Added
 
+- Sprint 25.1 Evidence Sufficiency Framework documentation.
+- Unknown state, evidence requirements, missing-vs-negative evidence, and future provider dependency documentation.
 - Sprint 25 Playability Intelligence Level 2 documentation.
 - Format weighting, demand signals, Playability business conclusions, future provider integrations, and updated Intelligence Registry documentation.
 - Sprint 24.2 finalized Intelligence Console UI contract documentation.
@@ -61,6 +63,8 @@
 
 ### Changed
 
+- Current sprint updated to Sprint 25.1.
+- Documentation now states that evidence precedes conclusions and missing evidence is not a failing grade.
 - Current sprint updated to Sprint 25.
 - Playability documentation now treats the model as demand intelligence rather than legality reporting.
 - Current sprint updated to Sprint 24.2.

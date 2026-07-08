@@ -5,6 +5,7 @@
 - Add official-provider Certification population ingestion once permitted sources are selected.
 - Add EDHREC Playability Provider once an approved integration path exists.
 - Add MTGGoldfish, Melee, MTGO, and Tournament API Playability providers once approved integration paths exist.
+- Add generated Evidence Sufficiency reports grouped by Intelligence model.
 - Add a command or script to run `RepositoryScanner` and write generated summaries.
 - Generate `ATLAS_SPRINT_REPORT.md` from git status, repository scan data, and canonical docs.
 - Add architecture drift detection between `docs/ARCHITECTURE.md` and repository structure.
@@ -15,6 +16,7 @@
 - Add automated UI assertions that Vendor Workspace Intelligence panels contain no implementation terminology.
 - Add automated UI assertions for expanded Intelligence tile session memory.
 - Add provider-backed Playability demand validation against known format staples.
+- Add visual regression coverage for Unknown grade presentation.
 - Add Certification provider health diagnostics for PSA, BGS, CGC, TAG, SGC, and ARS.
 - Add Certification cross-grading and population growth indicators.
 - Generate dependency graphs for engines, providers, intelligence models, workflows, and UI boundaries.

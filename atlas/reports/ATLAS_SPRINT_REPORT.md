@@ -2,15 +2,15 @@
 
 ## Sprint
 
-Sprint 25 - Playability Intelligence Level 2
+Sprint 25.1 - Evidence Sufficiency Framework
 
 ## Summary
 
-Matured Playability Intelligence from framework-level legality reporting into meaningful player demand intelligence.
+Introduced Evidence Sufficiency so Intelligence models distinguish missing evidence from negative evidence before issuing grades.
 
 ## Goal
 
-Explain why the market cares about playable cards through weighted formats, demand relevance, business conclusions, key signals, and future provider hooks.
+Prevent definitive conclusions when required evidence is missing and show Unknown instead of a failing grade.
 
 ## Files Added
 
@@ -18,19 +18,20 @@ Explain why the market cares about playable cards through weighted formats, dema
 
 ## Files Modified
 
-- `config/playability.ts`
-- Playability Intelligence engine/profile/indicator contracts.
-- Playability framework registry metadata.
-- Intelligence Console Playability presentation.
-- Playability regression tests.
+- `lib/intelligence/framework/EvidenceSufficiencyEngine.ts`
+- `lib/intelligence/framework/EvidenceRequirement.ts`
+- `lib/intelligence/framework/EvidenceScore.ts`
+- `lib/intelligence/framework/EvidenceStatus.ts`
+- `lib/intelligence/framework/EvidenceReport.ts`
+- `tests/evidence-sufficiency.test.ts`
 - Sprint documentation and Atlas files.
 
 ## Architecture Changes
 
-- Playability format scoring now uses configurable format weights.
-- Per-format Playability indicators now expose legality, importance, demand level, competitive relevance, casual relevance, confidence, trend, status, and provider.
-- Playability Profile now owns business conclusions, key signals, confidence reason, and format weights.
-- Future providers remain hooks only.
+- Every registered Intelligence model now declares evidence requirements.
+- Evidence reports attach to Intelligence models.
+- Insufficient evidence maps production grade display to Unknown.
+- Atlas Inspector displays evidence status, missing evidence, and evidence explanation.
 
 ## Documentation Updated
 
@@ -46,8 +47,8 @@ Explain why the market cares about playable cards through weighted formats, dema
 
 ## Technical Debt
 
-- Playability demand hints are local configuration until provider-backed demand data exists.
-- Supporting Evidence is still composed in the UI layer rather than a reusable presentation adapter.
+- Evidence requirements are hand-authored in the model registry.
+- Provider-backed evidence will need normalization once real providers are connected.
 
 ## Known Issues
 
@@ -55,7 +56,7 @@ Explain why the market cares about playable cards through weighted formats, dema
 
 ## Tests Added
 
-- Playability profile tests verify requested card examples, distinct business conclusions, framework registration, and configurable format weights.
+- Evidence Sufficiency tests verify Playability, Certification, Collector, and mocked sufficient Playability evidence states.
 
 ## Build Status
 
@@ -66,4 +67,4 @@ Explain why the market cares about playable cards through weighted formats, dema
 
 ## Suggested Next Sprint
 
-Connect approved EDHREC and tournament demand providers when available.
+Add generated evidence reports and visual regression coverage for Unknown grade presentation.

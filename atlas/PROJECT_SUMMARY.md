@@ -20,6 +20,10 @@ Sprint 25 matures Playability Intelligence to Level 2.
 
 Playability now measures weighted player demand using configurable format weights, demand hints, business conclusions, key signals, and richer per-format demand fields. Scryfall remains the current source, while EDHREC, MTGGoldfish, Melee, MTGO, and Tournament APIs remain future provider hooks.
 
+Sprint 25.1 adds Evidence Sufficiency.
+
+Intelligence models now declare required, optional, and future evidence. Insufficient required evidence produces Unknown rather than a failing grade, and Atlas Inspector displays missing evidence diagnostics.
+
 ## Current Architecture
 
 PriceTrackingLLC is a Next.js, TypeScript, and Tailwind CSS application for professional trading-card buying decisions.

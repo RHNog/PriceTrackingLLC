@@ -301,6 +301,47 @@ Future providers:
 
 No unofficial API integration is allowed.
 
+## Evidence Sufficiency Framework
+
+Evidence precedes conclusion.
+
+Every Intelligence model declares:
+
+- Required Evidence
+- Optional Evidence
+- Future Evidence
+
+Evidence states:
+
+- SUFFICIENT
+- PARTIAL
+- INSUFFICIENT
+- UNKNOWN
+- WAITING_FOR_PROVIDER
+
+Grade rules:
+
+- SUFFICIENT: generate grade.
+- PARTIAL: generate grade and reduce confidence.
+- INSUFFICIENT: display Unknown instead of a letter grade.
+
+Unknown is not a failing grade. It means the platform cannot yet produce a reliable conclusion.
+
+Missing evidence and negative evidence are separate states.
+
+Integrated model families:
+
+- Playability
+- Certification
+- Collector
+- Investment
+- Market
+- Liquidity
+- Regional
+- Historical
+- Behavior
+- Volatility
+
 ## Market Price Architecture
 
 Market Providers answer what a selected printing and finish variant is worth.

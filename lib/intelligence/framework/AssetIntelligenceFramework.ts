@@ -1,4 +1,6 @@
 import type { CardProfile } from "@/lib/engines/cardIntelligence/models/CardProfile";
+import { evaluateEvidenceSufficiency } from "@/lib/intelligence/framework/EvidenceSufficiencyEngine";
+import type { EvidenceRequirement } from "@/lib/intelligence/framework/EvidenceRequirement";
 import { createIndicator } from "@/lib/intelligence/framework/IndicatorFactory";
 import { indicatorRegistry } from "@/lib/intelligence/framework/IndicatorRegistry";
 import type {
@@ -19,6 +21,7 @@ type IntelligenceModelDefinition = {
   supportingSources: string[];
   explanation: string;
   dependencyGraph: string[];
+  evidenceRequirements: EvidenceRequirement[];
 };
 
 export const intelligenceModelRegistry: IntelligenceModelDefinition[] = [
@@ -33,6 +36,21 @@ export const intelligenceModelRegistry: IntelligenceModelDefinition[] = [
     supportingSources: ["Scryfall Market Provider"],
     explanation: "Measures reliability and resale context around the current market estimate.",
     dependencyGraph: ["Market Intelligence", "Market Snapshot", "Market Provider", "Scryfall Market Provider"],
+    evidenceRequirements: [
+      {
+        id: "market-price",
+        label: "Normalized market estimate",
+        type: "REQUIRED",
+        indicatorIds: ["market-confidence"],
+        minimumConfidence: 40,
+      },
+      {
+        id: "resale-depth",
+        label: "Marketplace resale depth",
+        type: "OPTIONAL",
+        indicatorIds: ["liquidity", "demand"],
+      },
+    ],
   },
   {
     id: "collector-intelligence",
@@ -51,6 +69,28 @@ export const intelligenceModelRegistry: IntelligenceModelDefinition[] = [
       "Printing Data",
       "Identity Provider",
       "Scryfall",
+    ],
+    evidenceRequirements: [
+      {
+        id: "collector-appeal",
+        label: "Collector appeal",
+        type: "REQUIRED",
+        indicatorIds: ["collector-appeal"],
+        minimumConfidence: 40,
+      },
+      {
+        id: "scarcity",
+        label: "Scarcity signal",
+        type: "REQUIRED",
+        indicatorIds: ["scarcity"],
+        minimumConfidence: 40,
+      },
+      {
+        id: "certification-grade",
+        label: "Certification evidence",
+        type: "OPTIONAL",
+        indicatorIds: ["certification-grade"],
+      },
     ],
   },
   {
@@ -88,6 +128,38 @@ export const intelligenceModelRegistry: IntelligenceModelDefinition[] = [
       "Negotiation Ladder",
       "Decision Resolver",
     ],
+    evidenceRequirements: [
+      {
+        id: "population",
+        label: "Population",
+        type: "REQUIRED",
+        indicatorIds: ["population-scarcity"],
+        acceptedDataSources: ["PSA", "BGS", "CGC"],
+        minimumConfidence: 60,
+      },
+      {
+        id: "gem-rate",
+        label: "Gem Rate",
+        type: "REQUIRED",
+        indicatorIds: ["gem-rate"],
+        acceptedDataSources: ["PSA", "BGS", "CGC"],
+        minimumConfidence: 60,
+      },
+      {
+        id: "premium",
+        label: "Certified Premium",
+        type: "REQUIRED",
+        indicatorIds: ["certification-premium"],
+        acceptedDataSources: ["PSA", "BGS", "CGC"],
+        minimumConfidence: 60,
+      },
+      {
+        id: "provider-integrations",
+        label: "PSA, BGS, and CGC providers",
+        type: "FUTURE",
+        futureProviders: ["PSA", "BGS", "CGC"],
+      },
+    ],
   },
   {
     id: "investment-intelligence",
@@ -100,6 +172,28 @@ export const intelligenceModelRegistry: IntelligenceModelDefinition[] = [
     supportingSources: ["Scryfall", "Scryfall Market Provider"],
     explanation: "Measures long-term asset potential without deciding whether to buy.",
     dependencyGraph: ["Investment Intelligence", "Card Profile", "Signals", "Strategy"],
+    evidenceRequirements: [
+      {
+        id: "investment-potential",
+        label: "Investment potential",
+        type: "REQUIRED",
+        indicatorIds: ["investment-potential"],
+        minimumConfidence: 40,
+      },
+      {
+        id: "market-confidence",
+        label: "Market confidence",
+        type: "REQUIRED",
+        indicatorIds: ["market-confidence"],
+        minimumConfidence: 40,
+      },
+      {
+        id: "collector-appeal",
+        label: "Collector appeal",
+        type: "OPTIONAL",
+        indicatorIds: ["collector-appeal"],
+      },
+    ],
   },
   {
     id: "liquidity-intelligence",
@@ -112,6 +206,22 @@ export const intelligenceModelRegistry: IntelligenceModelDefinition[] = [
     supportingSources: ["Future marketplace providers"],
     explanation: "Measures how quickly an asset can be resold once live provider depth exists.",
     dependencyGraph: ["Liquidity Intelligence", "Marketplace Depth", "Future Providers"],
+    evidenceRequirements: [
+      {
+        id: "marketplace-depth",
+        label: "Marketplace depth",
+        type: "REQUIRED",
+        indicatorIds: ["liquidity"],
+        acceptedDataSources: ["TCGplayer", "eBay", "Cardmarket", "LigaMagic"],
+        minimumConfidence: 60,
+      },
+      {
+        id: "future-liquidity-provider",
+        label: "Live marketplace providers",
+        type: "FUTURE",
+        futureProviders: ["TCGplayer", "eBay", "Cardmarket", "LigaMagic"],
+      },
+    ],
   },
   {
     id: "reprint-risk",
@@ -124,6 +234,15 @@ export const intelligenceModelRegistry: IntelligenceModelDefinition[] = [
     supportingSources: ["Scryfall"],
     explanation: "Measures possible future supply pressure without making a purchase decision.",
     dependencyGraph: ["Reprint Risk", "Card Metadata", "Scryfall"],
+    evidenceRequirements: [
+      {
+        id: "reprint-risk",
+        label: "Reprint risk signal",
+        type: "REQUIRED",
+        indicatorIds: ["reprint-risk"],
+        minimumConfidence: 20,
+      },
+    ],
   },
   {
     id: "market-confidence",
@@ -136,6 +255,15 @@ export const intelligenceModelRegistry: IntelligenceModelDefinition[] = [
     supportingSources: ["Scryfall Market Provider"],
     explanation: "Measures confidence in the current normalized market estimate.",
     dependencyGraph: ["Market Confidence", "Market Snapshot", "Scryfall Market Provider"],
+    evidenceRequirements: [
+      {
+        id: "market-confidence",
+        label: "Market confidence",
+        type: "REQUIRED",
+        indicatorIds: ["market-confidence"],
+        minimumConfidence: 40,
+      },
+    ],
   },
   {
     id: "playability-intelligence",
@@ -168,6 +296,36 @@ export const intelligenceModelRegistry: IntelligenceModelDefinition[] = [
       "Negotiation Ladder",
       "Decision Resolver",
     ],
+    evidenceRequirements: [
+      {
+        id: "format-availability",
+        label: "Format availability",
+        type: "REQUIRED",
+        indicatorIds: ["format-diversity"],
+        acceptedDataSources: ["Scryfall"],
+        minimumConfidence: 50,
+      },
+      {
+        id: "demand-provider",
+        label: "Provider-backed demand indicators",
+        type: "REQUIRED",
+        indicatorIds: ["commander-strength", "competitive-strength", "casual-strength"],
+        acceptedDataSources: ["EDHREC", "MTGGoldfish", "Melee", "MTGO", "Tournament APIs"],
+        minimumConfidence: 70,
+      },
+      {
+        id: "trend",
+        label: "Trend",
+        type: "OPTIONAL",
+        indicatorIds: ["demand-stability", "meta-dependency"],
+      },
+      {
+        id: "future-playability-providers",
+        label: "EDHREC, MTGO, and Melee providers",
+        type: "FUTURE",
+        futureProviders: ["EDHREC", "MTGO", "Melee"],
+      },
+    ],
   },
   {
     id: "grading-intelligence",
@@ -180,6 +338,15 @@ export const intelligenceModelRegistry: IntelligenceModelDefinition[] = [
     supportingSources: ["Condition Profile"],
     explanation: "Measures grading potential and prepares for PSA, CGC, and BGS providers.",
     dependencyGraph: ["Grading Intelligence", "Condition", "Future Grading Providers"],
+    evidenceRequirements: [
+      {
+        id: "condition",
+        label: "Condition profile",
+        type: "REQUIRED",
+        indicatorIds: ["grading"],
+        minimumConfidence: 40,
+      },
+    ],
   },
   {
     id: "regional-intelligence",
@@ -192,6 +359,15 @@ export const intelligenceModelRegistry: IntelligenceModelDefinition[] = [
     supportingSources: ["Future regional providers"],
     explanation: "Future model for regional valuation, shipping, tax, import cost, and demand.",
     dependencyGraph: ["Regional Intelligence", "Market Context", "Future Providers"],
+    evidenceRequirements: [
+      {
+        id: "regional-provider",
+        label: "Regional market provider",
+        type: "REQUIRED",
+        indicatorIds: ["regional"],
+        minimumConfidence: 60,
+      },
+    ],
   },
   {
     id: "behavior-intelligence",
@@ -204,6 +380,15 @@ export const intelligenceModelRegistry: IntelligenceModelDefinition[] = [
     supportingSources: ["Future user history"],
     explanation: "Future model for buyer-specific execution behavior.",
     dependencyGraph: ["Behavior Intelligence", "User History", "Future Storage"],
+    evidenceRequirements: [
+      {
+        id: "behavior-history",
+        label: "Behavior history",
+        type: "REQUIRED",
+        indicatorIds: ["behavior"],
+        minimumConfidence: 60,
+      },
+    ],
   },
   {
     id: "historical-intelligence",
@@ -216,6 +401,15 @@ export const intelligenceModelRegistry: IntelligenceModelDefinition[] = [
     supportingSources: ["Future historical storage"],
     explanation: "Future model for price history, drawdowns, and trend stability.",
     dependencyGraph: ["Historical Intelligence", "Historical Storage", "Future Providers"],
+    evidenceRequirements: [
+      {
+        id: "historical-prices",
+        label: "Historical prices",
+        type: "REQUIRED",
+        indicatorIds: ["historical"],
+        minimumConfidence: 60,
+      },
+    ],
   },
   {
     id: "volatility-intelligence",
@@ -228,6 +422,15 @@ export const intelligenceModelRegistry: IntelligenceModelDefinition[] = [
     supportingSources: ["Future historical storage"],
     explanation: "Future model for short-term price movement risk.",
     dependencyGraph: ["Volatility Intelligence", "Historical Storage", "Future Providers"],
+    evidenceRequirements: [
+      {
+        id: "historical-prices",
+        label: "Historical prices",
+        type: "REQUIRED",
+        indicatorIds: ["volatility"],
+        minimumConfidence: 60,
+      },
+    ],
   },
   {
     id: "demand-intelligence",
@@ -240,6 +443,15 @@ export const intelligenceModelRegistry: IntelligenceModelDefinition[] = [
     supportingSources: ["Future marketplace providers"],
     explanation: "Future model for marketplace demand and format popularity.",
     dependencyGraph: ["Demand Intelligence", "Market Context", "Future Providers"],
+    evidenceRequirements: [
+      {
+        id: "demand-provider",
+        label: "Marketplace demand provider",
+        type: "REQUIRED",
+        indicatorIds: ["demand"],
+        minimumConfidence: 60,
+      },
+    ],
   },
   {
     id: "scarcity-intelligence",
@@ -252,6 +464,15 @@ export const intelligenceModelRegistry: IntelligenceModelDefinition[] = [
     supportingSources: ["Scryfall"],
     explanation: "Measures relative scarcity from normalized printing metadata.",
     dependencyGraph: ["Scarcity Intelligence", "Printing Data", "Scryfall"],
+    evidenceRequirements: [
+      {
+        id: "scarcity",
+        label: "Scarcity signal",
+        type: "REQUIRED",
+        indicatorIds: ["scarcity"],
+        minimumConfidence: 40,
+      },
+    ],
   },
 ];
 
@@ -311,13 +532,21 @@ export function createAssetIntelligenceModels(
     const modelIndicators = indicators.filter((indicator) =>
       definition.indicatorIds.includes(indicator.id),
     );
+    const evidenceReport = evaluateEvidenceSufficiency({
+      indicators: modelIndicators,
+      requirements: definition.evidenceRequirements,
+    });
+    const confidence = Math.max(
+      0,
+      averageConfidence(modelIndicators) + evidenceReport.confidenceAdjustment,
+    );
 
     return {
       id: definition.id,
       name: definition.name,
       version: definition.version,
       status: definition.status,
-      confidence: averageConfidence(modelIndicators),
+      confidence,
       lastUpdated: new Date().toISOString(),
       inputs: definition.inputs,
       outputs: definition.outputs,
@@ -326,6 +555,7 @@ export function createAssetIntelligenceModels(
       health: getModelHealth(definition.status, modelIndicators),
       explanation: definition.explanation,
       dependencyGraph: definition.dependencyGraph,
+      evidenceReport,
     };
   });
 }

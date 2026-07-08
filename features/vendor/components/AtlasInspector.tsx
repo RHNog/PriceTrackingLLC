@@ -303,6 +303,20 @@ export default function AtlasInspector({
                   <KeyValue label="Health" value={model.health} />
                   <KeyValue label="Confidence" value={`${model.confidence}%`} />
                   <KeyValue
+                    label="Evidence Status"
+                    value={model.evidenceReport.status}
+                  />
+                  <KeyValue
+                    label="Missing Evidence"
+                    value={model.evidenceReport.missingEvidence
+                      .map((requirement) => requirement.label)
+                      .join(", ")}
+                  />
+                  <KeyValue
+                    label="Evidence Explanation"
+                    value={model.evidenceReport.explanation}
+                  />
+                  <KeyValue
                     label="Internal Sources"
                     value={model.supportingSources.join(", ")}
                   />

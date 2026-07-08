@@ -1,5 +1,6 @@
 import IntelligenceGradeBadge, {
   getConfidenceLabel,
+  getEvidenceAwareGrade,
 } from "@/components/intelligence/IntelligenceGrade";
 import type { IntelligenceModel } from "@/lib/intelligence/framework/IntelligenceModel";
 
@@ -30,7 +31,13 @@ export default function IntelligenceTile({
       <span className="truncate text-sm font-medium text-zinc-200">
         {getDisplayName(model.name)}
       </span>
-      <IntelligenceGradeBadge score={score} />
+      {model.evidenceReport.status === "INSUFFICIENT" ? (
+        <span className="inline-flex h-7 min-w-16 items-center justify-center rounded-md border border-zinc-600 bg-zinc-800 px-2 text-sm font-semibold text-zinc-200">
+          {getEvidenceAwareGrade(score, model.evidenceReport.status)}
+        </span>
+      ) : (
+        <IntelligenceGradeBadge score={score} />
+      )}
       <span className="min-w-12 text-right text-sm font-semibold text-zinc-300">
         {getConfidenceLabel(model.confidence)}
       </span>

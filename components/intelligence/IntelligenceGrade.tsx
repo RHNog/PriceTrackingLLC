@@ -1,4 +1,5 @@
 export type IntelligenceGrade =
+  | "Unknown"
   | "A+"
   | "A"
   | "A-"
@@ -82,6 +83,17 @@ export function getConfidenceLabel(
   }
 
   return "Very Low";
+}
+
+export function getEvidenceAwareGrade(
+  score: number,
+  evidenceStatus?: string,
+): IntelligenceGrade {
+  if (evidenceStatus === "INSUFFICIENT" || evidenceStatus === "UNKNOWN") {
+    return "Unknown";
+  }
+
+  return getIntelligenceGrade(score);
 }
 
 export default function IntelligenceGradeBadge({ score }: { score: number }) {

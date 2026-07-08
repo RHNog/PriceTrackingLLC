@@ -40,6 +40,7 @@
 - Layered Intelligence Console information architecture
 - Final Intelligence Console UI contract
 - Playability Intelligence Level 2
+- Evidence Sufficiency Framework
 - Certification Provider Registry
 - Placeholder PSA, BGS, and CGC certification provider coverage
 - Marketplace Profile templates
@@ -58,15 +59,15 @@
 
 ## Current Sprint
 
-Sprint 25: Playability Intelligence Level 2
+Sprint 25.1: Evidence Sufficiency Framework
 
 Goals:
 
-- Move Playability from legality reporting to meaningful player demand intelligence.
-- Explain why a card is played and why the market cares.
-- Keep provider abstraction intact.
-- Expose configurable format weights.
-- Prepare future EDHREC, MTGGoldfish, Melee, MTGO, and Tournament API integrations.
+- Require every Intelligence model to declare evidence requirements.
+- Distinguish missing evidence from negative evidence.
+- Display Unknown instead of a failing grade when required evidence is insufficient.
+- Let future provider integrations automatically improve evidence sufficiency.
+- Keep Atlas as the owner of implementation evidence diagnostics.
 
 ## Near-Term Roadmap
 

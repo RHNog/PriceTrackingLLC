@@ -18,6 +18,7 @@ Atlas Sprint A1
 - Evaluation history under `lib/history/`.
 - System readiness under `lib/validation/`.
 - Pipeline integrity under `lib/pipeline/`.
+- Evidence Sufficiency Framework under `lib/intelligence/framework/`.
 - Game and query knowledge under `knowledge/` and `data/query/`.
 
 ## Dependencies
@@ -68,6 +69,8 @@ Information architecture rule: Vendor Workspace displays Decision, Explanation, 
 Final Intelligence Console rule: expanded panels display Grade/Confidence, Business Conclusion, Key Signals, and Supporting Evidence only.
 
 Playability maturity rule: legality is evidence, not the conclusion. Playability conclusions describe player demand.
+
+Evidence sufficiency rule: required evidence gates grades. Unknown is not failure.
 
 ## Workflows
 

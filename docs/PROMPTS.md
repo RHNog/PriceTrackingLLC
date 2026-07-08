@@ -2,6 +2,16 @@
 
 This file summarizes major prompts and architectural instructions. It intentionally avoids copying every prompt in full.
 
+## Sprint 25.1
+
+Purpose: introduce the Evidence Sufficiency Framework.
+
+Core instruction: intelligence models must never produce definitive conclusions without sufficient supporting evidence.
+
+Major files affected: Intelligence framework evidence contracts, Asset Intelligence Framework model definitions, Intelligence Console grade display, Atlas Inspector diagnostics, tests, and documentation.
+
+Result: required/optional/future evidence declarations, Unknown state, low-confidence evidence explanations, and model-wide evidence sufficiency reports.
+
 ## Sprint 25
 
 Purpose: mature Playability Intelligence from Level 1 Framework to Level 2 Meaningful Intelligence.

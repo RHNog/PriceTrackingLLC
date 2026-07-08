@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   getConfidenceLabel,
+  getEvidenceAwareGrade,
   getIntelligenceGrade,
 } from "@/components/intelligence/IntelligenceGrade";
 
@@ -25,4 +26,10 @@ test("maps numeric confidence to production confidence labels", () => {
   assert.equal(getConfidenceLabel(55), "Moderate");
   assert.equal(getConfidenceLabel(35), "Low");
   assert.equal(getConfidenceLabel(28), "Very Low");
+});
+
+test("maps insufficient evidence to Unknown instead of failing grade", () => {
+  assert.equal(getEvidenceAwareGrade(0, "INSUFFICIENT"), "Unknown");
+  assert.equal(getEvidenceAwareGrade(49, "INSUFFICIENT"), "Unknown");
+  assert.equal(getEvidenceAwareGrade(92, "SUFFICIENT"), "A");
 });

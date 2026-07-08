@@ -1,4 +1,5 @@
 import type { Indicator } from "@/lib/intelligence/framework/Indicator";
+import type { EvidenceReport } from "@/lib/intelligence/framework/EvidenceReport";
 import type { IndicatorStatus } from "@/lib/intelligence/framework/IndicatorStatus";
 
 export type IntelligenceModelHealth =
@@ -23,4 +24,5 @@ export interface IntelligenceModel {
   health: IntelligenceModelHealth;
   explanation: string;
   dependencyGraph: string[];
+  evidenceReport: EvidenceReport;
 }

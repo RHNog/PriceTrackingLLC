@@ -2,6 +2,8 @@
 
 ## Major Product And Architecture Decisions
 
+0.4. Evidence precedes conclusion. Unknown is not a failing grade; it means required evidence is insufficient.
+
 0.3. Playability Intelligence measures player demand, not legality alone. Legality is evidence; demand is the conclusion.
 
 0.2. Final Intelligence Console panels answer exactly four questions: grade/confidence, business conclusion, key signals, and supporting evidence.
@@ -86,6 +88,23 @@ Consequences:
 - Future demand providers remain hooks only.
 - Playability Profile owns business conclusions and key signals.
 - Strategies continue to interpret Playability through existing signal weights.
+
+## Sprint 25.1 - Evidence Sufficiency Before Grades
+
+Decision:
+
+Every Intelligence model must evaluate evidence sufficiency before producing a definitive grade.
+
+Rationale:
+
+Missing provider evidence should not be interpreted as negative evidence. A model without required inputs should say Unknown with low confidence instead of producing an F-like conclusion.
+
+Consequences:
+
+- Models declare required, optional, and future evidence.
+- Confidence reflects evidence quality.
+- Insufficient required evidence blocks letter grades.
+- Atlas Inspector displays missing evidence and future provider dependencies.
 
 4. Search became the Query Engine. The system interprets intent instead of only matching text.
 

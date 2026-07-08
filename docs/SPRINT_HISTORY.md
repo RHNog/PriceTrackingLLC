@@ -2,6 +2,18 @@
 
 This file records logical product milestones. Sprint numbers may not perfectly match commit history.
 
+## Sprint 25.1
+
+Introduced the Evidence Sufficiency Framework.
+
+- Added framework contracts for Evidence Requirement, Evidence Status, Evidence Score, Evidence Report, and Evidence Sufficiency Engine.
+- Required every Intelligence model to declare required, optional, and future evidence.
+- Added Unknown as a non-failing grade state when evidence is insufficient.
+- Differentiated missing evidence from negative evidence.
+- Reduced confidence when evidence is partial or insufficient.
+- Integrated evidence reports into Playability, Certification, Collector, Investment, Market, Liquidity, Regional, Historical, Behavior, and Volatility models.
+- Added Atlas Inspector evidence diagnostics.
+
 ## Sprint 25
 
 Playability Intelligence matured from Level 1 Framework to Level 2 Meaningful Intelligence.
