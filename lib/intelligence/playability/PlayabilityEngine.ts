@@ -1,8 +1,14 @@
 import type { Card } from "@/types/card";
+import {
+  playabilityCardDemandHints,
+  playabilityFormatWeights,
+} from "@/config/playability";
 import type {
   PlayabilityBanStatus,
+  PlayabilityDemandLevel,
   PlayabilityFormat,
   PlayabilityIndicator,
+  PlayabilityRelevanceLevel,
 } from "@/lib/intelligence/playability/PlayabilityIndicator";
 import type { PlayabilityProfile, PlayabilityTier } from "@/lib/intelligence/playability/PlayabilityProfile";
 import type {
@@ -31,18 +37,42 @@ function clampScore(score: number) {
 
 function scoreFromStatus(status: PlayabilityBanStatus) {
   if (status === "Legal") {
-    return 70;
+    return 45;
   }
 
   if (status === "Restricted") {
-    return 35;
+    return 28;
   }
 
   if (status === "Banned") {
-    return 5;
+    return 0;
   }
 
   return 0;
+}
+
+function getLevel(score: number): PlayabilityDemandLevel {
+  if (score >= 85) {
+    return "Very High";
+  }
+
+  if (score >= 70) {
+    return "High";
+  }
+
+  if (score >= 45) {
+    return "Moderate";
+  }
+
+  if (score >= 20) {
+    return "Low";
+  }
+
+  return "Very Low";
+}
+
+function getRelevanceLevel(score: number): PlayabilityRelevanceLevel {
+  return getLevel(score);
 }
 
 function getTier(score: number): PlayabilityTier {
@@ -74,7 +104,103 @@ function normalizeScryfallLegality(value?: string): PlayabilityBanStatus {
     return "Banned";
   }
 
+  if (value === "not_legal") {
+    return "Not Legal";
+  }
+
   return "Unknown";
+}
+
+function getDemandHint(card: Card) {
+  return playabilityCardDemandHints[card.name.toLowerCase()];
+}
+
+function getFormatWeight(format: PlayabilityFormat) {
+  if (format === "Overall") {
+    return {
+      casualWeight: 0,
+      competitiveWeight: 0,
+      demandWeight: 0,
+    };
+  }
+
+  return playabilityFormatWeights[format];
+}
+
+function getImportance(format: PlayabilityFormat) {
+  const weight = getFormatWeight(format);
+
+  return clampScore(
+    (weight.casualWeight + weight.competitiveWeight + weight.demandWeight) *
+      33,
+  );
+}
+
+function getFormatDemandScore(
+  card: Card,
+  format: PlayabilityFormat,
+  status: PlayabilityBanStatus,
+) {
+  const weight = getFormatWeight(format);
+  const hint = getDemandHint(card)?.formatHints[format];
+  const statusScore = scoreFromStatus(status);
+
+  if (status === "Not Legal" || status === "Banned" || status === "Unknown") {
+    return clampScore(statusScore + (hint?.demandBonus ?? 0) * 0.25);
+  }
+
+  return clampScore(
+    statusScore +
+      weight.demandWeight * 25 +
+      weight.casualWeight * 8 +
+      weight.competitiveWeight * 8 +
+      (hint?.demandBonus ?? 0),
+  );
+}
+
+function getCompetitiveScore(
+  card: Card,
+  format: PlayabilityFormat,
+  status: PlayabilityBanStatus,
+) {
+  const hint = getDemandHint(card)?.formatHints[format];
+  const weight = getFormatWeight(format);
+  const statusBase = status === "Legal" || status === "Restricted" ? 35 : 0;
+
+  return clampScore(
+    statusBase + weight.competitiveWeight * 45 + (hint?.competitiveRelevanceBonus ?? 0),
+  );
+}
+
+function getCasualScore(
+  card: Card,
+  format: PlayabilityFormat,
+  status: PlayabilityBanStatus,
+) {
+  const hint = getDemandHint(card)?.formatHints[format];
+  const weight = getFormatWeight(format);
+  const statusBase = status === "Legal" || status === "Restricted" ? 35 : 0;
+
+  return clampScore(
+    statusBase + weight.casualWeight * 45 + (hint?.casualRelevanceBonus ?? 0),
+  );
+}
+
+function getIndicatorExplanation(
+  card: Card,
+  format: PlayabilityFormat,
+  status: PlayabilityBanStatus,
+  demandLevel: PlayabilityDemandLevel,
+) {
+  const hintSignals =
+    getDemandHint(card)?.formatHints[format]?.keySignals?.join(", ");
+  const signalText = hintSignals ? ` Key signals: ${hintSignals}.` : "";
+
+  if (status === "Legal" || status === "Restricted") {
+    return `${format} demand is ${demandLevel.toLowerCase()} because ${card.name} is ${status.toLowerCase()} and this format carries a configured demand weight.${signalText}`;
+  }
+
+  return `${format} demand is ${demandLevel.toLowerCase()} because ${card.name} is ${status.toLowerCase()} in this format.${signalText}`;
 }
 
 function createWaitingIndicator(
@@ -86,9 +212,14 @@ function createWaitingIndicator(
     format: context.format,
     score: 0,
     confidence: 0,
+    importance: getImportance(context.format),
+    demandLevel: "Very Low",
+    competitiveRelevance: "Very Low",
+    casualRelevance: "Very Low",
     trend: "Unknown",
     availability: "WAITING_FOR_PROVIDER",
     dataSource: "Future Provider",
+    provider: "Future Provider",
     status: "Unknown",
     lastUpdated: timestamp,
     metaStability: "Unknown",
@@ -98,7 +229,7 @@ function createWaitingIndicator(
       confidence: 0,
       status: "WAITING_FOR_PROVIDER",
     },
-    explanation: `${context.format} play demand is waiting for a provider.`,
+    explanation: `${context.format} play demand will become clearer once a provider is connected.`,
   };
 }
 
@@ -125,26 +256,46 @@ export class ScryfallPlayabilityProvider implements PlayabilityProvider {
     }
 
     const status = normalizeScryfallLegality(legalities[legalityKey]);
-    const score = scoreFromStatus(status);
+    const score = getFormatDemandScore(context.card, context.format, status);
+    const competitiveScore = getCompetitiveScore(
+      context.card,
+      context.format,
+      status,
+    );
+    const casualScore = getCasualScore(context.card, context.format, status);
+    const demandHint = getDemandHint(context.card);
+    const formatHint = demandHint?.formatHints[context.format];
     const timestamp = new Date().toISOString();
+    const demandLevel = getLevel(score);
 
     return {
       format: context.format,
       score,
-      confidence: status === "Unknown" ? 20 : 65,
-      trend: "Unknown",
+      confidence:
+        status === "Unknown" ? 20 : clampScore(55 + (demandHint?.confidenceBonus ?? 0)),
+      importance: getImportance(context.format),
+      demandLevel,
+      competitiveRelevance: getRelevanceLevel(competitiveScore),
+      casualRelevance: getRelevanceLevel(casualScore),
+      trend: formatHint?.trend ?? "Stable",
       availability: "LIVE",
       dataSource: "Scryfall",
+      provider: this.name,
       status,
       lastUpdated: timestamp,
-      metaStability: "Unknown",
+      metaStability: formatHint?.trend === "Declining" ? "Volatile" : "Stable",
       deckPenetration: {
         percentage: null,
         sampleSize: null,
         confidence: 0,
-        status: "PLACEHOLDER",
+        status: "WAITING_FOR_PROVIDER",
       },
-      explanation: `${context.format} status is ${status.toLowerCase()} from Scryfall legalities. Deck penetration and metagame movement are reserved for future providers.`,
+      explanation: getIndicatorExplanation(
+        context.card,
+        context.format,
+        status,
+        demandLevel,
+      ),
     };
   }
 }
@@ -161,12 +312,18 @@ function createOverallIndicator(
   const legalFormats = scoredIndicators.filter(
     (indicator) => indicator.status === "Legal" || indicator.status === "Restricted",
   );
+  const weightedDemand = scoredIndicators.reduce((sum, indicator) => {
+    const weight = getFormatWeight(indicator.format).demandWeight;
+
+    return sum + indicator.score * weight;
+  }, 0);
+  const totalWeight = scoredIndicators.reduce(
+    (sum, indicator) => sum + getFormatWeight(indicator.format).demandWeight,
+    0,
+  );
   const score =
     scoredIndicators.length > 0
-      ? clampScore(
-          scoredIndicators.reduce((sum, indicator) => sum + indicator.score, 0) /
-            scoredIndicators.length,
-        )
+      ? clampScore(weightedDemand / Math.max(1, totalWeight))
       : card.game === "Magic"
         ? 45
         : 0;
@@ -179,15 +336,31 @@ function createOverallIndicator(
           ) / scoredIndicators.length,
         )
       : 20;
-  const dataSource = scoredIndicators.length > 0 ? "Scryfall" : "Placeholder";
+  const dataSource = scoredIndicators.length > 0 ? "Scryfall" : "Future Provider";
+  const strongestFormat = [...scoredIndicators].sort(
+    (first, second) => second.score - first.score,
+  )[0];
 
   return {
     format: "Overall",
     score,
     confidence,
-    trend: "Unknown",
-    availability: scoredIndicators.length > 0 ? "LIVE" : "PLACEHOLDER",
+    importance: 100,
+    demandLevel: getLevel(score),
+    competitiveRelevance: getRelevanceLevel(
+      averageNumbers(scoredIndicators.map((indicator) => {
+        return scoreFromLevel(indicator.competitiveRelevance);
+      })),
+    ),
+    casualRelevance: getRelevanceLevel(
+      averageNumbers(scoredIndicators.map((indicator) => {
+        return scoreFromLevel(indicator.casualRelevance);
+      })),
+    ),
+    trend: strongestFormat?.trend ?? "Unknown",
+    availability: scoredIndicators.length > 0 ? "LIVE" : "WAITING_FOR_PROVIDER",
     dataSource,
+    provider: scoredIndicators.length > 0 ? "Scryfall Playability Provider" : "Future Provider",
     status: legalFormats.length > 0 ? "Legal" : "Unknown",
     lastUpdated: new Date().toISOString(),
     metaStability: "Unknown",
@@ -195,13 +368,31 @@ function createOverallIndicator(
       percentage: null,
       sampleSize: null,
       confidence: 0,
-      status: "PLACEHOLDER",
+      status: "WAITING_FOR_PROVIDER",
     },
     explanation:
       legalFormats.length > 0
-        ? `Legal or restricted in ${legalFormats.length} tracked format${legalFormats.length === 1 ? "" : "s"}. Metagame and deck penetration providers can raise confidence later.`
-        : "Playability uses placeholder metadata until legalities or format providers are available.",
+        ? `${card.name} has ${getLevel(score).toLowerCase()} play demand across ${legalFormats.length} playable format${legalFormats.length === 1 ? "" : "s"}, weighted by format relevance.`
+        : "Play demand will become clearer once legalities or format providers are available.",
   };
+}
+
+function scoreFromLevel(level: PlayabilityRelevanceLevel) {
+  return {
+    High: 75,
+    Low: 30,
+    Moderate: 55,
+    "Very High": 90,
+    "Very Low": 10,
+  }[level];
+}
+
+function averageNumbers(values: number[]) {
+  if (values.length === 0) {
+    return 0;
+  }
+
+  return clampScore(values.reduce((sum, value) => sum + value, 0) / values.length);
 }
 
 function averageIndicators(
@@ -209,10 +400,7 @@ function averageIndicators(
   indicators: PlayabilityIndicator[],
   explanation: string,
 ) {
-  const score = clampScore(
-    indicators.reduce((sum, indicator) => sum + indicator.score, 0) /
-      Math.max(1, indicators.length),
-  );
+  const score = averageNumbers(indicators.map((indicator) => indicator.score));
   const confidence = clampScore(
     indicators.reduce((sum, indicator) => sum + indicator.confidence, 0) /
       Math.max(1, indicators.length),
@@ -223,8 +411,56 @@ function averageIndicators(
     format,
     score,
     confidence,
+    demandLevel: getLevel(score),
     explanation,
   };
+}
+
+function getBusinessConclusion(card: Card, overall: PlayabilityIndicator) {
+  return (
+    getDemandHint(card)?.businessConclusion ??
+    `${card.name} has ${overall.demandLevel.toLowerCase()} player demand based on weighted format availability. Its market relevance depends on continued play across the formats where it is currently usable.`
+  );
+}
+
+function getConfidenceReason(card: Card, confidence: number) {
+  if (confidence >= 70) {
+    return "";
+  }
+
+  return (
+    getDemandHint(card)?.confidenceReason ??
+    "Dedicated deck adoption, tournament usage, and format demand providers have not yet been connected."
+  );
+}
+
+function getKeySignals(
+  card: Card,
+  formats: Record<PlayabilityFormat, PlayabilityIndicator>,
+) {
+  const legalFormats = Object.values(formats).filter(
+    (indicator) =>
+      indicator.format !== "Overall" &&
+      (indicator.status === "Legal" || indicator.status === "Restricted"),
+  );
+  const broadFormatDiversity = legalFormats.length >= 4;
+  const strongestSignals = legalFormats
+    .flatMap((indicator) => {
+      const signals = getDemandHint(card)?.formatHints[indicator.format]?.keySignals ?? [];
+
+      return signals.length > 0
+        ? signals
+        : [`${indicator.format} ${indicator.demandLevel} Demand`];
+    });
+
+  return Array.from(
+    new Set([
+      ...(getDemandHint(card)?.keySignals ?? []),
+      ...(broadFormatDiversity ? ["Broad Format Diversity"] : []),
+      ...strongestSignals,
+      formats.Overall.trend === "Increasing" ? "Growing Interest" : "Stable Demand",
+    ]),
+  ).slice(0, 4);
 }
 
 export function createPlayabilityProfile(card: Card): PlayabilityProfile {
@@ -253,6 +489,20 @@ export function createPlayabilityProfile(card: Card): PlayabilityProfile {
     formats.Pauper,
     formats.Explorer,
   ];
+  const demandStabilityScore = clampScore(
+    averageNumbers(formatIndicators.map((indicator) => indicator.score)) -
+      (formatIndicators.some((indicator) => indicator.trend === "Declining") ? 15 : 0),
+  );
+  const metaDependencyScore = clampScore(
+    averageNumbers(competitiveFormats.map((indicator) => indicator.score)) -
+      averageNumbers([formats.Commander.score, formats["Canadian Highlander"].score]),
+  );
+  const futureDemandReadiness = averageIndicators(
+    "Overall",
+    formatIndicators,
+    "Future demand readiness improves as Commander, metagame, and tournament providers are connected.",
+  );
+  const keySignals = getKeySignals(card, formats);
 
   return {
     modelId: "playability-intelligence",
@@ -261,6 +511,15 @@ export function createPlayabilityProfile(card: Card): PlayabilityProfile {
     overall,
     formats,
     tier: getTier(overall.score),
+    businessConclusion: getBusinessConclusion(card, overall),
+    confidenceReason: getConfidenceReason(card, overall.confidence),
+    keySignals,
+    formatWeights: Object.fromEntries(
+      Object.entries(playabilityFormatWeights).map(([format, weight]) => [
+        format,
+        weight.demandWeight,
+      ]),
+    ),
     indicators: {
       overallPlayability: overall,
       commanderStrength: formats.Commander,
@@ -280,25 +539,48 @@ export function createPlayabilityProfile(card: Card): PlayabilityProfile {
         "Ban risk is provider-ready; Scryfall legalities supply current status only.",
       ),
       formatDiversity: overall,
+      demandStability: {
+        ...overall,
+        score: demandStabilityScore,
+        demandLevel: getLevel(demandStabilityScore),
+        explanation:
+          demandStabilityScore >= 60
+            ? "Demand appears stable across currently playable formats."
+            : "Demand stability is limited until broader provider coverage is connected.",
+      },
+      metaDependency: {
+        ...overall,
+        score: Math.max(0, metaDependencyScore),
+        demandLevel: getLevel(Math.max(0, metaDependencyScore)),
+        explanation:
+          metaDependencyScore >= 45
+            ? "Demand has meaningful competitive format dependency."
+            : "Demand is not primarily dependent on current tournament metagames.",
+      },
+      futureDemandReadiness: {
+        ...futureDemandReadiness,
+        score: clampScore(overall.score * 0.75),
+        demandLevel: getLevel(overall.score * 0.75),
+      },
       metaStability: {
         ...overall,
-        score: 0,
-        confidence: 0,
-        availability: "PLACEHOLDER",
-        dataSource: "Placeholder",
-        explanation: "Meta stability is prepared for future metagame providers.",
+        score: demandStabilityScore,
+        confidence: overall.confidence,
+        availability: "LIVE",
+        dataSource: "Scryfall",
+        explanation: "Demand stability reflects current weighted format spread until dedicated metagame providers are connected.",
       },
       trend: {
         ...overall,
-        score: 0,
-        confidence: 0,
-        availability: "PLACEHOLDER",
-        dataSource: "Placeholder",
-        explanation: "Trend is prepared for future usage and metagame providers.",
+        score: clampScore(overall.score * 0.75),
+        confidence: overall.confidence,
+        availability: "LIVE",
+        dataSource: "Scryfall",
+        explanation: "Future demand readiness reflects current format demand and known provider gaps.",
       },
     },
-    explanation: `${card.name} has ${getTier(overall.score).toLowerCase()} playability based on current provider coverage. Playability measures demand only; strategies decide how to use it.`,
-    providerRoadmap: ["EDHREC", "MTGGoldfish", "Melee", "MTGO", "Top8"],
+    explanation: `${getBusinessConclusion(card, overall)} Playability measures player demand only; strategies decide how to use it.`,
+    providerRoadmap: ["EDHREC", "MTGGoldfish", "Melee", "MTGO", "Tournament APIs"],
     dependencyGraph: [
       "Playability Intelligence",
       "Playability Engine",

@@ -2,6 +2,19 @@
 
 This file records logical product milestones. Sprint numbers may not perfectly match commit history.
 
+## Sprint 25
+
+Playability Intelligence matured from Level 1 Framework to Level 2 Meaningful Intelligence.
+
+- Added configurable format weights.
+- Added playability demand hints for known test cards and provider-ready demand modeling.
+- Expanded each format indicator with legality, importance, demand level, competitive relevance, casual relevance, confidence, trend, status, and provider.
+- Added natural-language business conclusions explaining why the market cares about each card.
+- Added Key Signals describing where demand comes from.
+- Replaced legality-only scoring with weighted player demand scoring.
+- Added indicators for Commander Strength, Competitive Strength, Casual Strength, Format Diversity, Demand Stability, Ban Risk, Meta Dependency, and Future Demand Readiness.
+- Preserved provider abstraction and left EDHREC, MTGGoldfish, Melee, MTGO, and Tournament APIs as future hooks.
+
 ## Sprint 24.2
 
 Finalized the Intelligence Console presentation contract.

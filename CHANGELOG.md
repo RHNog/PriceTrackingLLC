@@ -9,6 +9,12 @@ The format is inspired by "Keep a Changelog".
 ## [Unreleased]
 
 ### Added
+- Sprint 25 Playability Intelligence Level 2.
+- Configurable Playability format weights and demand hints in `config/playability.ts`.
+- Playability Profile demand fields for legality, importance, demand level, competitive relevance, casual relevance, confidence, trend, status, and provider.
+- Playability business conclusions explaining why the market cares about a card.
+- Playability Key Signals such as Commander Staple, Broad Format Diversity, Stable Demand, and Meta Dependent.
+- New Playability indicators for Demand Stability, Meta Dependency, and Future Demand Readiness.
 - Sprint 24.2 final Intelligence Console presentation contract.
 - Session-scoped expanded Intelligence tile memory.
 - Model-specific confidence labels such as Certification Confidence and Playability Confidence.
@@ -114,6 +120,9 @@ The format is inspired by "Keep a Changelog".
 - Architecture, roadmap, decision, product spec, prompt history, and documentation changelog files.
 
 ### Changed
+- Playability Intelligence now measures weighted player demand instead of reporting legality as the primary signal.
+- Playability tile conclusions, key signals, and supporting evidence now use Playability Profile demand intelligence.
+- Playability provider roadmap now records EDHREC, MTGGoldfish, Melee, MTGO, and Tournament APIs.
 - Expanded Intelligence tiles now answer only Grade/Confidence, Business Conclusion, Key Signals, and Supporting Evidence.
 - Removed redundant Summary and What This Means sections from production Intelligence panels.
 - Primary Supporting Indicators was renamed to Key Signals.
@@ -208,6 +217,7 @@ The format is inspired by "Keep a Changelog".
 - Clear low-confidence identity candidates can now load printing candidates instead of leaving Vendor Workspace stuck at an identity row.
 
 ### Documented
+- Sprint 25 Playability maturity increase from Level 1 Framework to Level 2 Meaningful Intelligence.
 - Sprint 24.2 final Intelligence Console UI contract, confidence explanation rules, expansion memory, and redundancy removal.
 - Sprint 24.1 layered information architecture, Vendor Information Model, Atlas Information Model, and responsibility split.
 - Sprint 24 Certification Intelligence philosophy, provider abstraction, profile, dependency graph, architecture graph, backlog, and technical debt.

@@ -53,6 +53,7 @@ Provider rule: provider data must be adapted into domain objects before engines 
 - Asset Intelligence Framework.
 - Card Intelligence signals.
 - Playability Intelligence backed by Scryfall legalities.
+- Playability Intelligence Level 2 demand layer backed by configurable format weights and demand hints.
 - Certification Intelligence backed by a placeholder provider and provider registry.
 - Future models: Grading, Regional, Behavior, Historical, Volatility, Demand, Scarcity, Liquidity, and other registered intelligence dimensions.
 
@@ -65,6 +66,8 @@ Future certification providers: PSA, BGS, CGC, TAG, SGC, and ARS through `Certif
 Information architecture rule: Vendor Workspace displays Decision, Explanation, and Evidence. Atlas Inspector displays Implementation details.
 
 Final Intelligence Console rule: expanded panels display Grade/Confidence, Business Conclusion, Key Signals, and Supporting Evidence only.
+
+Playability maturity rule: legality is evidence, not the conclusion. Playability conclusions describe player demand.
 
 ## Workflows
 

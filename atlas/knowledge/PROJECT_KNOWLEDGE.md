@@ -34,6 +34,8 @@ Decision Resolver should remain deterministic after receiving a validated Offer 
 - Certification Intelligence measures collectible certification characteristics only.
 - Certification Provider data must enter through `CertificationRegistry`.
 - Collector Intelligence consumes Certification Intelligence before strategies interpret collector value.
+- Playability Intelligence measures player demand, not legality alone.
+- Playability format weights live in configuration.
 - Vendor Workspace owns Intelligence layers 1-3: Decision, Explanation, and Evidence.
 - Atlas Inspector owns Intelligence layer 4: Implementation.
 - Final Intelligence Console panels use Grade/Confidence, Business Conclusion, Key Signals, and Supporting Evidence only.
@@ -117,3 +119,33 @@ Production rules:
 - Supporting Evidence is factual.
 - Expanded tile memory is session-scoped.
 - Atlas owns implementation details.
+
+## Sprint 25 Knowledge
+
+Playability Intelligence is now Level 2 Meaningful Intelligence.
+
+It answers:
+
+- Why is this card played?
+- Where does demand come from?
+- Is demand Commander, competitive, casual, broad, stable, or meta-dependent?
+
+Current source:
+
+- Scryfall legalities.
+
+Demand layer:
+
+- Configurable format weights.
+- Demand hints.
+- Weighted format contribution.
+- Business conclusions.
+- Key Signals.
+
+Future providers:
+
+- EDHREC.
+- MTGGoldfish.
+- Melee.
+- MTGO.
+- Tournament APIs.

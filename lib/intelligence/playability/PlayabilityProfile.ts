@@ -12,6 +12,10 @@ export interface PlayabilityProfile {
   overall: PlayabilityIndicator;
   formats: Record<PlayabilityFormat, PlayabilityIndicator>;
   tier: PlayabilityTier;
+  businessConclusion: string;
+  confidenceReason: string;
+  keySignals: string[];
+  formatWeights: Record<string, number>;
   indicators: {
     overallPlayability: PlayabilityIndicator;
     commanderStrength: PlayabilityIndicator;
@@ -19,6 +23,9 @@ export interface PlayabilityProfile {
     casualStrength: PlayabilityIndicator;
     banRisk: PlayabilityIndicator;
     formatDiversity: PlayabilityIndicator;
+    demandStability: PlayabilityIndicator;
+    metaDependency: PlayabilityIndicator;
+    futureDemandReadiness: PlayabilityIndicator;
     metaStability: PlayabilityIndicator;
     trend: PlayabilityIndicator;
   };
@@ -27,4 +34,3 @@ export interface PlayabilityProfile {
   dependencyGraph: string[];
   generatedAt: string;
 }
-

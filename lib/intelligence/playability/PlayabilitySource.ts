@@ -5,6 +5,6 @@ export type PlayabilitySource =
   | "Melee"
   | "MTGO"
   | "Top8"
+  | "Tournament APIs"
   | "Future Provider"
   | "Placeholder";
-

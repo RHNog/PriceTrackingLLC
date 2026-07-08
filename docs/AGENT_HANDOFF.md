@@ -8,7 +8,7 @@ It helps trading-card buyers discover opportunities, evaluate in-person purchase
 
 ## Current Development Phase
 
-Current sprint: Sprint 24.2, Final Intelligence Console.
+Current sprint: Sprint 25, Playability Intelligence Level 2.
 
 The app now evaluates a selected card through deterministic Vendor Workflow states, Card Profile, Asset Intelligence models, condition-adjusted market context, strategy-weighted signals, Negotiation Ladder, and deterministic Decision Resolver output.
 
@@ -27,6 +27,8 @@ Certification Intelligence now measures collectible certification characteristic
 Intelligence Console now uses layered information architecture. Vendor Workspace should show business conclusions, confidence labels, supporting indicators, and evidence. Atlas Inspector owns implementation details such as version, health, status, internal sources, future dependencies, internal signals, and provider matrices.
 
 Sprint 24.2 finalized the production contract: expanded Intelligence tiles show Grade, model-specific Confidence, Business Conclusion, Key Signals, and Supporting Evidence only. Confidence below High must explain itself. Summary and What This Means should not return.
+
+Sprint 25 matures Playability Intelligence from legality reporting to player demand intelligence. Playability now uses configurable format weights and demand hints to generate business conclusions, key signals, demand level, competitive relevance, casual relevance, trend, and confidence reasons. Do not replace this with BUY/PASS logic.
 
 ## What Has Been Built?
 
@@ -58,6 +60,7 @@ Sprint 24.2 finalized the production contract: expanded Intelligence tiles show 
 - Certification Intelligence Platform
 - Layered Intelligence Console
 - Final Intelligence Console UI contract
+- Playability Intelligence Level 2
 - Certification Provider Registry
 - Placeholder Certification Provider
 - Offer Policy

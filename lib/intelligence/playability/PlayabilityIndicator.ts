@@ -15,6 +15,7 @@ export type PlayabilityFormat =
   | "Canadian Highlander";
 
 export type PlayabilityBanStatus =
+  | "Not Legal"
   | "Legal"
   | "Restricted"
   | "Banned"
@@ -33,17 +34,35 @@ export type DeckPenetrationIndicator = {
   status: IndicatorStatus;
 };
 
+export type PlayabilityDemandLevel =
+  | "Very High"
+  | "High"
+  | "Moderate"
+  | "Low"
+  | "Very Low";
+
+export type PlayabilityRelevanceLevel =
+  | "Very High"
+  | "High"
+  | "Moderate"
+  | "Low"
+  | "Very Low";
+
 export interface PlayabilityIndicator {
   format: PlayabilityFormat;
   score: number;
   confidence: number;
+  importance: number;
+  demandLevel: PlayabilityDemandLevel;
+  competitiveRelevance: PlayabilityRelevanceLevel;
+  casualRelevance: PlayabilityRelevanceLevel;
   trend: PlayabilityTrend;
   availability: IndicatorStatus;
   dataSource: PlayabilitySource;
+  provider: string;
   status: PlayabilityBanStatus;
   lastUpdated: string;
   metaStability: PlayabilityMetaStability;
   deckPenetration: DeckPenetrationIndicator;
   explanation: string;
 }
-

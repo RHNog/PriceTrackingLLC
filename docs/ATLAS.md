@@ -2,6 +2,31 @@
 
 Atlas is the permanent project knowledge base for PriceTrackingLLC.
 
+## Sprint 25 Synchronization
+
+Playability Intelligence maturity:
+
+- Previous: Level 1 Framework.
+- Current: Level 2 Meaningful Intelligence.
+
+Playability now measures:
+
+- Why the card is played.
+- Where demand comes from.
+- Whether demand is Commander, competitive, casual, broad, stable, or meta-dependent.
+
+Future providers:
+
+- EDHREC
+- MTGGoldfish
+- Melee
+- MTGO
+- Tournament APIs
+
+Architecture rule:
+
+Playability measures demand. Collector measures collectability. Certification measures certification characteristics. Strategies interpret intelligence. Negotiation consumes strategies.
+
 ## Sprint 24.2 Synchronization
 
 Final Intelligence Console UI Contract:

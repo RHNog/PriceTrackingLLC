@@ -2,6 +2,8 @@
 
 ## Major Product And Architecture Decisions
 
+0.3. Playability Intelligence measures player demand, not legality alone. Legality is evidence; demand is the conclusion.
+
 0.2. Final Intelligence Console panels answer exactly four questions: grade/confidence, business conclusion, key signals, and supporting evidence.
 
 0.1. Intelligence Console presentation is layered. Vendor Workspace shows Decision, Explanation, and Evidence; Atlas Inspector owns Implementation details.
@@ -66,6 +68,24 @@ Consequences:
 - Key Signals are limited to four items.
 - Supporting Evidence contains factual support only.
 - Expanded tile state persists for the current browser session.
+
+## Sprint 25 - Playability Demand Intelligence
+
+Decision:
+
+Playability Intelligence advances to Level 2 by evaluating weighted player demand.
+
+Rationale:
+
+Legality alone does not explain why the market cares. Player demand comes from format importance, Commander adoption, competitive relevance, casual relevance, format diversity, and metagame dependency.
+
+Consequences:
+
+- Format weights live in configuration.
+- Scryfall remains the current provider.
+- Future demand providers remain hooks only.
+- Playability Profile owns business conclusions and key signals.
+- Strategies continue to interpret Playability through existing signal weights.
 
 4. Search became the Query Engine. The system interprets intent instead of only matching text.
 

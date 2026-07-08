@@ -250,6 +250,57 @@ Future indicators:
 - Cross-grading
 - Population Growth
 
+## Playability Intelligence Level 2
+
+Playability Intelligence measures player demand.
+
+It does not decide BUY, NEGOTIATE, PASS, or offer values.
+
+Current provider:
+
+- Scryfall legalities
+
+Current demand layer:
+
+- Configurable format weights in `config/playability.ts`
+- Demand hints for known play patterns
+- Weighted format contribution
+- Business conclusions
+- Key Signals
+
+Per-format Playability indicators track:
+
+- Legality
+- Importance
+- Demand Level
+- Competitive Relevance
+- Casual Relevance
+- Confidence
+- Trend
+- Status
+- Provider
+
+Playability indicators:
+
+- Commander Strength
+- Competitive Strength
+- Casual Strength
+- Format Diversity
+- Demand Stability
+- Ban Risk
+- Meta Dependency
+- Future Demand Readiness
+
+Future providers:
+
+- EDHREC
+- MTGGoldfish
+- Melee
+- MTGO
+- Tournament APIs
+
+No unofficial API integration is allowed.
+
 ## Market Price Architecture
 
 Market Providers answer what a selected printing and finish variant is worth.

@@ -39,6 +39,7 @@
 - Certification Intelligence Platform
 - Layered Intelligence Console information architecture
 - Final Intelligence Console UI contract
+- Playability Intelligence Level 2
 - Certification Provider Registry
 - Placeholder PSA, BGS, and CGC certification provider coverage
 - Marketplace Profile templates
@@ -57,15 +58,15 @@
 
 ## Current Sprint
 
-Sprint 24.2: Final Intelligence Console
+Sprint 25: Playability Intelligence Level 2
 
 Goals:
 
-- Every Intelligence model answers exactly four questions.
-- Remove duplicate Summary and What This Means sections.
-- Explain confidence whenever it is below High.
-- Persist expanded tile state for the current session.
-- Keep Atlas as the exclusive owner of implementation details.
+- Move Playability from legality reporting to meaningful player demand intelligence.
+- Explain why a card is played and why the market cares.
+- Keep provider abstraction intact.
+- Expose configurable format weights.
+- Prepare future EDHREC, MTGGoldfish, Melee, MTGO, and Tournament API integrations.
 
 ## Near-Term Roadmap
 
@@ -95,6 +96,7 @@ Sprint 27: Printing Descriptor Engine
 - EDHREC Playability Provider
 - MTGGoldfish Playability Provider
 - Melee / MTGO / Top8 competitive metagame providers
+- Tournament API Playability Provider
 - Deck Penetration indicator implementation
 - Meta Stability and Trend provider implementation
 - Historical Analytics Engine

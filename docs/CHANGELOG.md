@@ -4,6 +4,8 @@
 
 ### Added
 
+- Sprint 25 Playability Intelligence Level 2 documentation.
+- Format weighting, demand signals, Playability business conclusions, future provider integrations, and updated Intelligence Registry documentation.
 - Sprint 24.2 finalized Intelligence Console UI contract documentation.
 - Expansion memory, model-specific confidence labels, confidence reason rules, and final section order documentation.
 - Sprint 24.1 layered Intelligence Console documentation.
@@ -59,6 +61,8 @@
 
 ### Changed
 
+- Current sprint updated to Sprint 25.
+- Playability documentation now treats the model as demand intelligence rather than legality reporting.
 - Current sprint updated to Sprint 24.2.
 - Intelligence Console documentation now removes redundant Summary and What This Means layers.
 - Intelligence Console documentation now treats implementation details as Atlas-only developer information.

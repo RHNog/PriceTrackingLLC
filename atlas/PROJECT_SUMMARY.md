@@ -16,6 +16,10 @@ Sprint 24.2 finalizes the Intelligence Console UI contract.
 
 Expanded tiles show Grade/Confidence, Business Conclusion, Key Signals, and Supporting Evidence only. Confidence below High includes a business-facing reason, and expanded tile state persists for the current session.
 
+Sprint 25 matures Playability Intelligence to Level 2.
+
+Playability now measures weighted player demand using configurable format weights, demand hints, business conclusions, key signals, and richer per-format demand fields. Scryfall remains the current source, while EDHREC, MTGGoldfish, Melee, MTGO, and Tournament APIs remain future provider hooks.
+
 ## Current Architecture
 
 PriceTrackingLLC is a Next.js, TypeScript, and Tailwind CSS application for professional trading-card buying decisions.

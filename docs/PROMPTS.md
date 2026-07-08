@@ -2,6 +2,16 @@
 
 This file summarizes major prompts and architectural instructions. It intentionally avoids copying every prompt in full.
 
+## Sprint 25
+
+Purpose: mature Playability Intelligence from Level 1 Framework to Level 2 Meaningful Intelligence.
+
+Core instruction: Playability should stop reporting legality and begin evaluating why the market cares about a card.
+
+Major files affected: `config/playability.ts`, Playability Intelligence engine/profile/indicators, framework registry metadata, Playability tests, and Atlas documentation.
+
+Result: weighted format demand, natural-language business conclusions, key signals, richer per-format Playability indicators, and future provider hooks without unofficial API integrations.
+
 ## Sprint 24.2
 
 Purpose: finalize Intelligence Console presentation without layout redesign, business logic changes, or intelligence calculation changes.

@@ -52,6 +52,9 @@ export function createIndicator(input: IndicatorFactoryInput): Indicator {
       ? [playabilityIndicator.dataSource]
       : input.metadata.dataSources,
     contributingFactors: signal?.contributingFactors ?? [
+      playabilityIndicator?.demandLevel ?? "Unknown demand",
+      playabilityIndicator?.competitiveRelevance ?? "Unknown competitive relevance",
+      playabilityIndicator?.casualRelevance ?? "Unknown casual relevance",
       certificationIndicator?.trend ?? "Unknown",
       playabilityIndicator?.status ?? "Unknown",
       playabilityIndicator?.trend ?? "Unknown",

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { playabilityFormatWeights } from "@/config/playability";
 import { seedStrategyProfiles } from "@/data/seedStrategies";
 import { createCardProfile } from "@/lib/engines/cardIntelligence/CardIntelligenceEngine";
 import { createConditionMarketSnapshot } from "@/lib/engines/market/createConditionMarketSnapshot";
@@ -128,15 +129,37 @@ test("requested cards generate complete Playability Profiles", () => {
     assert.ok(profile.overall.score >= 0);
     assert.ok(playabilityFormats.every((format) => profile.formats[format]));
     assert.equal(profile.formats.Commander.dataSource, "Scryfall");
-    assert.equal(profile.formats.Commander.trend, "Unknown");
-    assert.equal(profile.formats.Commander.metaStability, "Unknown");
+    assert.ok(profile.formats.Commander.importance > 0);
+    assert.ok(profile.formats.Commander.demandLevel);
+    assert.ok(profile.formats.Commander.competitiveRelevance);
+    assert.ok(profile.formats.Commander.casualRelevance);
+    assert.equal(profile.formats.Commander.provider, "Scryfall Playability Provider");
     assert.equal(
       profile.formats.Commander.deckPenetration.status,
-      "PLACEHOLDER",
+      "WAITING_FOR_PROVIDER",
     );
+    assert.ok(profile.businessConclusion.includes(card.name));
+    assert.ok(profile.keySignals.length > 0);
+    assert.ok(profile.confidenceReason.length > 0);
     assert.ok(profile.dependencyGraph.includes("Strategy"));
     assert.ok(profile.providerRoadmap.includes("EDHREC"));
   }
+});
+
+test("requested cards produce distinct business conclusions", () => {
+  const conclusions = requestedCards.map(
+    (card) => createPlayabilityProfile(card).businessConclusion,
+  );
+
+  assert.equal(new Set(conclusions).size, requestedCards.length);
+  assert.match(conclusions[1], /Commander demand/);
+  assert.match(conclusions[3], /Vintage power/);
+  assert.match(conclusions[5], /competitive creature decks/);
+});
+
+test("format demand uses configurable weights", () => {
+  assert.ok(playabilityFormatWeights.Commander.demandWeight > playabilityFormatWeights.Vintage.demandWeight);
+  assert.ok(playabilityFormatWeights.Modern.competitiveWeight > playabilityFormatWeights.Commander.competitiveWeight);
 });
 
 test("card profile exposes Playability through framework registration", () => {
@@ -165,7 +188,12 @@ test("card profile exposes Playability through framework registration", () => {
   );
   assert.ok(
     playabilityModel.indicators.some(
-      (indicator) => indicator.id === "playability-trend",
+      (indicator) => indicator.id === "future-demand-readiness",
+    ),
+  );
+  assert.ok(
+    playabilityModel.indicators.some(
+      (indicator) => indicator.id === "meta-dependency",
     ),
   );
 });
@@ -197,4 +225,3 @@ test("strategies consume Playability as a weighted signal", () => {
   );
   assert.equal(calculateSignalStrategyScore(noPlayability, profile.signals), 0);
 });
-

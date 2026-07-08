@@ -2,15 +2,15 @@
 
 ## Sprint
 
-Sprint 24.2 - Final Intelligence Console
+Sprint 25 - Playability Intelligence Level 2
 
 ## Summary
 
-Finalized the Intelligence Console presentation contract while preserving business engines and Intelligence calculations.
+Matured Playability Intelligence from framework-level legality reporting into meaningful player demand intelligence.
 
 ## Goal
 
-Remove redundant production sections, make confidence model-specific and self-explaining, and add session-scoped expanded tile memory.
+Explain why the market cares about playable cards through weighted formats, demand relevance, business conclusions, key signals, and future provider hooks.
 
 ## Files Added
 
@@ -18,15 +18,19 @@ Remove redundant production sections, make confidence model-specific and self-ex
 
 ## Files Modified
 
-- Intelligence Console components.
-- Intelligence Console tests.
+- `config/playability.ts`
+- Playability Intelligence engine/profile/indicator contracts.
+- Playability framework registry metadata.
+- Intelligence Console Playability presentation.
+- Playability regression tests.
 - Sprint documentation and Atlas files.
 
 ## Architecture Changes
 
-- Expanded Intelligence tiles now display Grade/Confidence, Business Conclusion, Key Signals, and Supporting Evidence only.
-- Confidence below High now includes a business-facing reason.
-- Expanded model id persists in session storage.
+- Playability format scoring now uses configurable format weights.
+- Per-format Playability indicators now expose legality, importance, demand level, competitive relevance, casual relevance, confidence, trend, status, and provider.
+- Playability Profile now owns business conclusions, key signals, confidence reason, and format weights.
+- Future providers remain hooks only.
 
 ## Documentation Updated
 
@@ -42,7 +46,7 @@ Remove redundant production sections, make confidence model-specific and self-ex
 
 ## Technical Debt
 
-- Automated browser assertions for expanded tile memory are still future work.
+- Playability demand hints are local configuration until provider-backed demand data exists.
 - Supporting Evidence is still composed in the UI layer rather than a reusable presentation adapter.
 
 ## Known Issues
@@ -51,7 +55,7 @@ Remove redundant production sections, make confidence model-specific and self-ex
 
 ## Tests Added
 
-- Confidence label mapping coverage remains in Intelligence Console tests.
+- Playability profile tests verify requested card examples, distinct business conclusions, framework registration, and configurable format weights.
 
 ## Build Status
 
@@ -62,4 +66,4 @@ Remove redundant production sections, make confidence model-specific and self-ex
 
 ## Suggested Next Sprint
 
-Add browser-level checks for final Intelligence Console section order and expansion memory.
+Connect approved EDHREC and tournament demand providers when available.

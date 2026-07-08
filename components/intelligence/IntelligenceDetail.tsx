@@ -71,11 +71,7 @@ function getBusinessConclusion(
   }
 
   if (model.id === "playability-intelligence") {
-    return [
-      `${cardProfile.printing.name} has ${cardProfile.playabilityProfile.tier.toLowerCase()} play demand.`,
-      "Format availability supports the card's buyer audience.",
-      "Additional metagame signals will appear after provider connection.",
-    ];
+    return [cardProfile.playabilityProfile.businessConclusion];
   }
 
   if (score >= 75) {
@@ -114,7 +110,10 @@ function getKeySignals(model: IntelligenceModel) {
     );
 }
 
-function getConfidenceReason(model: IntelligenceModel) {
+function getConfidenceReason(
+  cardProfile: CardProfile,
+  model: IntelligenceModel,
+) {
   if (getConfidenceLabel(model.confidence) === "High") {
     return "";
   }
@@ -128,7 +127,7 @@ function getConfidenceReason(model: IntelligenceModel) {
   }
 
   if (model.id === "playability-intelligence") {
-    return "Additional format usage and metagame providers have not yet been connected.";
+    return cardProfile.playabilityProfile.confidenceReason;
   }
 
   if (model.indicators.every((indicator) => indicator.confidence === 0)) {
@@ -194,13 +193,22 @@ function getSupportingEvidence(
   }
 
   if (model.id === "playability-intelligence") {
+    const strongestFormats = Object.values(cardProfile.playabilityProfile.formats)
+      .filter((indicator) => indicator.format !== "Overall")
+      .sort((first, second) => second.score - first.score)
+      .slice(0, 4)
+      .map(
+        (indicator) =>
+          `${indicator.format}: ${indicator.status}, ${indicator.demandLevel} demand, ${indicator.trend} trend, ${getConfidenceLabel(
+            indicator.confidence,
+          )} confidence`,
+      );
+
     return [
-      `Play Access: ${cardProfile.playabilityProfile.overall.status}`,
-      `Format Breadth: ${getIntelligenceGrade(
-        cardProfile.playabilityProfile.indicators.formatDiversity.score,
-      )}`,
+      `Format Breakdown: ${joinValues(strongestFormats)}`,
+      `Legality: ${cardProfile.playabilityProfile.overall.status}`,
       `Trend: ${cardProfile.playabilityProfile.overall.trend}`,
-      `Collector Context: ${collectorContext}`,
+      `Confidence: ${getConfidenceLabel(cardProfile.playabilityProfile.overall.confidence)}`,
     ];
   }
 
@@ -226,8 +234,11 @@ export default function IntelligenceDetail({
     model.indicators.flatMap((indicator) => indicator.contributingFactors),
   );
   const businessConclusion = getBusinessConclusion(cardProfile, model, score);
-  const keySignals = getKeySignals(model);
-  const confidenceReason = getConfidenceReason(model);
+  const keySignals =
+    model.id === "playability-intelligence"
+      ? cardProfile.playabilityProfile.keySignals
+      : getKeySignals(model);
+  const confidenceReason = getConfidenceReason(cardProfile, model);
   const supportingEvidence = getSupportingEvidence(cardProfile, model).filter(
     (item) => !item.endsWith(": "),
   );
