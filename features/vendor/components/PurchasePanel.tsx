@@ -3,6 +3,7 @@
 import CardImage from "@/components/ui/CardImage";
 import CardProfilePanel from "@/features/vendor/components/CardProfilePanel";
 import EvaluationSummary from "@/features/vendor/components/EvaluationSummary";
+import type { BusinessProfile } from "@/lib/business/BusinessProfileEngine";
 import { createCardProfile } from "@/lib/engines/cardIntelligence/CardIntelligenceEngine";
 import { evaluatePurchase } from "@/lib/engines/evaluation/evaluatePurchase";
 import { createConditionMarketSnapshot } from "@/lib/engines/market/createConditionMarketSnapshot";
@@ -32,6 +33,7 @@ type PurchasePanelProps = {
   marketPrice?: MarketPrice;
   marketSnapshot?: MarketSnapshot;
   selectedCondition: CardConditionCode;
+  selectedBusinessProfile: BusinessProfile;
   selectedStrategy?: Strategy;
   selectedStrategyProfile?: StrategyProfile;
   onAskingPriceChange: (price: string) => void;
@@ -73,6 +75,7 @@ export default function PurchasePanel({
   marketPrice,
   marketSnapshot,
   selectedCondition,
+  selectedBusinessProfile,
   selectedStrategy,
   selectedStrategyProfile,
   onAskingPriceChange,
@@ -127,6 +130,7 @@ export default function PurchasePanel({
     }
 
     return evaluatePurchase({
+      businessProfile: selectedBusinessProfile,
       card,
       condition,
       marketContext: defaultMarketContext,
@@ -141,6 +145,7 @@ export default function PurchasePanel({
     condition,
     debouncedAskingPrice,
     marketPrice,
+    selectedBusinessProfile,
     selectedStrategyProfile,
     selectedVariant,
   ]);
@@ -151,6 +156,7 @@ export default function PurchasePanel({
           assetContext.id,
           assetContext.generation,
           askingPrice,
+          selectedBusinessProfile.id,
           selectedStrategyProfile.id,
           createMarketSnapshotId({
             printingId: marketSnapshot.printingId,
@@ -228,6 +234,12 @@ export default function PurchasePanel({
             <p className="text-xs text-zinc-500">Current Buying Strategy</p>
             <p className="mt-1 text-sm font-medium text-cyan-300">
               {selectedStrategy?.name ?? "No strategy"}
+            </p>
+          </div>
+          <div className="rounded-md bg-zinc-950/60 px-3 py-2">
+            <p className="text-xs text-zinc-500">Business Profile</p>
+            <p className="mt-1 text-sm font-medium text-cyan-300">
+              {selectedBusinessProfile.name}
             </p>
           </div>
         </div>

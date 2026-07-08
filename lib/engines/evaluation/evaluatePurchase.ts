@@ -1,3 +1,9 @@
+import {
+  calculateBusinessCosts,
+  createOfferPolicy,
+  type BusinessProfile,
+} from "@/lib/business/BusinessProfileEngine";
+import { getDefaultBusinessProfile } from "@/lib/business/BusinessProfileRegistry";
 import { createCardProfile } from "@/lib/engines/cardIntelligence/CardIntelligenceEngine";
 import type { CardProfile } from "@/lib/engines/cardIntelligence/models/CardProfile";
 import {
@@ -16,6 +22,13 @@ import { calculateNetProfit } from "@/lib/engines/profit/calculateNetProfit";
 import { calculateOpportunityRanking } from "@/lib/engines/ranking/calculateOpportunityRanking";
 import { calculateSignalStrategyScore } from "@/lib/engines/strategy/calculateSignalStrategyScore";
 import { passesStrategyConstraints } from "@/lib/engines/strategy/applyStrategy";
+import { inspectEvaluationPipeline } from "@/lib/pipeline/PipelineInspector";
+import type { PipelineReport } from "@/lib/pipeline/PipelineReport";
+import {
+  createSystemReadinessReport,
+  isSystemReady,
+} from "@/lib/validation/SystemReadinessEngine";
+import type { ReadinessReport } from "@/lib/validation/ReadinessReport";
 import type { Card } from "@/types/card";
 import {
   findConditionProfile,
@@ -33,6 +46,7 @@ import type { PrintingVariant } from "@/types/printingVariant";
 import type { StrategyProfile } from "@/types/strategyProfile";
 
 type EvaluatePurchaseInput = {
+  businessProfile?: BusinessProfile;
   card: Card;
   condition?: CardConditionCode;
   marketContext?: MarketContext;
@@ -63,11 +77,14 @@ export type EvaluationTrace = {
     negotiationMargin: number | null;
     recommendedOffer: number | null;
     strategyWeights: string[];
+    pipelineReport?: PipelineReport;
   };
   pipeline: string[];
   profitTrace: {
+    businessProfileName: string;
     conditionAdjustment: string;
     estimatedFees: number | null;
+    estimatedFixedCosts: number | null;
     estimatedShipping: number | null;
     finalExpectedProfit: number | null;
     profitAfterCosts: number | null;
@@ -90,6 +107,7 @@ export type EvaluationTrace = {
 
 export type ReadyPurchaseEvaluation = {
   askingPrice: number;
+  businessProfile: BusinessProfile;
   cardProfile: CardProfile;
   confidence: number;
   conditionMarketSnapshot: ConditionMarketSnapshot;
@@ -103,6 +121,8 @@ export type ReadyPurchaseEvaluation = {
   offerLadder: NegotiationLadder;
   ranking: OpportunityRanking;
   recommendedOffer: number;
+  pipelineReport: PipelineReport;
+  readinessReport: ReadinessReport;
   roi: number;
   selectedPrinting: Card;
   selectedVariant: PrintingVariant;
@@ -114,8 +134,11 @@ export type ReadyPurchaseEvaluation = {
 
 export type UnavailablePurchaseEvaluation = {
   askingPrice: number;
+  businessProfile?: BusinessProfile;
   marketEstimate?: MarketPrice;
   reason: string;
+  readinessReport: ReadinessReport;
+  pipelineReport?: PipelineReport;
   selectedPrinting: Card;
   selectedVariant: PrintingVariant;
   status: Exclude<EvaluationStatus, "READY">;
@@ -125,9 +148,6 @@ export type UnavailablePurchaseEvaluation = {
 export type PurchaseEvaluation =
   | ReadyPurchaseEvaluation
   | UnavailablePurchaseEvaluation;
-
-const MARKETPLACE_FEES = 46;
-const SHIPPING_COST = 18;
 
 function calculateRoi(profit: number, purchasePrice: number) {
   if (purchasePrice <= 0 || !Number.isFinite(purchasePrice)) {
@@ -157,8 +177,11 @@ function isPositiveFinite(value: number) {
 
 function createUnavailableEvaluation(input: {
   askingPrice: number;
+  businessProfile?: BusinessProfile;
   marketEstimate?: MarketPrice;
   reason: string;
+  readinessReport?: ReadinessReport;
+  pipelineReport?: PipelineReport;
   selectedPrinting: Card;
   selectedVariant: PrintingVariant;
   status: Exclude<EvaluationStatus, "READY">;
@@ -166,8 +189,16 @@ function createUnavailableEvaluation(input: {
 }): UnavailablePurchaseEvaluation {
   return {
     askingPrice: input.askingPrice,
+    businessProfile: input.businessProfile,
     marketEstimate: input.marketEstimate,
     reason: input.reason,
+    readinessReport:
+      input.readinessReport ??
+      createSystemReadinessReport({
+        businessProfile: input.businessProfile,
+        marketPrice: input.marketEstimate,
+      }),
+    pipelineReport: input.pipelineReport,
     selectedPrinting: input.selectedPrinting,
     selectedVariant: input.selectedVariant,
     status: input.status,
@@ -191,8 +222,10 @@ function createUnavailableEvaluation(input: {
       },
       pipeline,
       profitTrace: {
+        businessProfileName: input.businessProfile?.name ?? "Unavailable",
         conditionAdjustment: "Unavailable",
         estimatedFees: null,
+        estimatedFixedCosts: null,
         estimatedShipping: null,
         finalExpectedProfit: null,
         profitAfterCosts: null,
@@ -253,11 +286,20 @@ export function evaluatePurchase(
   // TODO: Camera mode and voice mode.
   // TODO: Bulk evaluation.
   // TODO: Offline mode.
+  const businessProfile = input.businessProfile ?? getDefaultBusinessProfile();
+  const initialReadinessReport = createSystemReadinessReport({
+    businessProfile,
+    marketPrice: input.marketPrice,
+    strategyProfile: input.strategyProfile,
+  });
+
   if (!isPositiveFinite(input.marketPrice.price)) {
     return createUnavailableEvaluation({
       askingPrice: input.purchasePrice,
+      businessProfile,
       marketEstimate: input.marketPrice,
       reason: "Incomplete market data.",
+      readinessReport: initialReadinessReport,
       selectedPrinting: input.card,
       selectedVariant: input.selectedVariant,
       status: "UNAVAILABLE",
@@ -267,6 +309,7 @@ export function evaluatePurchase(
   if (!isPositiveFinite(input.purchasePrice)) {
     return createUnavailableEvaluation({
       askingPrice: input.purchasePrice,
+      businessProfile,
       marketEstimate: input.marketPrice,
       reason: "Current asking price is unavailable.",
       selectedPrinting: input.card,
@@ -287,12 +330,43 @@ export function evaluatePurchase(
     printing: input.card,
     variant: input.selectedVariant,
   });
+  const readinessReport = createSystemReadinessReport({
+    businessProfile,
+    cardProfile,
+    marketPrice: input.marketPrice,
+    strategyProfile: input.strategyProfile,
+  });
+
+  if (!isSystemReady(readinessReport)) {
+    const blockingIssue = readinessReport.blockingIssues[0];
+
+    return createUnavailableEvaluation({
+      askingPrice: input.purchasePrice,
+      businessProfile,
+      marketEstimate: input.marketPrice,
+      reason: blockingIssue?.message ?? "System is waiting for required setup.",
+      readinessReport,
+      selectedPrinting: input.card,
+      selectedVariant: input.selectedVariant,
+      status:
+        readinessReport.status === "WAITING_FOR_MARKET_DATA"
+          ? "WAITING_FOR_DATA"
+          : readinessReport.status === "INVALID"
+            ? "INVALID"
+            : "WAITING_FOR_DATA",
+    });
+  }
   const marketEstimate = conditionMarketSnapshot.selectedPrice;
+  const businessCosts = calculateBusinessCosts(businessProfile, marketEstimate.price);
+  const offerPolicy = createOfferPolicy(businessProfile);
+  const effectiveMinimumProfit = Math.max(
+    input.strategyProfile.constraints.minimumProfit,
+    offerPolicy.minimumProfit,
+  );
   const profit = calculateNetProfit({
+    businessProfile,
     purchasePrice: input.purchasePrice,
     sellPrice: marketEstimate.price,
-    marketplaceFees: MARKETPLACE_FEES,
-    shippingCost: SHIPPING_COST,
   });
   const roi = calculateRoi(profit.netProfit, input.purchasePrice);
   const intelligenceScore = calculateSignalStrategyScore(
@@ -308,10 +382,10 @@ export function evaluatePurchase(
     weights: input.strategyProfile.rankingWeights,
   });
   const negotiationLadder = createNegotiationLadder({
+    businessProfile,
     cardProfile,
-    marketplaceFees: MARKETPLACE_FEES,
-    minimumProfit: input.strategyProfile.constraints.minimumProfit,
-    shippingCost: SHIPPING_COST,
+    offerPolicy,
+    minimumProfit: effectiveMinimumProfit,
     strategyProfile: input.strategyProfile,
   });
   const recommendedOffer = Math.min(
@@ -325,9 +399,23 @@ export function evaluatePurchase(
     negotiationMargin,
     recommendedOffer,
   });
+  const pipelineReport = inspectEvaluationPipeline({
+    askingPrice: input.purchasePrice,
+    businessProfile,
+    cardProfile,
+    marketPrice: input.marketPrice,
+    selectedVariant: input.selectedVariant,
+    strategyProfile: input.strategyProfile,
+  });
+  const firstInvalidStage = pipelineReport.firstInvalidStage;
+  const zeroOfferLadderValue =
+    firstInvalidStage?.name === "Offer Ladder" &&
+    firstInvalidStage.reason?.includes("resolved to zero");
   const profitTrace = {
+    businessProfileName: businessProfile.name,
     conditionAdjustment: `${condition.code} multiplier ${condition.marketMultiplier}`,
     estimatedFees: profit.trace.estimatedFees,
+    estimatedFixedCosts: profit.trace.estimatedFixedCosts,
     estimatedShipping: profit.trace.estimatedShipping,
     finalExpectedProfit: profit.trace.finalExpectedProfit,
     profitAfterCosts: profit.trace.profitAfterCosts,
@@ -336,6 +424,9 @@ export function evaluatePurchase(
     strategyAdjustments: [
       `Minimum profit ${input.strategyProfile.constraints.minimumProfit}`,
       `Minimum ROI ${input.strategyProfile.constraints.minimumROI}`,
+      `Business minimum profit ${businessProfile.minimumProfit}`,
+      `Business minimum ROI ${businessProfile.minimumROI}`,
+      `Business costs ${businessCosts.totalCosts}`,
     ],
     variantAdjustment: `${input.selectedVariant.finish} via ${input.selectedVariant.source}`,
   };
@@ -351,18 +442,23 @@ export function evaluatePurchase(
     strategyWeights: Object.entries(input.strategyProfile.signalWeights).map(
       ([signal, weight]) => `${signal}: ${weight}`,
     ),
+    pipelineReport,
   };
 
-  if (!ladderValidation.validatedLadder) {
+  if (!ladderValidation.validatedLadder || zeroOfferLadderValue) {
     const validationStatus =
       ladderValidation.status === "READY" ? "INVALID" : ladderValidation.status;
 
     return createUnavailableEvaluation({
       askingPrice: input.purchasePrice,
+      businessProfile,
       marketEstimate,
       reason:
+        firstInvalidStage?.reason ??
         ladderValidation.errors[0] ??
-        "Offer ladder unavailable. Evaluation unavailable.",
+        "Offer ladder unavailable. Check setup and market data.",
+      pipelineReport,
+      readinessReport,
       selectedPrinting: input.card,
       selectedVariant: input.selectedVariant,
       status: validationStatus,
@@ -386,7 +482,14 @@ export function evaluatePurchase(
     purchasePrice: input.purchasePrice,
     score: ranking.score,
   });
-  const strategyConfidence = passesConstraints ? 90 : 45;
+  const passesBusinessProfile =
+    profit.netProfit >= effectiveMinimumProfit &&
+    roi >= Math.max(
+      input.strategyProfile.constraints.minimumROI,
+      businessProfile.minimumROI,
+    );
+  const passesAllConstraints = passesConstraints && passesBusinessProfile;
+  const strategyConfidence = passesAllConstraints ? 90 : 45;
   const confidence = calculateConfidence({
     intelligenceScore,
     rankingScore: ranking.score,
@@ -400,16 +503,19 @@ export function evaluatePurchase(
   });
   const estimatedMargin =
     Math.round((marketEstimate.price - input.purchasePrice) * 100) / 100;
-  const strategyReason = passesConstraints
-    ? "Matches the selected buying strategy."
-    : "Does not satisfy the selected buying strategy thresholds.";
+  const strategyReason = passesAllConstraints
+    ? `Matches the selected buying strategy and ${businessProfile.name}.`
+    : `Does not satisfy the selected strategy or ${businessProfile.name} thresholds.`;
   const decisionDrivers = createDecisionDrivers({
     action,
     askingPrice: input.purchasePrice,
     estimatedProfit: profit.netProfit,
     maximumPurchasePrice: negotiationLadder.maximumBuyPrice,
-    minimumProfit: input.strategyProfile.constraints.minimumProfit,
-    minimumROI: input.strategyProfile.constraints.minimumROI,
+    minimumProfit: effectiveMinimumProfit,
+    minimumROI: Math.max(
+      input.strategyProfile.constraints.minimumROI,
+      businessProfile.minimumROI,
+    ),
     recommendedOffer,
     roi,
   });
@@ -427,6 +533,9 @@ export function evaluatePurchase(
   if (!passesConstraints) {
     strategyIssues.push("Strategy constraints failed.");
   }
+  if (!passesBusinessProfile) {
+    strategyIssues.push("Business Profile thresholds failed.");
+  }
   const decisionTrace = {
     businessInvariantChecks: [
       `Opening <= Target: ${negotiationLadder.openingOffer <= negotiationLadder.targetOffer}`,
@@ -441,6 +550,7 @@ export function evaluatePurchase(
 
   return {
     askingPrice: input.purchasePrice,
+    businessProfile,
     cardProfile,
     confidence,
     conditionMarketSnapshot,
@@ -464,6 +574,8 @@ export function evaluatePurchase(
     offerLadder: negotiationLadder,
     ranking,
     recommendedOffer,
+    pipelineReport,
+    readinessReport,
     roi,
     selectedPrinting: input.card,
     selectedVariant: input.selectedVariant,
@@ -476,7 +588,7 @@ export function evaluatePurchase(
       profitTrace,
       strategyTrace: {
         issues: strategyIssues,
-        passedConstraints: passesConstraints,
+        passedConstraints: passesAllConstraints,
         score: intelligenceScore,
       },
       validation: {

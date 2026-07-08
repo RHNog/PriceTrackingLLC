@@ -5,6 +5,14 @@ import AtlasInspector from "@/features/vendor/components/AtlasInspector";
 import CardSearchPalette from "@/features/vendor/components/CardSearchPalette";
 import PrintingResults from "@/features/vendor/components/PrintingResults";
 import PurchasePanel from "@/features/vendor/components/PurchasePanel";
+import {
+  defaultBusinessProfileId,
+  defaultBusinessProfiles,
+} from "@/lib/business/BusinessDefaults";
+import { createCardProfile } from "@/lib/engines/cardIntelligence/CardIntelligenceEngine";
+import { createConditionMarketSnapshot } from "@/lib/engines/market/createConditionMarketSnapshot";
+import { inspectEvaluationPipeline } from "@/lib/pipeline/PipelineInspector";
+import { createSystemReadinessReport } from "@/lib/validation/SystemReadinessEngine";
 import { searchPrintings } from "@/lib/engines/search/searchPrintings";
 import { createWorkflowCommand } from "@/lib/workflow/commands/WorkflowCommand";
 import {
@@ -18,6 +26,8 @@ import {
 import type { Card } from "@/types/card";
 import type { CardIdentity } from "@/types/cardIdentity";
 import type { CardConditionCode } from "@/types/conditionProfile";
+import { findConditionProfile } from "@/types/conditionProfile";
+import { defaultMarketContext } from "@/types/MarketContext";
 import type { MarketSnapshot } from "@/types/marketSnapshot";
 import type { PrintingMatchCandidate } from "@/types/printingResolution";
 import type { ResolvedIntent } from "@/types/resolvedIntent";
@@ -136,6 +146,9 @@ export default function VendorWorkspace({
   >([]);
   const [resolvedIntent, setResolvedIntent] = useState<ResolvedIntent>();
   const [marketSnapshot, setMarketSnapshot] = useState<MarketSnapshot>();
+  const [selectedBusinessProfileId, setSelectedBusinessProfileId] = useState(
+    defaultBusinessProfileId,
+  );
   const [isDeveloperMode, setIsDeveloperMode] = useState(false);
   const [isMarketLoading, setIsMarketLoading] = useState(false);
   const [workflow, setWorkflow] = useState({
@@ -260,6 +273,9 @@ export default function VendorWorkspace({
   const selectedProfile = selectedStrategy
     ? findById(strategyProfiles, selectedStrategy.profileId)
     : undefined;
+  const selectedBusinessProfile =
+    findById(defaultBusinessProfiles, selectedBusinessProfileId) ??
+    defaultBusinessProfiles[0];
   const marketSnapshotId = marketSnapshot
     ? createMarketSnapshotId({
         printingId: marketSnapshot.printingId,
@@ -281,6 +297,32 @@ export default function VendorWorkspace({
     marketSnapshot: activeMarketSnapshot,
     printing: selectedCard,
     variant: selectedVariant,
+  });
+  const systemReadinessReport = createSystemReadinessReport({
+    businessProfile: selectedBusinessProfile,
+    marketPrice,
+    strategyProfile: selectedProfile,
+  });
+  const pipelineCardProfile =
+    selectedCard && selectedVariant && marketPrice
+      ? createCardProfile({
+          condition: findConditionProfile(selectedCondition),
+          marketContext: defaultMarketContext,
+          marketContextSnapshot: createConditionMarketSnapshot(
+            marketPrice,
+            selectedCondition,
+          ),
+          printing: selectedCard,
+          variant: selectedVariant,
+        })
+      : undefined;
+  const pipelineReport = inspectEvaluationPipeline({
+    askingPrice: Number(askingPrice),
+    businessProfile: selectedBusinessProfile,
+    cardProfile: pipelineCardProfile,
+    marketPrice,
+    selectedVariant,
+    strategyProfile: selectedProfile,
   });
 
   useEffect(() => {
@@ -429,6 +471,10 @@ export default function VendorWorkspace({
     dispatchCommand(
       createWorkflowCommand("ChangeStrategy", { strategyId: nextStrategyId }),
     );
+  }
+
+  function handleBusinessProfileChange(nextBusinessProfileId: string) {
+    setSelectedBusinessProfileId(nextBusinessProfileId);
   }
 
   function resetWorkflow() {
@@ -582,8 +628,10 @@ export default function VendorWorkspace({
           isMarketLoading={isMarketLoading}
           marketSnapshot={activeMarketSnapshot}
           query={query}
+          pipelineReport={pipelineReport}
           resolvedIntent={resolvedIntent}
           selectedCondition={selectedCondition}
+          systemReadinessReport={systemReadinessReport}
           workflow={workflow}
         />
       ) : null}
@@ -600,6 +648,23 @@ export default function VendorWorkspace({
           {strategies.map((strategy) => (
             <option key={strategy.id} value={strategy.id}>
               {strategy.name}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="block max-w-xs space-y-2">
+        <span className="block text-sm font-medium text-zinc-300">
+          Business Profile
+        </span>
+        <select
+          value={selectedBusinessProfileId}
+          onChange={(event) => handleBusinessProfileChange(event.target.value)}
+          className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/30"
+        >
+          {defaultBusinessProfiles.map((businessProfile) => (
+            <option key={businessProfile.id} value={businessProfile.id}>
+              {businessProfile.name}
             </option>
           ))}
         </select>
@@ -661,6 +726,7 @@ export default function VendorWorkspace({
               selectedCondition={
                 selectedCondition
               }
+              selectedBusinessProfile={selectedBusinessProfile}
               selectedStrategy={selectedStrategy}
               selectedStrategyProfile={selectedProfile}
               onAskingPriceChange={(price) =>

@@ -3,7 +3,9 @@ import test from "node:test";
 import type { ReadyPurchaseEvaluation } from "@/lib/engines/evaluation/evaluatePurchase";
 import { EvaluationHistoryEngine } from "@/lib/history/EvaluationHistoryEngine";
 import { HistoryRepository } from "@/lib/history/HistoryRepository";
+import { getDefaultBusinessProfile } from "@/lib/business/BusinessProfileRegistry";
 import { createPlayabilityProfile } from "@/lib/intelligence/playability/PlayabilityEngine";
+import { createReadinessReport } from "@/lib/validation/ReadinessReport";
 import type { AssetContext } from "@/types/AssetContext";
 import type { Card } from "@/types/card";
 import type { CardConditionCode } from "@/types/conditionProfile";
@@ -120,6 +122,7 @@ function createEvaluation(input: {
   variant: PrintingVariant;
 }): ReadyPurchaseEvaluation {
   const marketEstimate = createMarketPrice(input.printing.id, input.variant.id);
+  const businessProfile = getDefaultBusinessProfile();
   const decision =
     input.decision ??
     {
@@ -136,6 +139,7 @@ function createEvaluation(input: {
 
   return {
     askingPrice: 300,
+    businessProfile,
     cardProfile: {
       condition: {
         code: "NM",
@@ -201,12 +205,27 @@ function createEvaluation(input: {
       targetOffer: 300,
       walkAwayPrice: 351,
     },
+    pipelineReport: {
+      status: "READY",
+      stages: [],
+    },
     ranking: {
       explanation: [],
       grade: "A",
       score: 88,
     },
     recommendedOffer: 300,
+    readinessReport: createReadinessReport({
+      readyComponents: [
+        "Business Profile",
+        "Market Snapshot",
+        "Card Intelligence",
+        "Strategy",
+        "Offer Ladder",
+        "Decision",
+      ],
+      status: "READY",
+    }),
     roi: 20,
     selectedPrinting: input.printing,
     selectedVariant: input.variant,
@@ -230,8 +249,10 @@ function createEvaluation(input: {
       },
       pipeline: [],
       profitTrace: {
+        businessProfileName: businessProfile.name,
         conditionAdjustment: "NM",
         estimatedFees: 46,
+        estimatedFixedCosts: 0,
         estimatedShipping: 18,
         finalExpectedProfit: 60,
         profitAfterCosts: 60,

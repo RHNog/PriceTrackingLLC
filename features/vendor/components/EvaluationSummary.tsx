@@ -43,6 +43,16 @@ export default function EvaluationSummary({
           Unable to evaluate purchase.
         </p>
         <p className="mt-2 text-sm text-zinc-400">Reason: {evaluation.reason}</p>
+        {evaluation.readinessReport.blockingIssues.length > 0 ? (
+          <ul className="mt-3 space-y-2 text-sm text-zinc-400">
+            {evaluation.readinessReport.blockingIssues.map((issue) => (
+              <li key={`${issue.component}:${issue.message}`} className="flex gap-2">
+                <span className="text-amber-300">!</span>
+                <span>{issue.message}</span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
         <EvaluationTraceView trace={evaluation.trace} />
       </section>
     );
@@ -105,6 +115,7 @@ function ReadyEvaluationSummary({
         <MetricGroup title="Pricing">
           <Metric label="Market Estimate" value={`$${evaluation.marketEstimate.price.toLocaleString()}`} />
           <Metric label="Current Asking Price" value={`$${askingPrice.toLocaleString()}`} />
+          <Metric label="Business Profile" value={evaluation.businessProfile.name} tone="cyan" />
         </MetricGroup>
 
         <MetricGroup title="Profitability">

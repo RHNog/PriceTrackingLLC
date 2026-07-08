@@ -845,6 +845,206 @@ Intelligence Detail
 
 Grade Mapping
 
+## Business Profiles Platform
+
+Business Profiles make recommendations business-aware. Market Intelligence answers what the card is worth in the market; Business Profile answers what the card is worth to a specific business.
+
+Source files:
+
+- `lib/business/BusinessProfileEngine.ts`
+- `lib/business/BusinessProfileRegistry.ts`
+- `lib/business/MarketplaceProfile.ts`
+- `lib/business/CostProfile.ts`
+- `lib/business/ShippingProfile.ts`
+- `lib/business/TaxProfile.ts`
+- `lib/business/PaymentProfile.ts`
+- `lib/business/BusinessDefaults.ts`
+
+Business Profile fields include id, name, currency, country, default marketplace, cost profile, shipping profile, payment profile, tax profile, minimum ROI, minimum profit, target margin, target ROI, negotiation aggressiveness, maximum capital exposure, risk tolerance, created timestamp, and updated timestamp.
+
+Business Profiles own Offer Policy. `createOfferPolicy` extracts the evaluation-facing policy from a profile:
+
+- minimum ROI
+- minimum profit
+- desired margin
+- negotiation aggressiveness
+- maximum capital exposure
+
+Offer Ladder consumes Offer Policy. Decision Resolver stays deterministic and receives only a validated ladder.
+
+Built-in marketplace templates:
+
+- TCGplayer
+- eBay
+- CardTrader
+- Facebook Marketplace
+- Discord
+- Local Cash
+- Convention Sales
+- Direct Store
+
+Built-in starting profiles:
+
+- Prime Time Retail
+- Convention Buying
+- Cash Only
+- Online Marketplace
+
+Business-aware evaluation graph:
+
+Market Estimate
+
+↓
+
+Business Profile
+
+↓
+
+Strategy
+
+↓
+
+Offer Ladder
+
+↓
+
+Offer Ladder Validation
+
+↓
+
+Decision Resolver
+
+Vendor Workspace owns the selected Business Profile in UI state and passes it to purchase evaluation. Switching Business Profiles regenerates profit, ROI, Offer Ladder, negotiation, and decision without changing the selected card, printing, variant, or condition.
+
+Settings currently provides an in-memory profile management surface for create, duplicate, rename, delete, and set default. Persisted Business Profiles are future work.
+
+## Pipeline Integrity
+
+Sprint 23.2 adds a pipeline inspector for mathematically consistent evaluation.
+
+Source files:
+
+- `lib/pipeline/PipelineInspector.ts`
+- `lib/pipeline/PipelineStage.ts`
+- `lib/pipeline/PipelineReport.ts`
+- `lib/pipeline/PipelineValidation.ts`
+
+Evaluation pipeline:
+
+Asset Context
+
+↓
+
+Market Snapshot
+
+↓
+
+Business Profile
+
+↓
+
+Cost Profile
+
+↓
+
+Offer Policy
+
+↓
+
+Strategy
+
+↓
+
+Offer Ladder
+
+↓
+
+Decision
+
+Each stage records received inputs, calculated outputs, validation status, fallbacks used, missing fields, execution time, and an optional reason. The first stage that is not READY terminates the pipeline. Downstream engines must not silently substitute defaults after an invalid or unavailable upstream stage.
+
+Offer Ladder Integrity requires Opening Offer, Target Offer, Maximum Buy Price, and Recommended Offer to be positive when the market estimate, costs, profit policy, and strategy are valid. Zero is not an implicit fallback. Missing values return unavailable or invalid pipeline status with an explicit reason.
+
+The Sprint 23.2 failure appeared when `calculateMaximumBuyPrice` produced a negative feasible maximum after costs and an overly high Online Marketplace minimum profit, then rounded that impossible value into `0`. The Pipeline Inspector now identifies the Offer Ladder as the first invalid stage, and the Online Marketplace default policy now supports valid low-dollar buys.
+
+Developer diagnostics live in Atlas Inspector only. Production users must not see pipeline, trace, undefined, fallback, or zero-default terminology.
+
+## System Readiness Platform
+
+System Readiness validates prerequisites before business engines execute.
+
+Source files:
+
+- `lib/validation/SystemReadinessEngine.ts`
+- `lib/validation/ReadinessValidator.ts`
+- `lib/validation/ReadinessReport.ts`
+- `lib/validation/ReadinessStatus.ts`
+- `lib/validation/ConfigurationValidator.ts`
+- `lib/validation/EvaluationPrerequisites.ts`
+
+Readiness states:
+
+- READY
+- PARTIAL
+- WAITING_FOR_CONFIGURATION
+- WAITING_FOR_PROVIDER
+- WAITING_FOR_MARKET_DATA
+- INVALID
+- ERROR
+
+Issue classes:
+
+- Configuration Problem
+- Missing Data
+- Business Rule Failure
+- Calculation Failure
+- Internal Error
+
+Readiness pipeline:
+
+Asset Context
+
+↓
+
+Business Profile
+
+↓
+
+Market Snapshot
+
+↓
+
+Card Intelligence
+
+↓
+
+Strategy
+
+↓
+
+Offer Ladder
+
+↓
+
+Decision
+
+Readiness Report fields:
+
+- status
+- blocking issues
+- warnings
+- ready components
+- missing components
+
+Validation layers:
+
+- Configuration Validator checks Business Profile, Market Snapshot, and Strategy configuration.
+- Readiness Validator checks Card Intelligence and optional Playability readiness.
+- System Readiness Engine composes component readiness before Strategy, Offer Ladder, and Decision Resolver execution.
+- Offer Ladder Validator still validates ladder math after prerequisites are ready.
+
+Production UI shows user-facing readiness blockers. Atlas Inspector shows System Readiness, Configuration Readiness, Offer Ladder Readiness, Decision Readiness, and dependency state in developer mode.
+
 ## Engine Rules
 
 - Business engines must remain provider-independent.
@@ -857,6 +1057,13 @@ Grade Mapping
 - Market Provider data has precedence over any future condition inference.
 - Condition changes must request a generation-aware Market Snapshot before evaluation is current.
 - History is append-only and immutable.
+- Business Profiles supply assumptions and must not query providers.
+- Business Profiles own Offer Policy.
+- System Readiness owns prerequisite validation before Strategy, Offer Ladder, or Decision execution.
+- Business engines assume READY inputs and should not expose configuration failures directly.
+- Offer Ladder must consume Business Profile assumptions when available.
+- Pipeline Inspector must terminate at the first invalid or unavailable stage.
+- Zero-valued Offer Ladder outputs are invalid unless a future feature explicitly declares zero as an intended outcome.
 - Business engines must not write or mutate history.
 - Dictionaries and config files should evolve before parser logic is rewritten.
 - Finish selection must be resolved by domain data, constraints, and the Variant Resolution Policy, not by UI defaults.
@@ -869,6 +1076,7 @@ Grade Mapping
 - Negotiation Ladder owns negotiation guidance.
 - Offer Ladder Validator validates negotiation output before Decision Resolver execution.
 - Decision Resolver compares asking price against the Negotiation Ladder.
+- Decision Resolver must remain deterministic and business-profile agnostic after receiving a validated ladder.
 - Scryfall prices must be labeled as market estimates, never live inventory.
 - Recommendation explanations must add decision context instead of repeating visible metrics.
 - Vendor Workspace shortcuts must preserve normal typing behavior inside inputs and selects.

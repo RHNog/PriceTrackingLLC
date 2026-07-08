@@ -8,13 +8,19 @@ It helps trading-card buyers discover opportunities, evaluate in-person purchase
 
 ## Current Development Phase
 
-Current sprint: Sprint 22, Playability Intelligence Platform and Intelligence Console v2.
+Current sprint: Sprint 23.2, Pipeline Integrity.
 
 The app now evaluates a selected card through deterministic Vendor Workflow states, Card Profile, Asset Intelligence models, condition-adjusted market context, strategy-weighted signals, Negotiation Ladder, and deterministic Decision Resolver output.
 
 Playability Intelligence now measures why a card has play demand. It is registered in the Asset Intelligence Framework, backed first by Scryfall legalities, exposed on `CardProfile.playabilityProfile`, and consumed by strategies through configurable `Playability` signal weights.
 
 Card Profile now renders `components/intelligence/IntelligenceConsole.tsx`. Future intelligence models should appear automatically through the shared Intelligence Tile pattern rather than adding custom Card Profile UI.
+
+Business Profiles now make purchase recommendations business-aware. Vendor Workspace has a Business Profile selector, `/settings` has an in-memory management surface, and purchase evaluation / offer ladder calculations consume selected profile costs and targets instead of generic fixed fees.
+
+System Readiness now validates Business Profile, Market Snapshot, Card Intelligence, and Strategy prerequisites before Strategy, Offer Ladder, or Decision Resolver execution. Evaluations carry a Readiness Report, production UI shows user-facing blockers, and Atlas Inspector exposes developer-only readiness diagnostics.
+
+Pipeline Integrity now inspects Asset, Market, Business, Cost Profile, Offer Policy, Strategy, Offer Ladder, and Decision stages. Evaluations carry a Pipeline Report, Atlas Inspector shows the first invalid stage in developer mode, and zero-valued Offer Ladder output blocks Decision Resolver execution unless a future feature explicitly defines zero as intended.
 
 ## What Has Been Built?
 
@@ -39,6 +45,15 @@ Card Profile now renders `components/intelligence/IntelligenceConsole.tsx`. Futu
 - Intelligence Console v2
 - Intelligence Tile pattern
 - Intelligence grade mapping
+- Business Profiles Platform
+- System Readiness Platform
+- Pipeline Integrity
+- Pipeline Inspector
+- Offer Policy
+- Readiness Report
+- Configuration Validator
+- Marketplace Profile templates
+- Business-aware Offer Ladder integration
 - Playability Intelligence Platform
 - Playability Provider Registry
 - Scryfall Playability Provider using legalities
@@ -75,6 +90,11 @@ Card Profile now renders `components/intelligence/IntelligenceConsole.tsx`. Futu
 - Playability vs recommendation separation
 - Intelligence Console vs business engine separation
 - Grade presentation vs numeric score storage separation
+- Business Profile vs provider separation
+- Business Profile vs Decision Resolver separation
+- System Readiness vs business engine separation
+- Business Profile vs Offer Policy ownership
+- Pipeline Inspector vs business engine separation
 - Playability Provider abstraction and registry
 - Asset Intelligence model contract
 - Indicator contract and status metadata
@@ -106,6 +126,13 @@ Card Profile now renders `components/intelligence/IntelligenceConsole.tsx`. Futu
 - Playability must not negotiate or decide BUY / PASS.
 - Intelligence Console must not calculate recommendations or mutate model output.
 - Every Intelligence Model must use the shared Intelligence Tile presentation contract.
+- Business Profiles must not query providers.
+- Business Profiles own Offer Policy.
+- System Readiness owns prerequisite validation.
+- Business engines assume READY inputs and must not expose internal validation errors.
+- Offer Ladder consumes Business Profile assumptions; Decision Resolver remains deterministic.
+- Pipeline Inspector must identify the first invalid or unavailable stage before downstream engines substitute values.
+- Opening Offer, Target Offer, Maximum Buy Price, and Recommended Offer must not silently collapse to zero.
 - Future intelligence must be registered as an Asset Intelligence model, not built as an isolated scoring engine.
 - Strategies must not read provider data directly.
 - Strategies may consume Playability only through normalized signal/model outputs and configured weights.
@@ -172,4 +199,4 @@ No sprint is complete until documentation is updated.
 
 ## Suggested Next Step
 
-Next Playability work should add official provider integrations for EDHREC-style deck penetration, MTGGoldfish-style format popularity, and Melee / MTGO / Top8 competitive results without scraping. Market Provider v2 should add true live listings or recent sales from a marketplace-specific provider while preserving normalized `MarketSnapshot` output. Future intelligence work should register models in the Asset Intelligence Framework without changing the Asset Intelligence → Strategy → Negotiation Ladder → Offer Ladder Validation → Decision Resolver contract. Evaluation History is now the input for future backtesting, simulation, strategy replay, evaluation replay, Market Context replay, signal validation, personal buying history, and portfolio tracking.
+Next Pipeline Integrity work should persist Pipeline Reports with failed evaluations and add policy validation before Business Profiles are saved. Next System Readiness work should persist Readiness Reports with Evaluation Snapshots and add historical diagnostics for failed evaluations. Next Business Profile work should persist profiles, add import / export, and include profile ids plus Offer Policy in immutable evaluation snapshots. Next Playability work should add official provider integrations for EDHREC-style deck penetration, MTGGoldfish-style format popularity, and Melee / MTGO / Top8 competitive results without scraping. Market Provider v2 should add true live listings or recent sales from a marketplace-specific provider while preserving normalized `MarketSnapshot` output. Future intelligence work should register models in the Asset Intelligence Framework without changing the Asset Intelligence → Strategy → Negotiation Ladder → Offer Ladder Validation → Decision Resolver contract. Evaluation History is now the input for future backtesting, simulation, strategy replay, evaluation replay, Market Context replay, signal validation, personal buying history, and portfolio tracking.

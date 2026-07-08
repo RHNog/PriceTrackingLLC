@@ -205,3 +205,33 @@ The first provider is `ScryfallPlayabilityProvider`, which consumes normalized S
 `CardProfile` now exposes `playabilityProfile`, Asset Intelligence registers Playability as a live model, the Playability signal consumes profile output, strategies consume the signal through configurable weights, and Vendor Workspace displays playability through the reusable Intelligence Console.
 
 Added `components/intelligence/` as the permanent presentation layer for every Asset Intelligence model. The console renders compact collapsed tiles by default, converts scores into A+ through F grades for presentation, keeps confidence separate, and expands one tile at a time into model details without requiring custom UI per intelligence model.
+
+## Sprint 23
+
+Business Profiles Platform.
+
+Introduced business-aware recommendations so two vendors evaluating the same card can receive different recommendations based on their actual costs, marketplace assumptions, target profit, ROI, margin, negotiation style, and risk tolerance.
+
+Added `lib/business/` with Business Profile Engine, Registry, Marketplace Profiles, Cost Profiles, Shipping Profiles, Tax Profiles, Payment Profiles, and built-in defaults. Initial marketplace templates include TCGplayer, eBay, CardTrader, Facebook Marketplace, Discord, Local Cash, Convention Sales, and Direct Store.
+
+Purchase Evaluation and Offer Ladder now consume Business Profiles instead of generic fixed fees. Vendor Workspace has a Business Profile selector, `/settings` supports profile management actions, and regression tests verify that the same card and market estimate can produce different profit, ROI, offer ladder, and decision outcomes.
+
+## Sprint 23.1
+
+System Readiness Platform.
+
+Introduced centralized readiness validation under `lib/validation/` so purchase evaluation validates prerequisites before Strategy, Offer Ladder, or Decision Resolver execution. Readiness distinguishes configuration problems, missing data, business rule failures, calculation failures, and internal errors.
+
+Readiness reports now include status, blocking issues, warnings, ready components, and missing components. Purchase Evaluation carries the report, production unavailable states show user-facing blockers, and Atlas Inspector exposes System Readiness, Configuration Readiness, Offer Ladder Readiness, and Decision Readiness in developer mode only.
+
+Negative negotiation margin is no longer treated as an internal validation error; it remains decision context. Regression coverage verifies missing Business Profile, missing ROI, missing market data, optional Playability, complete readiness, and the previous negotiation-margin message failure mode.
+
+## Sprint 23.2
+
+Pipeline Integrity.
+
+Introduced `lib/pipeline/` with Pipeline Inspector, Pipeline Stage, Pipeline Report, and Pipeline Validation contracts. The inspector executes Asset, Market, Business, Cost Profile, Offer Policy, Strategy, Offer Ladder, and Decision stages, recording received inputs, calculated outputs, validation status, fallbacks, missing fields, execution time, and first invalid stage.
+
+Business Profiles now own Offer Policy, which contains minimum ROI, minimum profit, desired margin, negotiation aggressiveness, and maximum capital exposure. Offer Ladder consumes that policy directly.
+
+The sprint fixed a zero-valued Offer Ladder failure where an impossible maximum buy price was rounded into `0`. Pipeline Integrity now blocks Decision Resolver execution when a ladder output becomes zero unexpectedly and Atlas Inspector shows the first invalid stage in developer mode only.

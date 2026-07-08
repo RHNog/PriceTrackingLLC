@@ -31,7 +31,7 @@ const navigationItems = [
   },
   {
     label: "Settings",
-    href: "#",
+    href: "/settings",
   },
 ];
 

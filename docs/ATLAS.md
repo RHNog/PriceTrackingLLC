@@ -29,6 +29,13 @@ No sprint is complete until Atlas has been synchronized.
 - Asset Intelligence models wrap reusable indicators behind a shared framework contract.
 - Intelligence Console is the shared presentation layer for all Asset Intelligence models.
 - Intelligence Tiles use grade mapping for quick scanning while confidence remains separate.
+- Business Profiles make recommendations business-aware.
+- Business Profiles supply costs, targets, and assumptions without querying providers.
+- Business Profiles own Offer Policy for Offer Ladder consumption.
+- System Readiness validates prerequisites before business engines execute.
+- Readiness Reports distinguish configuration, data, business rule, calculation, and internal failures.
+- Pipeline Inspector identifies the first invalid or unavailable evaluation stage.
+- Zero-valued Offer Ladder outputs are invalid unless explicitly intended.
 - Playability Intelligence measures play demand and never chooses BUY / PASS.
 - Playability providers plug into a registry before strategies consume normalized outputs.
 - Workflow Command Processor controls workflow progression and diagnostics.
@@ -65,6 +72,10 @@ Vendor Workspace
 
 → Condition-Aware Market Snapshot
 
+→ Business Profile
+
+→ System Readiness
+
 → Market Context
 
 → Asset Intelligence Framework
@@ -80,6 +91,12 @@ Vendor Workspace
 → Card Intelligence Engine
 
 → Strategy Signal Weights
+
+→ Business-Aware Cost Model
+
+→ Offer Policy
+
+→ Pipeline Inspector
 
 → Negotiation Ladder Engine
 
@@ -119,6 +136,86 @@ Tile rule:
 - Every current and future Intelligence Model uses this same tile contract.
 
 Grade mapping is presentation-only. Engines retain numeric scores and confidence remains separate from grade.
+
+## Business Profiles
+
+Business Profiles define what a card is worth to a specific business.
+
+Current built-in examples:
+
+- Prime Time Retail
+- Convention Buying
+- Cash Only
+- Online Marketplace
+
+Marketplace templates:
+
+- TCGplayer
+- eBay
+- CardTrader
+- Facebook Marketplace
+- Discord
+- Local Cash
+- Convention Sales
+- Direct Store
+
+Dependency rule:
+
+Market Estimate → Business Profile → Offer Policy → Strategy → Offer Ladder → Offer Ladder Validation → Decision Resolver.
+
+Business Profile must not query providers, make BUY / PASS decisions, or bypass the Offer Ladder.
+
+Offer Policy fields:
+
+- minimum ROI
+- minimum profit
+- desired margin
+- negotiation aggressiveness
+- maximum capital exposure
+
+## System Readiness
+
+System Readiness validates every prerequisite before Strategy, Offer Ladder, or Decision Resolver execution.
+
+Pipeline:
+
+Asset Context → Business Profile → Market Snapshot → Card Intelligence → Strategy → Offer Ladder → Decision.
+
+Readiness states:
+
+- READY
+- PARTIAL
+- WAITING_FOR_CONFIGURATION
+- WAITING_FOR_PROVIDER
+- WAITING_FOR_MARKET_DATA
+- INVALID
+- ERROR
+
+Readiness failure classes:
+
+- Configuration Problem
+- Missing Data
+- Business Rule Failure
+- Calculation Failure
+- Internal Error
+
+Production UI should show user-safe blockers such as "Configure Target ROI" or "Market estimate unavailable." Atlas Inspector owns detailed dependency diagnostics.
+
+## Pipeline Integrity
+
+Pipeline Inspector executes the complete purchase evaluation path and records the first invalid stage.
+
+Pipeline:
+
+Asset → Market → Business → Cost Profile → Offer Policy → Strategy → Offer Ladder → Decision.
+
+Each stage captures received inputs, calculated outputs, validation status, fallbacks used, missing fields, execution time, and reason. The first non-READY stage terminates the pipeline.
+
+Business invariant:
+
+If Market Estimate, Costs, Profit, Strategy, and Offer Policy are valid, then Opening Offer, Target Offer, Maximum Buy Price, and Recommended Offer must be positive. A zero-valued ladder is a blocked evaluation, not a PASS decision.
+
+Atlas Inspector may show Pipeline Trace in developer mode. Production users must not see pipeline, trace, undefined, fallback, or zero-default terminology.
 
 → Immutable Evaluation Snapshot
 
@@ -559,22 +656,29 @@ Dependency graph metadata is included on each model so future Atlas visualizatio
 5. Add Deck Penetration implementation with percentage, sample size, confidence, and status.
 6. Add Meta Stability and Trend provider implementations.
 7. Add Intelligence Console keyboard and visual regression coverage.
-8. Add a Printing Descriptor Engine for provider-neutral printing labels.
-9. Add development-only Vendor Workflow transition inspector.
-10. Add Evaluation Trace replay UI.
-11. Add workflow context inspector.
-12. Add historical backtesting.
-13. Add simulation engine.
-14. Add strategy replay and Market Context replay.
-15. Add Asset Intelligence model diagnostics UI.
-16. Add Liquidity Engine as an Asset Intelligence model.
-17. Add Historical Analytics Engine as an Asset Intelligence model.
-18. Add Market Context Engine.
-19. Add camera, OCR, and barcode entry.
-20. Add ARIA active-descendant support for richer keyboard highlighting.
-21. Add persisted buyer preferences for finish defaults.
-22. Add saved Vendor Workspace chip presets.
-23. Add visual regression coverage for 13-inch and 14-inch laptop viewports.
+8. Persist Business Profiles.
+9. Add Business Profile import and export.
+10. Validate Offer Policy before Business Profiles are saved.
+11. Persist Readiness Reports with Evaluation Snapshots.
+12. Persist Pipeline Reports for failed evaluations.
+13. Add readiness browser diagnostics for historical failed evaluations.
+14. Add Pipeline Trace replay UI.
+15. Add a Printing Descriptor Engine for provider-neutral printing labels.
+16. Add development-only Vendor Workflow transition inspector.
+17. Add Evaluation Trace replay UI.
+18. Add workflow context inspector.
+19. Add historical backtesting.
+20. Add simulation engine.
+21. Add strategy replay and Market Context replay.
+22. Add Asset Intelligence model diagnostics UI.
+23. Add Liquidity Engine as an Asset Intelligence model.
+24. Add Historical Analytics Engine as an Asset Intelligence model.
+25. Add Market Context Engine.
+26. Add camera, OCR, and barcode entry.
+27. Add ARIA active-descendant support for richer keyboard highlighting.
+28. Add persisted buyer preferences for finish defaults.
+29. Add saved Vendor Workspace chip presets.
+30. Add visual regression coverage for 13-inch and 14-inch laptop viewports.
 
 ## Technical Debt
 
@@ -592,6 +696,10 @@ Dependency graph metadata is included on each model so future Atlas visualizatio
 - Playability currently uses Scryfall legalities only; deck penetration, trend, and meta stability need future providers.
 - Canadian Highlander playability is registered but waits for a provider.
 - Intelligence Console has build-level coverage and grade mapping tests, but no browser interaction regression test yet.
+- Business Profile Settings are in-memory only until persistence is added.
+- Business Profile settings validate numeric inputs locally but do not yet enforce full Offer Policy save-time invariants.
+- Readiness Reports are runtime evaluation objects and are not yet persisted into history snapshots.
+- Pipeline Reports are runtime evaluation objects and are not yet persisted into history snapshots.
 - Model health is currently derived from registration status and indicator status.
 - Vendor Workflow diagnostics are rendered in the workspace for development visibility and should later move behind a development-only inspector.
 - Keyboard highlighting uses component state today; richer ARIA active-descendant focus management remains future work.

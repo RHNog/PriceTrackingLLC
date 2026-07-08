@@ -126,16 +126,12 @@ test("changing condition changes negotiation ladder", () => {
   });
   const nearMintLadder = createNegotiationLadder({
     cardProfile: nearMintProfile,
-    marketplaceFees: 46,
     minimumProfit: strategyProfile.constraints.minimumProfit,
-    shippingCost: 18,
     strategyProfile,
   });
   const lightlyPlayedLadder = createNegotiationLadder({
     cardProfile: lightlyPlayedProfile,
-    marketplaceFees: 46,
     minimumProfit: strategyProfile.constraints.minimumProfit,
-    shippingCost: 18,
     strategyProfile,
   });
 

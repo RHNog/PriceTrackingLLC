@@ -65,8 +65,34 @@ function createOfferValue(label: string, value: number | null): OfferValue {
     };
   }
 
+  if (value === 0) {
+    return {
+      label,
+      reason: `${label} cannot be zero without an explicit zero-offer policy.`,
+      status: "INVALID",
+      value,
+    };
+  }
+
   return {
     label,
+    status: "READY",
+    value,
+  };
+}
+
+function createNegotiationMarginValue(value: number | null): OfferValue {
+  if (!isReadyNumber(value)) {
+    return {
+      label: "Negotiation Margin",
+      reason: "Negotiation Margin is unavailable.",
+      status: "UNAVAILABLE",
+      value: null,
+    };
+  }
+
+  return {
+    label: "Negotiation Margin",
     status: "READY",
     value,
   };
@@ -94,10 +120,7 @@ export function validateOfferLadder(
       "Recommended Offer",
       input.recommendedOffer,
     ),
-    negotiationMargin: createOfferValue(
-      "Negotiation Margin",
-      input.negotiationMargin,
-    ),
+    negotiationMargin: createNegotiationMarginValue(input.negotiationMargin),
   };
 
   Object.values(values).forEach((value) => {

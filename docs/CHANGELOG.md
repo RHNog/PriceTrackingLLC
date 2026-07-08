@@ -4,6 +4,12 @@
 
 ### Added
 
+- Sprint 23.2 Pipeline Integrity documentation.
+- Pipeline Inspector, Offer Policy, first-invalid-stage termination, zero-valued ladder prevention, Business Invariants, architecture graph, technical debt, and Atlas Pipeline Trace documentation.
+- Sprint 23.1 System Readiness Platform documentation.
+- Readiness Pipeline, validation layers, configuration validation, user-facing error handling, dependency graph, backlog, and technical debt documentation.
+- Sprint 23 Business Profiles Platform documentation.
+- Business Profiles, Marketplace Profiles, Cost Profiles, Offer Ladder integration, business-aware recommendations, dependency graph, backlog, and technical debt documentation.
 - Sprint 22 Intelligence Console v2 documentation.
 - Intelligence Tile, Intelligence Detail, grade mapping, confidence separation, progressive disclosure, and shared presentation contract documentation.
 - Sprint 22 Playability Intelligence Platform documentation.
@@ -47,6 +53,13 @@
 
 ### Changed
 
+- Current sprint updated to Sprint 23.2.
+- Documentation now treats Offer Policy as owned by Business Profiles and consumed by Offer Ladder.
+- Documentation now treats Pipeline Inspector as the first-invalid-stage diagnostic owner for purchase evaluation.
+- Current sprint updated to Sprint 23.1.
+- Documentation now treats System Readiness as the centralized validation owner before business engines execute.
+- Current sprint updated to Sprint 23.
+- Documentation now treats Business Profile as the source of business-specific costs and target assumptions.
 - Documentation now records Intelligence Console as the standard presentation layer for every Asset Intelligence model.
 - Current sprint updated to Sprint 22.
 - Documentation now treats Playability as measurement consumed by strategies, not a decision engine.
@@ -66,6 +79,7 @@
 
 ### Fixed
 
+- Documented zero-valued Offer Ladder prevention and the Online Marketplace policy correction for low-dollar opportunities.
 - Documented rejection of incomplete evaluation snapshots before persistence.
 - Documented restoration of condition-aware market estimates after Asset Context integration.
 - Documented stale market snapshot rejection and generation-based Asset Context protection.

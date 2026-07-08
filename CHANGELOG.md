@@ -9,6 +9,23 @@ The format is inspired by "Keep a Changelog".
 ## [Unreleased]
 
 ### Added
+- Sprint 23.2 Pipeline Integrity.
+- `lib/pipeline/` with Pipeline Inspector, Pipeline Stage, Pipeline Report, and Pipeline Validation contracts.
+- Developer-only Atlas Pipeline Trace for Asset, Market, Business, Offer Policy, Strategy, Offer Ladder, and Decision stages.
+- Business-owned Offer Policy extraction with minimum ROI, minimum profit, desired margin, negotiation aggressiveness, and maximum capital exposure.
+- Regression coverage for a $34.01 market estimate, $5 seller ask, and Online Marketplace Business Profile producing a positive Offer Ladder and BUY / NEGOTIATE result.
+- Sprint 23.1 System Readiness Platform.
+- `lib/validation/` with System Readiness Engine, Readiness Validator, Readiness Report, Readiness Status, Configuration Validator, and Evaluation Prerequisites.
+- Centralized readiness checks for Business Profile, Market Snapshot, Card Intelligence, Strategy, Offer Ladder, and Decision prerequisites.
+- Developer-only Atlas Inspector System Readiness diagnostics.
+- System readiness regression coverage for missing Business Profile, missing ROI, missing market data, optional Playability, complete configuration, and negative negotiation margin messaging.
+- Sprint 23 Business Profiles Platform.
+- `lib/business/` with Business Profile Engine, Registry, Marketplace Profile, Cost Profile, Shipping Profile, Tax Profile, Payment Profile, and built-in defaults.
+- Built-in Business Profile examples for Prime Time Retail, Convention Buying, Cash Only, and Online Marketplace.
+- Marketplace templates for TCGplayer, eBay, CardTrader, Facebook Marketplace, Discord, Local Cash, Convention Sales, and Direct Store.
+- Vendor Workspace Business Profile selector.
+- Settings page for creating, duplicating, renaming, deleting, and setting default Business Profiles.
+- Business-aware evaluation regression coverage.
 - Intelligence Console v2 as the reusable presentation layer for Asset Intelligence models.
 - `components/intelligence/IntelligenceConsole.tsx`, `IntelligenceTile.tsx`, `IntelligenceDetail.tsx`, and `IntelligenceGrade.tsx`.
 - Intelligence grade mapping from internal numeric scores to A+ through F presentation grades.
@@ -82,6 +99,16 @@ The format is inspired by "Keep a Changelog".
 - Architecture, roadmap, decision, product spec, prompt history, and documentation changelog files.
 
 ### Changed
+- Offer Ladder now consumes Offer Policy extracted from the selected Business Profile instead of relying on scattered business thresholds.
+- Evaluation now attaches a Pipeline Report so developer diagnostics can identify the first invalid stage instead of only the final symptom.
+- Online Marketplace default minimum profit now reflects low-dollar marketplace buys so valid low-value opportunities do not collapse the Offer Ladder to zero.
+- Purchase evaluation now generates a Readiness Report before strategy, offer ladder, and decision execution.
+- Evaluation no longer treats negative negotiation margin as an implementation error.
+- Production unavailable states now show user-facing readiness blockers instead of internal engine terminology.
+- Purchase evaluation now uses Business Profile costs instead of generic fixed marketplace fees and shipping assumptions.
+- Offer Ladder now consumes Business Profile assumptions and explains which profile was used.
+- Profit, ROI, maximum buy price, negotiation, and decision can change when the Business Profile changes without changing the selected card.
+- Evaluation summary now shows the Business Profile used for the recommendation.
 - Card Profile now renders the Intelligence Console instead of bespoke large indicator cards.
 - Intelligence model presentation now uses grades while preserving numeric scores internally.
 - Intelligence confidence remains visually separate from grade.
@@ -131,6 +158,9 @@ The format is inspired by "Keep a Changelog".
 - README now describes PriceTrackingLLC instead of the default Next.js template.
 
 ### Fixed
+- Fixed zero-valued Offer Ladder output caused by impossible business policy math being rounded into `0`.
+- Pipeline Integrity now blocks Decision Resolver execution when Opening Offer, Target Offer, Maximum Buy Price, or Recommended Offer resolve to zero unexpectedly.
+- The first invalid evaluation stage is now reported before downstream engines can silently substitute fallback values.
 - Incomplete or invalid evaluation snapshots are rejected before entering history.
 - Restored condition-aware market estimate and evaluation refresh after the Asset Context refactor.
 - Changing NM, LP, MP, HP, or DMG no longer leaves Market Estimate unavailable when provider market data exists.
@@ -154,6 +184,9 @@ The format is inspired by "Keep a Changelog".
 - Clear low-confidence identity candidates can now load printing candidates instead of leaving Vendor Workspace stuck at an identity row.
 
 ### Documented
+- Sprint 23.2 Pipeline Inspector, Offer Policy, Pipeline Integrity, Business Invariants, technical debt, and architecture graph.
+- Sprint 23.1 System Readiness Platform, validation layers, readiness pipeline, configuration validation, user-facing error improvements, dependency graph, backlog, and technical debt.
+- Sprint 23 Business Profiles Platform, marketplace templates, cost profiles, offer ladder integration, business-aware recommendations, dependency graph, backlog, and technical debt.
 - Sprint 22 Intelligence Console v2, Intelligence Tile, grade mapping, confidence separation, and progressive disclosure.
 - Sprint 22 Playability Intelligence Platform, provider abstraction, format indicators, strategy integration, provider roadmap, dependency graph, backlog, and technical debt.
 - Sprint 21 Intelligence History Platform, immutable history, evaluation snapshot lifecycle, repository abstraction, and future Simulation Platform.

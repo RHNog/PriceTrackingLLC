@@ -132,6 +132,30 @@
 
 65. Confidence must remain separate from grade because score quality and data reliability are different concepts.
 
+66. Business Profiles answer what a card is worth to a specific business. Market Intelligence answers what the card is worth in the market.
+
+67. Business Profiles must not query providers. They supply costs, targets, and assumptions to evaluation engines.
+
+68. Offer Ladder consumes Business Profile assumptions before Decision Resolver executes. Decision Resolver remains deterministic.
+
+69. Generic fixed marketplace fee and shipping assumptions should not drive purchase recommendations when a Business Profile is available.
+
+70. System Readiness owns prerequisite validation. Business engines assume READY input and should not each validate configuration independently.
+
+71. Readiness failures must be classified as configuration problems, missing data, business rule failures, calculation failures, or internal errors.
+
+72. Production users should see meaningful readiness blockers, while Atlas Developer Mode owns readiness dependency diagnostics.
+
+73. Negative negotiation margin is valid decision context, not an implementation failure.
+
+74. Business Profiles own Offer Policy. Offer Ladder consumes extracted policy rather than reading scattered business thresholds.
+
+75. Pipeline Inspector owns first-invalid-stage diagnostics for evaluation. Downstream engines must not continue with silent substitutions after an invalid upstream stage.
+
+76. Zero-valued Opening Offer, Target Offer, Maximum Buy Price, or Recommended Offer is invalid unless a future feature explicitly declares zero as intended.
+
+77. Atlas Developer Mode may display Pipeline Trace. Production users must not see pipeline, trace, undefined, fallback, or zero-default terminology.
+
 ## Documentation Rule
 
 Every sprint must update:

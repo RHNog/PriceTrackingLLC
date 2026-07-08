@@ -1,10 +1,17 @@
+import {
+  calculateBusinessCosts,
+  type BusinessProfile,
+  type OfferPolicy,
+} from "@/lib/business/BusinessProfileEngine";
+import { getDefaultBusinessProfile } from "@/lib/business/BusinessProfileRegistry";
 import type { CardProfile } from "@/lib/engines/cardIntelligence/models/CardProfile";
 
 type OfferCalculatorInput = {
+  businessProfile?: BusinessProfile;
   cardProfile: CardProfile;
-  marketplaceFees: number;
+  offerPolicy?: OfferPolicy | null;
   minimumProfit: number;
-  shippingCost: number;
+  minimumROI: number;
   strategyMaximumPurchasePrice: number;
 };
 
@@ -33,21 +40,38 @@ function getMaximumModifier(cardProfile: CardProfile) {
 
 export function calculateMaximumBuyPrice(input: OfferCalculatorInput) {
   const marketPrice = input.cardProfile.marketContextSnapshot.selectedPrice.price;
-  const paymentFee = marketPrice * 0.03;
+  const businessProfile = input.businessProfile ?? getDefaultBusinessProfile();
+  const businessCosts = calculateBusinessCosts(businessProfile, marketPrice);
+  const offerPolicy = input.offerPolicy;
+  const minimumProfit = Math.max(
+    offerPolicy?.minimumProfit ?? 0,
+    input.minimumProfit,
+  );
+  const minimumROI = Math.max(offerPolicy?.minimumROI ?? 0, input.minimumROI);
+  const desiredMargin = offerPolicy?.desiredMargin ?? 0;
+  const maximumCapitalExposure =
+    offerPolicy?.maximumCapitalExposure ?? Number.POSITIVE_INFINITY;
+  const availableAfterCosts = marketPrice - businessCosts.totalCosts;
   const rawMaximum =
-    marketPrice -
-    input.marketplaceFees -
-    input.shippingCost -
-    paymentFee -
-    input.minimumProfit;
+    availableAfterCosts -
+    minimumProfit;
+  const roiMaximum = minimumROI > 0
+    ? availableAfterCosts / (1 + minimumROI / 100)
+    : availableAfterCosts;
+  const marginMaximum = desiredMargin > 0
+    ? marketPrice * (1 - desiredMargin / 100) - businessCosts.totalCosts
+    : availableAfterCosts;
   const conditionAdjustedMaximum =
-    rawMaximum * input.cardProfile.condition.offerMultiplier;
+    Math.min(rawMaximum, roiMaximum, marginMaximum) *
+    input.cardProfile.condition.offerMultiplier;
   const signalAdjustedMaximum =
     conditionAdjustedMaximum * getMaximumModifier(input.cardProfile);
   const strategyCeiling =
     input.strategyMaximumPurchasePrice * input.cardProfile.condition.offerMultiplier;
 
-  return roundCurrency(Math.min(signalAdjustedMaximum, strategyCeiling));
+  return roundCurrency(
+    Math.min(signalAdjustedMaximum, strategyCeiling, maximumCapitalExposure),
+  );
 }
 
 export function calculateTargetOffer(

@@ -281,3 +281,33 @@ Core instruction: PriceTrackingLLC should understand why a card is valuable from
 Major files affected: `lib/intelligence/playability/`, `lib/intelligence/framework/`, `lib/engines/cardIntelligence/`, `lib/providers/identity/adapters/ScryfallAdapter.ts`, `features/vendor/components/CardProfilePanel.tsx`, `tests/playability-intelligence.test.ts`, `docs/`.
 
 Result: provider-ready Playability architecture, Scryfall legalities provider, format indicators, Card Profile integration, framework registration, strategy signal weighting, Intelligence Console v2, reusable Intelligence Tiles, grade mapping, progressive disclosure, and provider roadmap.
+
+## Sprint 23
+
+Purpose: introduce the Business Profiles Platform.
+
+Core instruction: recommendations should be business-aware. Business Profiles supply cost, marketplace, shipping, payment, tax, margin, ROI, negotiation, and risk assumptions; Offer Ladder consumes them while Decision Resolver remains deterministic.
+
+Major files affected: `lib/business/`, `lib/engines/evaluation/`, `lib/engines/negotiation/`, `lib/engines/profit/`, `features/vendor/`, `features/settings/`, `app/settings/page.tsx`, `tests/business-profiles.test.ts`, `docs/`.
+
+Result: built-in Business Profiles, marketplace templates, cost-aware profit and offer ladder calculations, Vendor Workspace profile selector, Settings profile management surface, business-aware regression coverage, and Atlas synchronization.
+
+## Sprint 23.1
+
+Purpose: introduce the System Readiness Platform.
+
+Core instruction: validate every prerequisite before Strategy, Offer Ladder, and Decision Resolver execution. Separate configuration problems, missing data, business rule failures, calculation failures, and internal errors.
+
+Major files affected: `lib/validation/`, `lib/engines/evaluation/`, `lib/engines/negotiation/OfferLadderValidator.ts`, `features/vendor/components/AtlasInspector.tsx`, `features/vendor/components/EvaluationSummary.tsx`, `tests/system-readiness.test.ts`, `docs/`.
+
+Result: centralized readiness engine, readiness reports on evaluations, developer-only Atlas readiness diagnostics, user-facing readiness blockers, optional Playability warning behavior, and removal of the negative negotiation margin implementation-error path.
+
+## Sprint 23.2
+
+Purpose: restore evaluation pipeline integrity.
+
+Core instruction: inspect Asset Context, Market Snapshot, Business Profile, Cost Profile, Offer Policy, Strategy, Offer Ladder, and Decision to find the first point where valid evaluation data becomes invalid. Do not redesign UI, Business Profiles, Offer Ladder, or Strategy.
+
+Major files affected: `lib/pipeline/`, `lib/business/`, `lib/engines/evaluation/evaluatePurchase.ts`, `lib/engines/negotiation/`, `features/vendor/components/AtlasInspector.tsx`, `features/vendor/components/VendorWorkspace.tsx`, `features/settings/components/BusinessProfilesSettings.tsx`, `tests/pipeline-integrity.test.ts`, `docs/`.
+
+Result: Pipeline Inspector, explicit business-owned Offer Policy, developer-only Pipeline Trace, first-invalid-stage termination, zero-valued Offer Ladder blocking, Online Marketplace low-dollar policy correction, and regression coverage for a $34.01 market estimate with a $5 seller ask.

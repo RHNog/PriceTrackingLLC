@@ -1,3 +1,10 @@
+import {
+  calculateBusinessCosts,
+  createOfferPolicy,
+  explainBusinessProfile,
+  type BusinessProfile,
+  type OfferPolicy,
+} from "@/lib/business/BusinessProfileEngine";
 import type { CardProfile } from "@/lib/engines/cardIntelligence/models/CardProfile";
 import type { NegotiationLadder } from "@/lib/engines/negotiation/NegotiationLadder";
 import {
@@ -8,21 +15,30 @@ import {
 import type { StrategyProfile } from "@/types/strategyProfile";
 
 type NegotiationLadderInput = {
+  businessProfile?: BusinessProfile;
   cardProfile: CardProfile;
-  marketplaceFees: number;
+  offerPolicy?: OfferPolicy | null;
   minimumProfit: number;
-  shippingCost: number;
   strategyProfile: StrategyProfile;
 };
 
 export function createNegotiationLadder(
   input: NegotiationLadderInput,
 ): NegotiationLadder {
+  const businessProfile = input.businessProfile;
+  const offerPolicy =
+    input.offerPolicy ??
+    (businessProfile ? createOfferPolicy(businessProfile) : null);
+  const marketPrice = input.cardProfile.marketContextSnapshot.selectedPrice.price;
+  const businessCosts = businessProfile
+    ? calculateBusinessCosts(businessProfile, marketPrice)
+    : null;
   const maximumBuyPrice = calculateMaximumBuyPrice({
+    businessProfile,
     cardProfile: input.cardProfile,
-    marketplaceFees: input.marketplaceFees,
+    offerPolicy,
     minimumProfit: input.minimumProfit,
-    shippingCost: input.shippingCost,
+    minimumROI: input.strategyProfile.constraints.minimumROI,
     strategyMaximumPurchasePrice:
       input.strategyProfile.constraints.maximumPurchasePrice,
   });
@@ -35,6 +51,17 @@ export function createNegotiationLadder(
     maximumBuyPrice,
     walkAwayPrice: maximumBuyPrice,
     explanation: [
+      ...(businessProfile && businessCosts
+        ? explainBusinessProfile(businessProfile, businessCosts)
+        : []),
+      ...(offerPolicy
+        ? [
+            `Offer Policy minimum profit: ${offerPolicy.minimumProfit}`,
+            `Offer Policy minimum ROI: ${offerPolicy.minimumROI}%`,
+            `Offer Policy desired margin: ${offerPolicy.desiredMargin}%`,
+            `Offer Policy maximum capital exposure: ${offerPolicy.maximumCapitalExposure}`,
+          ]
+        : []),
       "Liquidity increases the opening offer.",
       "Scarcity increases the target offer.",
       "Collector appeal can raise the maximum buy price.",

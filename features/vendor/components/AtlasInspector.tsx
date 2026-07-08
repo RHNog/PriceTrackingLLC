@@ -1,6 +1,8 @@
 "use client";
 
 import type { AssetContextValidationResult } from "@/lib/workflow/AssetContextValidator";
+import type { PipelineReport } from "@/lib/pipeline/PipelineReport";
+import type { ReadinessReport } from "@/lib/validation/ReadinessReport";
 import type { CardConditionCode } from "@/types/conditionProfile";
 import type { MarketSnapshot } from "@/types/marketSnapshot";
 import type { ResolvedIntent } from "@/types/resolvedIntent";
@@ -10,9 +12,11 @@ type AtlasInspectorProps = {
   assetValidation: AssetContextValidationResult;
   isMarketLoading: boolean;
   marketSnapshot?: MarketSnapshot;
+  pipelineReport: PipelineReport;
   query: string;
   resolvedIntent?: ResolvedIntent;
   selectedCondition: CardConditionCode;
+  systemReadinessReport: ReadinessReport;
   workflow: VendorWorkflowSnapshot;
 };
 
@@ -49,13 +53,30 @@ function KeyValue({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
+function ReadinessList({ label, items }: { label: string; items: string[] }) {
+  return (
+    <div>
+      <p className="font-medium text-zinc-500">{label}</p>
+      <ul className="mt-2 list-disc space-y-1 pl-5">
+        {items.length > 0 ? (
+          items.map((item) => <li key={item}>{item}</li>)
+        ) : (
+          <li>None</li>
+        )}
+      </ul>
+    </div>
+  );
+}
+
 export default function AtlasInspector({
   assetValidation,
   isMarketLoading,
   marketSnapshot,
+  pipelineReport,
   query,
   resolvedIntent,
   selectedCondition,
+  systemReadinessReport,
   workflow,
 }: AtlasInspectorProps) {
   const assetContext = workflow.assetContext;
@@ -79,6 +100,118 @@ export default function AtlasInspector({
           <KeyValue label="Accepted" value={workflow.commandLog.at(-1)} />
           <KeyValue label="Rejected" value={workflow.rejectedCommands.at(-1)} />
           <KeyValue label="Execution" value={`${workflow.executionDurationMs}ms`} />
+        </div>
+      </InspectorSection>
+
+      <InspectorSection title="System Readiness" defaultOpen>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <KeyValue label="Status" value={systemReadinessReport.status} />
+          <KeyValue
+            label="Ready"
+            value={systemReadinessReport.readyComponents.join(", ")}
+          />
+          <KeyValue
+            label="Missing"
+            value={systemReadinessReport.missingComponents.join(", ")}
+          />
+        </div>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <ReadinessList
+            label="Blocking Issues"
+            items={systemReadinessReport.blockingIssues.map(
+              (issue) => `${issue.component}: ${issue.message}`,
+            )}
+          />
+          <ReadinessList
+            label="Warnings"
+            items={systemReadinessReport.warnings.map(
+              (issue) => `${issue.component}: ${issue.message}`,
+            )}
+          />
+        </div>
+      </InspectorSection>
+
+      <InspectorSection title="Configuration Readiness">
+        <KeyValue
+          label="Business Profile"
+          value={
+            systemReadinessReport.readyComponents.includes("Business Profile")
+              ? "READY"
+              : "WAITING_FOR_CONFIGURATION"
+          }
+        />
+        <KeyValue
+          label="Strategy"
+          value={
+            systemReadinessReport.readyComponents.includes("Strategy")
+              ? "READY"
+              : "WAITING_FOR_CONFIGURATION"
+          }
+        />
+      </InspectorSection>
+
+      <InspectorSection title="Offer Ladder Readiness">
+        <KeyValue
+          label="Status"
+          value={
+            systemReadinessReport.readyComponents.includes("Offer Ladder")
+              ? "READY"
+              : "WAITING_FOR_PREREQUISITES"
+          }
+        />
+      </InspectorSection>
+
+      <InspectorSection title="Decision Readiness">
+        <KeyValue
+          label="Status"
+          value={
+            systemReadinessReport.readyComponents.includes("Decision")
+              ? "READY"
+              : "WAITING_FOR_PREREQUISITES"
+          }
+        />
+      </InspectorSection>
+
+      <InspectorSection title="Pipeline Trace">
+        <KeyValue
+          label="Status"
+          value={pipelineReport.status}
+        />
+        <KeyValue
+          label="First Invalid"
+          value={pipelineReport.firstInvalidStage?.name ?? "None"}
+        />
+        <div className="mt-3 grid gap-2">
+          {pipelineReport.stages.map((stage) => (
+            <div
+              key={stage.name}
+              className={`rounded-md border px-3 py-2 ${
+                pipelineReport.firstInvalidStage?.name === stage.name
+                  ? "border-amber-500/60 bg-amber-950/20"
+                  : "border-zinc-800 bg-zinc-950/60"
+              }`}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="font-semibold text-zinc-200">{stage.name}</span>
+                <span className="text-zinc-500">{stage.validationStatus}</span>
+              </div>
+              <div className="mt-2 grid gap-1 sm:grid-cols-2">
+                <KeyValue
+                  label="Missing"
+                  value={stage.missingFields.join(", ")}
+                />
+                <KeyValue
+                  label="Fallbacks"
+                  value={stage.fallbacksUsed.join(", ")}
+                />
+                <KeyValue
+                  label="Execution"
+                  value={`${stage.executionTimeMs}ms`}
+                />
+                <KeyValue label="Reason" value={stage.reason} />
+              </div>
+            </div>
+          ))}
         </div>
       </InspectorSection>
 

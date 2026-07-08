@@ -31,6 +31,13 @@
 - Intelligence Console v2
 - Intelligence Tile pattern
 - Intelligence grade mapping
+- Business Profiles Platform
+- System Readiness Platform
+- Pipeline Integrity
+- Pipeline Inspector
+- Offer Policy extraction
+- Marketplace Profile templates
+- Cost Profile assumptions
 - Playability Intelligence Platform
 - Playability Provider Registry
 - Scryfall legalities as first Playability provider source
@@ -45,26 +52,23 @@
 
 ## Current Sprint
 
-Sprint 22: Playability Intelligence Platform and Intelligence Console v2
+Sprint 23.2: Pipeline Integrity
 
 Goals:
 
-- Explain why a card is valuable from play demand.
-- Keep Playability as measurement only, not BUY / PASS or negotiation logic.
-- Register Playability Intelligence in the Asset Intelligence Framework.
-- Add provider abstraction before integrating EDHREC, MTGGoldfish, Melee, MTGO, or Top8.
-- Use Scryfall legalities as the first live provider-backed input.
-- Surface Playability in Card Profile and strategy signal weights.
-- Replace bespoke Card Profile intelligence cards with reusable collapsed Intelligence Tiles.
-- Present scores as grades while keeping confidence separate.
+- Inspect the complete evaluation pipeline from Asset Context through Decision.
+- Terminate evaluation at the first invalid or unavailable stage.
+- Prevent zero-valued Offer Ladder outputs from driving PASS decisions.
+- Make Offer Policy explicit and owned by Business Profiles.
+- Keep pipeline diagnostics developer-only in Atlas Inspector.
 
 ## Near-Term Roadmap
 
-Sprint 23: Live Hot Opportunities
+Sprint 24: Live Hot Opportunities
 
-Sprint 24: Live Marketplace Listings
+Sprint 25: Live Marketplace Listings
 
-Sprint 25: Printing Descriptor Engine
+Sprint 26: Printing Descriptor Engine
 
 ## Future Roadmap
 
@@ -72,6 +76,11 @@ Sprint 25: Printing Descriptor Engine
 - Pricing normalization
 - Currency engine
 - Market Context Engine
+- Persisted Business Profiles
+- Business Profile import / export
+- Persisted Pipeline Reports for failed evaluations
+- Pipeline Report snapshots in Evaluation History
+- Business Profile policy validation before save
 - Asset Intelligence model health dashboard
 - Intelligence Console keyboard and visual regression coverage
 - Liquidity Engine
