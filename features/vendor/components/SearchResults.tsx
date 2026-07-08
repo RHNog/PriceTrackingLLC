@@ -1,3 +1,4 @@
+import CardImage from "@/components/ui/CardImage";
 import type { CardIdentity } from "@/types/cardIdentity";
 import type { SearchResult } from "@/types/searchResult";
 
@@ -32,7 +33,14 @@ export default function SearchResults({
                 : "bg-zinc-900 text-zinc-100 hover:bg-zinc-800"
             }`}
           >
-            <span>
+            {result.item.printings[0] ? (
+              <CardImage
+                card={result.item.printings[0]}
+                detail={`${result.item.printings[0].set} ${result.item.printings[0].finish}`}
+                size="identity"
+              />
+            ) : null}
+            <span className="min-w-0 flex-1">
               <span className="block text-sm font-semibold">{result.item.name}</span>
               <span className="mt-1 block text-xs opacity-75">
                 {result.item.game} / {result.item.printings.length} printings

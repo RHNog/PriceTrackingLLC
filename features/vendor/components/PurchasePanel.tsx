@@ -1,5 +1,6 @@
 "use client";
 
+import CardImage from "@/components/ui/CardImage";
 import EvaluationSummary from "@/features/vendor/components/EvaluationSummary";
 import {
   evaluatePurchase,
@@ -91,15 +92,26 @@ export default function PurchasePanel({
         onSubmit={handleSubmit}
         className="rounded-lg border border-zinc-800 bg-zinc-900 p-5 shadow-lg shadow-black/10"
       >
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-xs text-zinc-500">Selected Card</p>
-            <h3 className="mt-1 text-xl font-semibold text-white">{card.name}</h3>
-            <p className="mt-1 text-sm text-zinc-400">
-              {card.game} / {card.set} / {card.finish}
-            </p>
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row">
+            <CardImage
+              card={card}
+              detail={`${card.set} ${card.finish}`}
+              size="selected"
+            />
+            <div>
+              <p className="text-xs text-zinc-500">Selected Card</p>
+              <h3 className="mt-1 text-xl font-semibold text-white">{card.name}</h3>
+              <p className="mt-1 text-sm text-zinc-400">
+                {card.game} / {card.set} / {card.finish}
+              </p>
+              <p className="mt-2 text-sm text-zinc-500">
+                #{card.number} / {card.language ?? "English"} /{" "}
+                {card.treatment || "Standard"} / {card.releaseYear ?? "Unknown"}
+              </p>
+            </div>
           </div>
-          <div className="rounded-md bg-zinc-950/60 px-3 py-2 text-right">
+          <div className="rounded-md bg-zinc-950/60 px-3 py-2 text-left md:text-right">
             <p className="text-xs text-zinc-500">Current Buying Strategy</p>
             <p className="mt-1 text-sm font-medium text-cyan-300">
               {selectedStrategy?.name ?? "No strategy"}

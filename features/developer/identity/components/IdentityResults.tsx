@@ -1,4 +1,4 @@
-import Image from "next/image";
+import CardImage from "@/components/ui/CardImage";
 import type { CardIdentity } from "@/types/cardIdentity";
 import type { SearchResult } from "@/types/searchResult";
 
@@ -30,14 +30,11 @@ export default function IdentityResults({
                   : "border-zinc-800 bg-zinc-950/50 hover:border-zinc-700"
               }`}
             >
-              {result.item.printings[0]?.imageUrl ? (
-                <Image
-                  src={result.item.printings[0].imageUrl}
-                  alt=""
-                  width={64}
-                  height={96}
-                  unoptimized
-                  className="h-24 w-16 rounded object-cover"
+              {result.item.printings[0] ? (
+                <CardImage
+                  card={result.item.printings[0]}
+                  detail={`${result.item.printings[0].set} ${result.item.printings[0].finish}`}
+                  size="printing"
                 />
               ) : null}
               <span className="min-w-0 text-sm">

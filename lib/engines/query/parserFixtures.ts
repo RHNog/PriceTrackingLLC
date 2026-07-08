@@ -285,4 +285,13 @@ export const parserFixtures: ParserFixture[] = [
   { query: "showca ragavan", expected: ["frame"] },
   { query: "serial ragavan", expected: ["treatment"] },
   { query: "prerele birds", expected: ["promo"] },
+  { query: "urza's saga textless", expected: ["treatment"] },
+  { query: "urzas saga textless", expected: ["treatment"] },
+  { query: "urza saga textless", expected: ["treatment"] },
+  { query: "urzas saga text less", expected: ["treatment"] },
+  { query: "urza saga no text", expected: ["treatment"] },
+  { query: "jace mind sculptor", expected: [] },
+  { query: "thalia guardian thraben", expected: [] },
+  { query: "ugin's labyrinth", expected: [] },
+  { query: "fable mirror breaker", expected: [] },
 ];

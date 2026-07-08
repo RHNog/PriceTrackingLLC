@@ -7,6 +7,9 @@ export interface IdentityCandidate {
   explanation: string[];
   explanationDetails?: CandidateExplanation[];
   identity: CardIdentity;
+  normalizationBoost?: number;
+  scoreAfterNormalizationBoost?: number;
+  scoreBeforeNormalizationBoost?: number;
   relationship?: IdentityRelationship;
   rejectedReason?: string;
 }

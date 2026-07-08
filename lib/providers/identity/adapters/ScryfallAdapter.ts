@@ -1,11 +1,17 @@
 import { normalizeCard } from "@/lib/providers/identity/normalizers/CardNormalizer";
 import { classifyRelationship } from "@/lib/engines/entity/classifyRelationship";
-import type { Card } from "@/types/card";
+import type { Card, CardImageUrls } from "@/types/card";
+
+type ScryfallImageUris = {
+  art_crop?: string;
+  large?: string;
+  normal?: string;
+  small?: string;
+};
 
 type ScryfallCardFace = {
-  image_uris?: {
-    normal?: string;
-  };
+  image_uris?: ScryfallImageUris;
+  name?: string;
 };
 
 export type ScryfallCardResponse = {
@@ -26,9 +32,7 @@ export type ScryfallCardResponse = {
   released_at?: string;
   set?: string;
   type_line?: string;
-  image_uris?: {
-    normal?: string;
-  };
+  image_uris?: ScryfallImageUris;
   card_faces?: ScryfallCardFace[];
 };
 
@@ -48,10 +52,35 @@ function getFinish(card: ScryfallCardResponse) {
   return "Unknown";
 }
 
+function getImageUrls(imageUris?: ScryfallImageUris): CardImageUrls {
+  return {
+    artCrop: imageUris?.art_crop,
+    large: imageUris?.large,
+    normal: imageUris?.normal,
+    small: imageUris?.small,
+  };
+}
+
+function getPrimaryImageUrls(card: ScryfallCardResponse) {
+  return card.image_uris
+    ? getImageUrls(card.image_uris)
+    : getImageUrls(card.card_faces?.[0]?.image_uris);
+}
+
 function getImageUrl(card: ScryfallCardResponse) {
-  return (
-    card.image_uris?.normal ?? card.card_faces?.[0]?.image_uris?.normal ?? ""
-  );
+  const imageUrls = getPrimaryImageUrls(card);
+
+  return imageUrls.normal ?? imageUrls.small ?? imageUrls.large ?? "";
+}
+
+function getCardFaces(card: ScryfallCardResponse) {
+  // TODO: front/back image display.
+  // TODO: multi-face image carousel.
+  // TODO: image fallback handling for missing provider images.
+  return card.card_faces?.map((face) => ({
+    imageUrls: getImageUrls(face.image_uris),
+    name: face.name,
+  }));
 }
 
 function getTreatment(card: ScryfallCardResponse) {
@@ -66,6 +95,10 @@ function getTreatment(card: ScryfallCardResponse) {
 
   if (searchableText.includes("textless")) {
     return "Textless";
+  }
+
+  if (searchableText.includes("store championship")) {
+    return "Store Championship";
   }
 
   if (searchableText.includes("showcase")) {
@@ -135,7 +168,16 @@ export function adaptScryfallCard(card: ScryfallCardResponse): Card | null {
     finish: normalized.finish,
     frame: card.frame,
     frameEffects: normalized.frameEffects,
+    cardFaces: getCardFaces(card),
+    hasCardFaces: Boolean(card.card_faces?.length),
+    imageFace: card.card_faces?.length ? "front" : "single",
     imageUrl: getImageUrl(card),
+    imageSource: card.image_uris
+      ? "card"
+      : card.card_faces?.[0]?.image_uris
+        ? "card_faces"
+        : "fallback",
+    imageUrls: getPrimaryImageUrls(card),
     identityRelationship: classifyRelationship({
       component: card.component,
       layout: card.layout,

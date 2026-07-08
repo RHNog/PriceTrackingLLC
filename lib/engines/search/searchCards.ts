@@ -9,8 +9,9 @@ export function createSearchQuery(raw: string): SearchQuery {
   const normalized = normalizeQuery(raw);
 
   return {
-    raw,
     normalized,
+    punctuationStripped: normalized,
+    raw,
     tokens: tokenizeQuery(normalized),
   };
 }

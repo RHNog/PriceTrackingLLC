@@ -52,7 +52,7 @@ export function buildParsedQuery(tokens: QueryToken[]): ParsedQuery {
     set: findValue(tokens, "set"),
     setCode: findValue(tokens, "setCode"),
     treatment: findValue(tokens, "treatment"),
-    variant: findValue(tokens, "treatment") ?? findValue(tokens, "frame"),
+    variant: findValue(tokens, "variant"),
   };
   const confidenceByField = scoreParsedQuery(queryWithoutConfidence, tokens);
 

@@ -20,6 +20,9 @@ export default function ProviderDiagnostics({
   const diagnostics = response.diagnostics;
   const canonicalResolution = diagnostics.canonicalResolution;
   const printingResolution = response.intent.printingResolution;
+  const selectedPrinting =
+    printingResolution?.selectedPrinting ??
+    printingResolution?.printingCandidates[0]?.printing;
   const selectedCandidate =
     response.intent.identityCandidates.find(
       (candidate) =>
@@ -35,6 +38,10 @@ export default function ProviderDiagnostics({
         <Diagnostic label="Identity Provider" value={diagnostics.providerName} />
         <Diagnostic label="Original Query" value={response.query.raw || "-"} />
         <Diagnostic label="Normalized Query" value={response.query.normalized} />
+        <Diagnostic
+          label="Punctuation-Stripped Query"
+          value={response.query.punctuationStripped || "-"}
+        />
         <Diagnostic
           label="Canonical Candidates"
           value={
@@ -211,6 +218,34 @@ export default function ProviderDiagnostics({
           value={response.intent.selectedIdentity?.name ?? "Ambiguous"}
         />
         <Diagnostic
+          label="Identity Score Before Normalization Boost"
+          value={String(selectedCandidate?.scoreBeforeNormalizationBoost ?? 0)}
+        />
+        <Diagnostic
+          label="Identity Score After Normalization Boost"
+          value={String(selectedCandidate?.scoreAfterNormalizationBoost ?? 0)}
+        />
+        <Diagnostic
+          label="Identity Auto-Committed"
+          value={response.intent.selectedIdentity ? "Yes" : "No"}
+        />
+        <Diagnostic
+          label="Printings Loaded"
+          value={
+            printingResolution?.printingCandidates.length ? "Yes" : "No"
+          }
+        />
+        <Diagnostic
+          label="Why Printings Displayed"
+          value={
+            printingResolution?.printingCandidates.length
+              ? response.intent.selectedIdentity
+                ? "Identity auto-committed and printing constraints were evaluated."
+                : "Clear top identity candidate was available for inspection."
+              : "No selected or inspectable identity was available."
+          }
+        />
+        <Diagnostic
           label="Relationship Type"
           value={selectedCandidate?.relationship?.type ?? "None"}
         />
@@ -293,10 +328,35 @@ export default function ProviderDiagnostics({
         <Diagnostic
           label="Selected Printing"
           value={
-            printingResolution?.selectedPrinting
-              ? `${printingResolution.selectedPrinting.set} #${printingResolution.selectedPrinting.number}`
+            selectedPrinting
+              ? `${selectedPrinting.set} #${selectedPrinting.number}`
               : "Not committed"
           }
+        />
+        <Diagnostic
+          label="Image URL Selected"
+          value={
+            selectedPrinting?.imageUrls?.normal ??
+            selectedPrinting?.imageUrls?.small ??
+            selectedPrinting?.imageUrl ??
+            "None"
+          }
+        />
+        <Diagnostic
+          label="Image Source"
+          value={selectedPrinting?.imageSource ?? "None"}
+        />
+        <Diagnostic
+          label="Image Fallback Used"
+          value={selectedPrinting?.imageSource === "fallback" ? "Yes" : "No"}
+        />
+        <Diagnostic
+          label="Card Faces Present"
+          value={selectedPrinting?.hasCardFaces ? "Yes" : "No"}
+        />
+        <Diagnostic
+          label="Selected Face Image"
+          value={selectedPrinting?.imageFace ?? "None"}
         />
         <Diagnostic
           label="Printing Selection Explanation"

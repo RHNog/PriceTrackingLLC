@@ -9,6 +9,35 @@ import type { ParsedQuery } from "@/types/parsedQuery";
 import type { PrintingResolution } from "@/types/printingResolution";
 import type { ResolvedIntent } from "@/types/resolvedIntent";
 
+function getInspectableIdentity(identityCandidates: IdentityCandidate[]) {
+  const topCandidate = identityCandidates[0];
+  const secondCandidate = identityCandidates[1];
+
+  if (!topCandidate) {
+    return undefined;
+  }
+
+  if (!secondCandidate && topCandidate.confidence >= 30) {
+    return topCandidate.identity;
+  }
+
+  if (
+    secondCandidate &&
+    topCandidate.confidence >= 40 &&
+    topCandidate.confidence - secondCandidate.confidence >= 12
+  ) {
+    return topCandidate.identity;
+  }
+
+  return undefined;
+}
+
+function formatConstraintType(type: string) {
+  return type
+    .replace(/([A-Z])/g, " $1")
+    .replace(/^./, (character) => character.toUpperCase());
+}
+
 function getResolutionExplanation(
   selectedIdentity: CardIdentity | undefined,
   identityCandidates: IdentityCandidate[],
@@ -50,7 +79,7 @@ function getResolutionExplanation(
         ? [
             ...printingResolution.matchedConstraints.map(
               (match) =>
-                `✓ ${match.constraint.type}: ${match.constraint.value}`,
+                `✓ ${formatConstraintType(match.constraint.type)}: ${match.constraint.value}`,
             ),
             ...printingResolution.relaxedConstraints.map(
               (constraint) =>
@@ -82,10 +111,12 @@ export function resolveIntent(
   const relationshipResolutionTimeMs = Date.now() - relationshipStartedAt;
   const identityCandidates = rankIdentityCandidates(identities, parsedQuery);
   const selectedIdentity = commitIdentity(identityCandidates);
-  const printingResolution = selectedIdentity
+  const printingIdentity =
+    selectedIdentity ?? getInspectableIdentity(identityCandidates);
+  const printingResolution = printingIdentity
     ? satisfyPrintingConstraints(
-        selectedIdentity,
-        selectedIdentity.printings,
+        printingIdentity,
+        printingIdentity.printings,
         resolvedConstraints,
       )
     : undefined;
@@ -97,7 +128,9 @@ export function resolveIntent(
       ),
       printing: candidate.printing,
     })) ?? [];
-  const selectedPrinting = printingResolution?.selectedPrinting;
+  const selectedPrinting = selectedIdentity
+    ? printingResolution?.selectedPrinting
+    : undefined;
   const identityConfidence = identityCandidates[0]?.confidence ?? 0;
   const printingConfidence =
     printingResolution?.selectedPrintingConfidence ??

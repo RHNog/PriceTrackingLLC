@@ -163,7 +163,7 @@ export const mtgKnowledgeBase: KnowledgeEntry[] = [
   },
   {
     canonical: "Textless",
-    aliases: ["textless"],
+    aliases: ["textless", "text less", "no text"],
     category: "treatment",
   },
   {

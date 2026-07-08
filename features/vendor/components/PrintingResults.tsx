@@ -1,3 +1,4 @@
+import CardImage from "@/components/ui/CardImage";
 import type { PrintingMatchCandidate } from "@/types/printingResolution";
 
 type PrintingResultsProps = {
@@ -42,7 +43,13 @@ export default function PrintingResults({
             }`}
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
+              <div className="flex min-w-0 gap-3">
+                <CardImage
+                  card={printing}
+                  detail={`${printing.set} ${printing.finish}`}
+                  size="printing"
+                />
+                <div className="min-w-0">
                 <p className="text-sm font-semibold">
                   {printing.set} {printing.setCode ? `(${printing.setCode})` : ""}
                 </p>
@@ -59,6 +66,7 @@ export default function PrintingResults({
                   Product: {printing.productFamily || printing.set} / Released:{" "}
                   {printing.releaseYear ?? "Unknown"}
                 </p>
+                </div>
               </div>
               <span className="text-xs font-semibold">
                 Match {candidate.confidence}

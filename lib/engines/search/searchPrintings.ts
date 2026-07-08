@@ -19,8 +19,10 @@ export function searchPrintings(raw: string, printings: Card[]) {
     getExactText: getCardExactText,
     getSearchText: getCardSearchText,
     query: {
-      raw,
       normalized: parsedQuery.remainingTokens.join(" ") || raw.toLowerCase(),
+      punctuationStripped:
+        parsedQuery.remainingTokens.join(" ") || raw.toLowerCase(),
+      raw,
       tokens: parsedQuery.remainingTokens.length
         ? parsedQuery.remainingTokens
         : raw.toLowerCase().split(" ").filter(Boolean),

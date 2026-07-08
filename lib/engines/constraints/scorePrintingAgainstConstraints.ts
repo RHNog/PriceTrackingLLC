@@ -84,6 +84,15 @@ function matchesConstraint(printing: Card, constraint: PrintingConstraint) {
     case "treatment":
     case "variant":
       if (
+        normalize(constraint.value) === "textless" &&
+        /(textless|store championship|championship)/i.test(
+          getSearchablePrintingText(printing),
+        )
+      ) {
+        return true;
+      }
+
+      if (
         normalize(constraint.value) === "masterpiece" &&
         /(invention|invocation|expedition|masterpiece)/i.test(
           getSearchablePrintingText(printing),
