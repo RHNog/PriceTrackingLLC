@@ -2,6 +2,30 @@
 
 This file records logical product milestones. Sprint numbers may not perfectly match commit history.
 
+## Sprint 24.2
+
+Finalized the Intelligence Console presentation contract.
+
+- Expanded tiles now answer exactly four questions: what the model thinks, how certain it is, why, and what evidence supports it.
+- Removed redundant Summary and What This Means sections.
+- Renamed confidence to model-specific labels such as Certification Confidence.
+- Added plain-language confidence reasons whenever confidence is below High.
+- Renamed Primary Supporting Indicators to Key Signals.
+- Renamed Evidence to Supporting Evidence and kept it factual.
+- Added session-scoped expanded tile memory.
+- Preserved business logic and Intelligence calculations.
+
+## Sprint 24.1
+
+Layered Information Architecture for the Intelligence Console.
+
+- Standardized every Intelligence model around Decision, Explanation, Evidence, and Implementation layers.
+- Kept Layers 1 and 2 visible by default in Vendor Workspace.
+- Moved implementation details into Atlas Inspector developer mode.
+- Replaced numeric production confidence with Very Low, Low, Moderate, High, and Very High labels.
+- Kept numeric confidence, versions, status, health, provider status, internal sources, future dependencies, and provider matrix visible in Atlas.
+- Preserved business engines and intelligence calculations.
+
 ## Sprint 24
 
 Certification Intelligence became a first-class Asset Intelligence model.

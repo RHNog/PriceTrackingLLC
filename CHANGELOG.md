@@ -9,6 +9,13 @@ The format is inspired by "Keep a Changelog".
 ## [Unreleased]
 
 ### Added
+- Sprint 24.2 final Intelligence Console presentation contract.
+- Session-scoped expanded Intelligence tile memory.
+- Model-specific confidence labels such as Certification Confidence and Playability Confidence.
+- Plain-language confidence reasons whenever confidence is below High.
+- Sprint 24.1 layered Intelligence Console information architecture.
+- Production confidence labels: Very Low, Low, Moderate, High, and Very High.
+- Atlas Inspector implementation layer for Intelligence model versions, health, status, internal sources, future dependencies, internal signals, and Certification provider matrix.
 - Sprint 24 Certification Intelligence Platform.
 - `lib/intelligence/certification/` with Certification Engine, Provider abstraction, Registry, Profile, Indicator, Trend, and Source contracts.
 - Placeholder Certification Provider for PSA, BGS, and CGC without scraping or unofficial APIs.
@@ -107,6 +114,13 @@ The format is inspired by "Keep a Changelog".
 - Architecture, roadmap, decision, product spec, prompt history, and documentation changelog files.
 
 ### Changed
+- Expanded Intelligence tiles now answer only Grade/Confidence, Business Conclusion, Key Signals, and Supporting Evidence.
+- Removed redundant Summary and What This Means sections from production Intelligence panels.
+- Primary Supporting Indicators was renamed to Key Signals.
+- Evidence was renamed to Supporting Evidence and limited to factual support.
+- Intelligence Console now prioritizes business conclusions, summary, confidence, supporting indicators, and evidence before implementation details.
+- Vendor Workspace Intelligence tiles now show model name, grade, confidence label, and expand affordance without numeric confidence.
+- Implementation details such as Version, Health, Status, Provider Status, Internal Sources, and Future Dependencies moved from Vendor Workspace into Atlas Developer Mode.
 - Collector Intelligence now consumes Certification Intelligence as a measured input while strategies continue to use configurable signal weights.
 - Current sprint updated to Sprint 24.
 - Offer Ladder now consumes Offer Policy extracted from the selected Business Profile instead of relying on scattered business thresholds.
@@ -194,6 +208,8 @@ The format is inspired by "Keep a Changelog".
 - Clear low-confidence identity candidates can now load printing candidates instead of leaving Vendor Workspace stuck at an identity row.
 
 ### Documented
+- Sprint 24.2 final Intelligence Console UI contract, confidence explanation rules, expansion memory, and redundancy removal.
+- Sprint 24.1 layered information architecture, Vendor Information Model, Atlas Information Model, and responsibility split.
 - Sprint 24 Certification Intelligence philosophy, provider abstraction, profile, dependency graph, architecture graph, backlog, and technical debt.
 - Sprint 23.2 Pipeline Inspector, Offer Policy, Pipeline Integrity, Business Invariants, technical debt, and architecture graph.
 - Sprint 23.1 System Readiness Platform, validation layers, readiness pipeline, configuration validation, user-facing error improvements, dependency graph, backlog, and technical debt.

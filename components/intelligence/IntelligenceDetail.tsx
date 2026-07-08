@@ -1,4 +1,7 @@
-import { getIntelligenceGrade } from "@/components/intelligence/IntelligenceGrade";
+import {
+  getConfidenceLabel,
+  getIntelligenceGrade,
+} from "@/components/intelligence/IntelligenceGrade";
 import type { CardProfile } from "@/lib/engines/cardIntelligence/models/CardProfile";
 import type { IntelligenceModel } from "@/lib/intelligence/framework/IntelligenceModel";
 
@@ -16,18 +19,6 @@ function unique(values: string[]) {
   return Array.from(new Set(values.filter(Boolean)));
 }
 
-function getTrend(cardProfile: CardProfile, model: IntelligenceModel) {
-  if (model.id === "certification-intelligence") {
-    return cardProfile.certificationProfile.indicators.populationTrend.trend;
-  }
-
-  if (model.id === "playability-intelligence") {
-    return cardProfile.playabilityProfile.overall.trend;
-  }
-
-  return "Unknown";
-}
-
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-md bg-zinc-950/60 px-3 py-2">
@@ -37,7 +28,15 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function DetailList({ items, label }: { items: string[]; label: string }) {
+function DetailList({
+  emptyLabel = "More evidence will appear as connected data improves.",
+  items,
+  label,
+}: {
+  emptyLabel?: string;
+  items: string[];
+  label: string;
+}) {
   return (
     <div className="rounded-md bg-zinc-950/60 px-3 py-2">
       <p className="text-xs text-zinc-500">{label}</p>
@@ -45,112 +44,177 @@ function DetailList({ items, label }: { items: string[]; label: string }) {
         {items.length > 0 ? (
           items.map((item) => <li key={item}>{item}</li>)
         ) : (
-          <li>None</li>
+          <li>{emptyLabel}</li>
         )}
       </ul>
     </div>
   );
 }
 
-function PlayabilityFormats({ cardProfile }: { cardProfile: CardProfile }) {
-  const formats = [
-    "Commander",
-    "Modern",
-    "Legacy",
-    "Vintage",
-    "Pioneer",
-    "Standard",
-    "Pauper",
-    "Explorer",
-  ] as const;
-  const playability = cardProfile.playabilityProfile;
+function getModelDisplayName(name: string) {
+  return name.replace(/\s+Intelligence$/, "");
+}
 
-  return (
-    <div className="rounded-md bg-zinc-950/60 px-3 py-2">
-      <p className="text-xs text-zinc-500">Format Indicators</p>
-      <div className="mt-2 grid gap-2 sm:grid-cols-2">
-        {formats.map((format) => {
-          const indicator = playability.formats[format];
+function getBusinessConclusion(
+  cardProfile: CardProfile,
+  model: IntelligenceModel,
+  score: number,
+) {
+  if (model.id === "certification-intelligence") {
+    const tier = cardProfile.certificationProfile.tier.toLowerCase();
 
-          return (
-            <div
-              key={format}
-              className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 rounded-md bg-zinc-900 px-2 py-1.5"
-            >
-              <span className="truncate text-xs text-zinc-400">{format}</span>
-              <span className="text-xs font-semibold text-zinc-200">
-                {getIntelligenceGrade(indicator.score)}
-              </span>
-              <span className="text-xs text-zinc-500">{indicator.status}</span>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
+    return [
+      `${cardProfile.printing.name} is a ${tier} certification candidate.`,
+      "Collector interest appears strong when certification traits are considered.",
+      "Population reporting will improve once certification providers are connected.",
+    ];
+  }
+
+  if (model.id === "playability-intelligence") {
+    return [
+      `${cardProfile.printing.name} has ${cardProfile.playabilityProfile.tier.toLowerCase()} play demand.`,
+      "Format availability supports the card's buyer audience.",
+      "Additional metagame signals will appear after provider connection.",
+    ];
+  }
+
+  if (score >= 75) {
+    return [
+      `${getModelDisplayName(model.name)} signals are favorable for this asset.`,
+      "The current profile supports stronger buyer attention.",
+    ];
+  }
+
+  if (score >= 50) {
+    return [
+      `${getModelDisplayName(model.name)} signals are mixed but usable.`,
+      "The current profile should be interpreted with supporting evidence.",
+    ];
+  }
+
+  return [
+    `${getModelDisplayName(model.name)} signals are limited right now.`,
+    "Additional connected data may improve this read later.",
+  ];
+}
+
+function getKeySignals(model: IntelligenceModel) {
+  return model.indicators
+    .filter((indicator) => indicator.score > 0 || indicator.confidence > 0)
+    .sort(
+      (first, second) =>
+        second.score * second.confidence - first.score * first.confidence,
+    )
+    .slice(0, 4)
+    .map(
+      (indicator) =>
+        `${indicator.name}: ${getIntelligenceGrade(indicator.score)} / ${getConfidenceLabel(
+          indicator.confidence,
+        )}`,
+    );
+}
+
+function getConfidenceReason(model: IntelligenceModel) {
+  if (getConfidenceLabel(model.confidence) === "High") {
+    return "";
+  }
+
+  if (getConfidenceLabel(model.confidence) === "Very High") {
+    return "";
+  }
+
+  if (model.id === "certification-intelligence") {
+    return "Official certification population providers have not yet been connected.";
+  }
+
+  if (model.id === "playability-intelligence") {
+    return "Additional format usage and metagame providers have not yet been connected.";
+  }
+
+  if (model.indicators.every((indicator) => indicator.confidence === 0)) {
+    return "Connected data is not available for this intelligence model yet.";
+  }
+
+  return "Some supporting data is still waiting for provider connection.";
 }
 
 function formatNullableNumber(value: number | null) {
-  return value === null ? "Pending" : `${value}`;
+  return value === null
+    ? "Population data will become available after certification provider integration."
+    : `${value}`;
 }
 
 function formatNullablePercent(value: number | null) {
-  return value === null ? "Pending" : `${value}%`;
+  return value === null
+    ? "Additional grading signals will appear once PSA, BGS and CGC providers are connected."
+    : `${value}%`;
 }
 
-function CertificationProviders({ cardProfile }: { cardProfile: CardProfile }) {
-  const certification = cardProfile.certificationProfile;
+function getSupportingEvidence(
+  cardProfile: CardProfile,
+  model: IntelligenceModel,
+) {
+  const collectorContext = unique(
+    model.indicators.flatMap((indicator) => indicator.contributingFactors),
+  )
+    .slice(0, 4)
+    .join(", ");
 
-  return (
-    <div className="rounded-md bg-zinc-950/60 px-3 py-2">
-      <p className="text-xs text-zinc-500">Certification Providers</p>
-      <div className="mt-2 grid gap-2">
-        {certification.providers.map((provider) => (
-          <div
-            key={provider.providerId}
-            className="grid gap-2 rounded-md bg-zinc-900 px-2 py-2 text-xs text-zinc-400 sm:grid-cols-[auto_repeat(8,minmax(0,1fr))]"
-          >
-            <span className="font-semibold text-zinc-200">
-              {provider.providerName}
-            </span>
-            <span>Grade {getIntelligenceGrade(provider.grade)}</span>
-            <span>Confidence {provider.confidence}%</span>
-            <span>Population {formatNullableNumber(provider.population)}</span>
-            <span>Gem {formatNullableNumber(provider.gemPopulation)}</span>
-            <span>Gem Rate {formatNullablePercent(provider.gemRate)}</span>
-            <span>Premium {formatNullablePercent(provider.estimatedPremium)}</span>
-            <span>Trend {provider.trend}</span>
-            <span>Status {provider.status}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+  if (model.id === "certification-intelligence") {
+    const certification = cardProfile.certificationProfile;
 
-function FutureCertificationProviders({
-  cardProfile,
-}: {
-  cardProfile: CardProfile;
-}) {
-  return (
-    <div className="rounded-md bg-zinc-950/60 px-3 py-2">
-      <p className="text-xs text-zinc-500">Future Provider Status</p>
-      <div className="mt-2 grid gap-2 sm:grid-cols-3">
-        {cardProfile.certificationProfile.futureProviders.map((provider) => (
-          <div
-            key={provider.providerId}
-            className="rounded-md bg-zinc-900 px-2 py-1.5 text-xs text-zinc-400"
-          >
-            <span className="font-semibold text-zinc-200">
-              {provider.providerName}
-            </span>{" "}
-            {provider.status}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+    return [
+      `Population: ${joinValues(
+        certification.providers.map(
+          (provider) =>
+            `${provider.providerName}: ${formatNullableNumber(
+              provider.population,
+            )}`,
+        ),
+      )}`,
+      `Gem Rate: ${joinValues(
+        certification.providers.map(
+          (provider) =>
+            `${provider.providerName}: ${formatNullablePercent(
+              provider.gemRate,
+            )}`,
+        ),
+      )}`,
+      `Premium: ${joinValues(
+        certification.providers.map(
+          (provider) =>
+            `${provider.providerName}: ${formatNullablePercent(
+              provider.estimatedPremium,
+            )}`,
+        ),
+      )}`,
+      `Trend: ${certification.indicators.populationTrend.trend}`,
+      `Collector Context: ${collectorContext}`,
+    ];
+  }
+
+  if (model.id === "playability-intelligence") {
+    return [
+      `Play Access: ${cardProfile.playabilityProfile.overall.status}`,
+      `Format Breadth: ${getIntelligenceGrade(
+        cardProfile.playabilityProfile.indicators.formatDiversity.score,
+      )}`,
+      `Trend: ${cardProfile.playabilityProfile.overall.trend}`,
+      `Collector Context: ${collectorContext}`,
+    ];
+  }
+
+  return [
+    `Trend: Unknown`,
+    `Collector Context: ${collectorContext}`,
+    ...model.indicators
+      .filter((indicator) => indicator.score > 0 || indicator.confidence > 0)
+      .slice(0, 2)
+      .map(
+        (indicator) =>
+          `${indicator.name}: ${getIntelligenceGrade(indicator.score)}`,
+      ),
+  ];
 }
 
 export default function IntelligenceDetail({
@@ -161,129 +225,52 @@ export default function IntelligenceDetail({
   const contributingFactors = unique(
     model.indicators.flatMap((indicator) => indicator.contributingFactors),
   );
-  const supportingSources = unique([
-    ...model.supportingSources,
-    ...model.indicators.flatMap((indicator) => indicator.dataSources),
-  ]);
-  const futureDependencies = unique(
-    model.indicators.flatMap((indicator) => indicator.futureDependencies),
+  const businessConclusion = getBusinessConclusion(cardProfile, model, score);
+  const keySignals = getKeySignals(model);
+  const confidenceReason = getConfidenceReason(model);
+  const supportingEvidence = getSupportingEvidence(cardProfile, model).filter(
+    (item) => !item.endsWith(": "),
   );
-  const isCertification = model.id === "certification-intelligence";
-  const isPlayability = model.id === "playability-intelligence";
+  const modelDisplayName = getModelDisplayName(model.name);
 
   return (
     <div className="rounded-md border border-zinc-800 bg-zinc-900 px-3 py-3">
-      <div className="grid gap-2 sm:grid-cols-4">
-        <DetailRow label="Score" value={`${score}`} />
+      <div className="grid gap-2 sm:grid-cols-2">
         <DetailRow label="Grade" value={getIntelligenceGrade(score)} />
-        <DetailRow label="Confidence" value={`${model.confidence}%`} />
-        <DetailRow label="Version" value={model.version} />
-      </div>
-
-      <div className="mt-2 grid gap-2 sm:grid-cols-3">
-        <DetailRow label="Status" value={model.status} />
-        <DetailRow label="Trend" value={getTrend(cardProfile, model)} />
-        <DetailRow label="Health" value={model.health} />
+        <div className="rounded-md bg-zinc-950/60 px-3 py-2">
+          <p className="text-xs text-zinc-500">
+            {modelDisplayName} Confidence
+          </p>
+          <p className="mt-1 text-sm font-medium text-zinc-200">
+            {getConfidenceLabel(model.confidence)}
+          </p>
+          {confidenceReason ? (
+            <p className="mt-2 text-xs text-zinc-400">
+              Reason: {confidenceReason}
+            </p>
+          ) : null}
+        </div>
       </div>
 
       <div className="mt-2 rounded-md bg-zinc-950/60 px-3 py-2">
-        <p className="text-xs text-zinc-500">Summary</p>
-        <p className="mt-1 text-sm text-zinc-300">{model.explanation}</p>
+        <p className="text-xs text-zinc-500">Business Conclusion</p>
+        <ul className="mt-2 space-y-1 text-sm text-zinc-300">
+          {businessConclusion.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
       </div>
 
-      {isPlayability ? (
-        <div className="mt-2 grid gap-2">
-          <PlayabilityFormats cardProfile={cardProfile} />
-          <div className="grid gap-2 sm:grid-cols-3">
-            <DetailRow
-              label="Ban Status"
-              value={cardProfile.playabilityProfile.overall.status}
-            />
-            <DetailRow
-              label="Meta Stability"
-              value={cardProfile.playabilityProfile.overall.metaStability}
-            />
-            <DetailRow
-              label="Deck Penetration"
-              value={cardProfile.playabilityProfile.overall.deckPenetration.status}
-            />
-          </div>
-        </div>
-      ) : null}
-
-      {isCertification ? (
-        <div className="mt-2 grid gap-2">
-          <div className="grid gap-2 sm:grid-cols-3">
-            <DetailRow
-              label="Overall Grade"
-              value={getIntelligenceGrade(
-                cardProfile.certificationProfile.overallGrade,
-              )}
-            />
-            <DetailRow
-              label="Population"
-              value={joinValues(
-                cardProfile.certificationProfile.providers.map(
-                  (provider) =>
-                    `${provider.providerName}: ${formatNullableNumber(
-                      provider.population,
-                    )}`,
-                ),
-              )}
-            />
-            <DetailRow
-              label="Gem Rate"
-              value={joinValues(
-                cardProfile.certificationProfile.providers.map(
-                  (provider) =>
-                    `${provider.providerName}: ${formatNullablePercent(
-                      provider.gemRate,
-                    )}`,
-                ),
-              )}
-            />
-            <DetailRow
-              label="Premium"
-              value={joinValues(
-                cardProfile.certificationProfile.providers.map(
-                  (provider) =>
-                    `${provider.providerName}: ${formatNullablePercent(
-                      provider.estimatedPremium,
-                    )}`,
-                ),
-              )}
-            />
-            <DetailRow
-              label="Trend"
-              value={cardProfile.certificationProfile.indicators.populationTrend.trend}
-            />
-            <DetailRow
-              label="Source"
-              value={joinValues(
-                unique(
-                  cardProfile.certificationProfile.providers.map(
-                    (provider) => provider.source,
-                  ),
-                ),
-              )}
-            />
-          </div>
-          <CertificationProviders cardProfile={cardProfile} />
-          <FutureCertificationProviders cardProfile={cardProfile} />
-        </div>
-      ) : null}
-
-      <div className="mt-2 grid gap-2 lg:grid-cols-3">
-        <DetailList label="Contributing Factors" items={contributingFactors} />
-        <DetailList label="Supporting Data Sources" items={supportingSources} />
-        <DetailList label="Future Dependencies" items={futureDependencies} />
-      </div>
-
-      <div className="mt-2 rounded-md bg-zinc-950/60 px-3 py-2">
-        <p className="text-xs text-zinc-500">Explanation</p>
-        <p className="mt-1 text-sm text-zinc-300">
-          {joinValues(model.indicators.map((indicator) => indicator.explanation))}
-        </p>
+      <div className="mt-2 grid gap-2 lg:grid-cols-2">
+        <DetailList label="Key Signals" items={keySignals} />
+        <DetailList
+          label="Supporting Evidence"
+          items={
+            supportingEvidence.length > 0
+              ? supportingEvidence
+              : contributingFactors.slice(0, 4)
+          }
+        />
       </div>
     </div>
   );

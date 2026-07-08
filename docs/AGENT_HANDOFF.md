@@ -8,7 +8,7 @@ It helps trading-card buyers discover opportunities, evaluate in-person purchase
 
 ## Current Development Phase
 
-Current sprint: Sprint 24, Certification Intelligence Platform.
+Current sprint: Sprint 24.2, Final Intelligence Console.
 
 The app now evaluates a selected card through deterministic Vendor Workflow states, Card Profile, Asset Intelligence models, condition-adjusted market context, strategy-weighted signals, Negotiation Ladder, and deterministic Decision Resolver output.
 
@@ -23,6 +23,10 @@ System Readiness now validates Business Profile, Market Snapshot, Card Intellige
 Pipeline Integrity now inspects Asset, Market, Business, Cost Profile, Offer Policy, Strategy, Offer Ladder, and Decision stages. Evaluations carry a Pipeline Report, Atlas Inspector shows the first invalid stage in developer mode, and zero-valued Offer Ladder output blocks Decision Resolver execution unless a future feature explicitly defines zero as intended.
 
 Certification Intelligence now measures collectible certification characteristics as a first-class Asset Intelligence model. It exposes a Certification Profile, placeholder PSA/BGS/CGC provider summaries, future TAG/SGC/ARS status, and indicators for grade, population scarcity, gem rate, premium, population trend, collector competition, and submission saturation. It must never decide BUY/PASS; Collector Intelligence consumes it, Strategies consume Collector Intelligence through weights, and Negotiation consumes Strategy output.
+
+Intelligence Console now uses layered information architecture. Vendor Workspace should show business conclusions, confidence labels, supporting indicators, and evidence. Atlas Inspector owns implementation details such as version, health, status, internal sources, future dependencies, internal signals, and provider matrices.
+
+Sprint 24.2 finalized the production contract: expanded Intelligence tiles show Grade, model-specific Confidence, Business Conclusion, Key Signals, and Supporting Evidence only. Confidence below High must explain itself. Summary and What This Means should not return.
 
 ## What Has Been Built?
 
@@ -52,6 +56,8 @@ Certification Intelligence now measures collectible certification characteristic
 - Pipeline Integrity
 - Pipeline Inspector
 - Certification Intelligence Platform
+- Layered Intelligence Console
+- Final Intelligence Console UI contract
 - Certification Provider Registry
 - Placeholder Certification Provider
 - Offer Policy

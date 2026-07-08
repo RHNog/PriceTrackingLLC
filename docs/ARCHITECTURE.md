@@ -40,6 +40,52 @@ Examples:
 
 Generic UI should remain in `components/ui`.
 
+## Intelligence Console Information Architecture
+
+Every Intelligence model uses the same presentation contract:
+
+Layer 1: Grade and model-specific confidence
+
+Layer 2: Business Conclusion
+
+Layer 3: Key Signals
+
+Layer 4: Supporting Evidence
+
+Implementation remains Atlas-only.
+
+Expanded Vendor Workspace panels answer exactly four questions:
+
+1. What do you think?
+2. How certain are you?
+3. Why?
+4. What evidence supports it?
+
+Vendor Workspace owns:
+
+- Grade
+- Model-specific confidence label
+- Confidence reason when confidence is below High
+- Business conclusion
+- Key Signals
+- Supporting Evidence
+
+Atlas Inspector owns Layer 4:
+
+- Version
+- Health
+- Status
+- Framework and engine details
+- Internal sources
+- Future dependencies
+- Internal signals
+- Provider health
+- Provider status
+- Provider matrix
+- Debug information
+
+Production UI must not expose implementation language such as Placeholder, Experimental, Framework Version, Engine Version, Provider Matrix, Internal Sources, or Future Dependencies.
+
 ## Current Query Pipeline
 
 User Query

@@ -1,6 +1,7 @@
 "use client";
 
 import type { AssetContextValidationResult } from "@/lib/workflow/AssetContextValidator";
+import type { CardProfile } from "@/lib/engines/cardIntelligence/models/CardProfile";
 import type { PipelineReport } from "@/lib/pipeline/PipelineReport";
 import type { ReadinessReport } from "@/lib/validation/ReadinessReport";
 import type { CardConditionCode } from "@/types/conditionProfile";
@@ -10,6 +11,7 @@ import type { VendorWorkflowSnapshot } from "@/types/VendorWorkflowState";
 
 type AtlasInspectorProps = {
   assetValidation: AssetContextValidationResult;
+  cardProfile?: CardProfile;
   isMarketLoading: boolean;
   marketSnapshot?: MarketSnapshot;
   pipelineReport: PipelineReport;
@@ -70,6 +72,7 @@ function ReadinessList({ label, items }: { label: string; items: string[] }) {
 
 export default function AtlasInspector({
   assetValidation,
+  cardProfile,
   isMarketLoading,
   marketSnapshot,
   pipelineReport,
@@ -283,6 +286,126 @@ export default function AtlasInspector({
           label="Status"
           value={isMarketLoading ? "Loading" : "Driven by validated market data"}
         />
+      </InspectorSection>
+
+      <InspectorSection title="Intelligence Implementation Details">
+        {cardProfile ? (
+          <div className="grid gap-3">
+            {cardProfile.intelligenceModels.map((model) => (
+              <div
+                key={model.id}
+                className="rounded-md border border-zinc-800 bg-zinc-950/60 px-3 py-2"
+              >
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <KeyValue label="Model" value={model.name} />
+                  <KeyValue label="Version" value={model.version} />
+                  <KeyValue label="Status" value={model.status} />
+                  <KeyValue label="Health" value={model.health} />
+                  <KeyValue label="Confidence" value={`${model.confidence}%`} />
+                  <KeyValue
+                    label="Internal Sources"
+                    value={model.supportingSources.join(", ")}
+                  />
+                  <KeyValue
+                    label="Future Dependencies"
+                    value={model.indicators
+                      .flatMap((indicator) => indicator.futureDependencies)
+                      .join(", ")}
+                  />
+                  <KeyValue
+                    label="Dependency Graph"
+                    value={model.dependencyGraph.join(" -> ")}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <KeyValue label="Card Profile" value="Waiting for validated data" />
+        )}
+      </InspectorSection>
+
+      <InspectorSection title="Internal Signals">
+        {cardProfile ? (
+          <div className="grid gap-2 sm:grid-cols-2">
+            {cardProfile.signals.map((signal) => (
+              <div
+                key={signal.name}
+                className="rounded-md border border-zinc-800 bg-zinc-950/60 px-3 py-2"
+              >
+                <KeyValue label="Signal" value={signal.label} />
+                <KeyValue label="Score" value={signal.score} />
+                <KeyValue label="Confidence" value={`${signal.confidence}%`} />
+                <KeyValue label="Version" value={signal.version} />
+                <KeyValue label="Status" value={signal.status} />
+                <KeyValue
+                  label="Sources"
+                  value={signal.supportingDataSources.join(", ")}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <KeyValue label="Signals" value="Waiting for card profile" />
+        )}
+      </InspectorSection>
+
+      <InspectorSection title="Certification Provider Matrix">
+        {cardProfile ? (
+          <div className="grid gap-2">
+            {cardProfile.certificationProfile.providers.map((provider) => (
+              <div
+                key={provider.providerId}
+                className="rounded-md border border-zinc-800 bg-zinc-950/60 px-3 py-2"
+              >
+                <div className="grid gap-2 sm:grid-cols-3">
+                  <KeyValue label="Provider" value={provider.providerName} />
+                  <KeyValue label="Status" value={provider.status} />
+                  <KeyValue label="Source" value={provider.source} />
+                  <KeyValue label="Grade" value={provider.grade} />
+                  <KeyValue
+                    label="Confidence"
+                    value={`${provider.confidence}%`}
+                  />
+                  <KeyValue
+                    label="Population"
+                    value={provider.population ?? "Provider pending"}
+                  />
+                  <KeyValue
+                    label="Gem Population"
+                    value={provider.gemPopulation ?? "Provider pending"}
+                  />
+                  <KeyValue
+                    label="Gem Rate"
+                    value={
+                      provider.gemRate === null
+                        ? "Provider pending"
+                        : `${provider.gemRate}%`
+                    }
+                  />
+                  <KeyValue
+                    label="Estimated Premium"
+                    value={
+                      provider.estimatedPremium === null
+                        ? "Provider pending"
+                        : `${provider.estimatedPremium}%`
+                    }
+                  />
+                  <KeyValue label="Trend" value={provider.trend} />
+                  <KeyValue label="Last Updated" value={provider.lastUpdated} />
+                </div>
+              </div>
+            ))}
+            <KeyValue
+              label="Future Providers"
+              value={cardProfile.certificationProfile.futureProviders
+                .map((provider) => `${provider.providerName}: ${provider.status}`)
+                .join(", ")}
+            />
+          </div>
+        ) : (
+          <KeyValue label="Certification" value="Waiting for card profile" />
+        )}
       </InspectorSection>
 
       <InspectorSection title="Offer Ladder">

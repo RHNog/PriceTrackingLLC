@@ -37,6 +37,8 @@
 - Pipeline Inspector
 - Offer Policy extraction
 - Certification Intelligence Platform
+- Layered Intelligence Console information architecture
+- Final Intelligence Console UI contract
 - Certification Provider Registry
 - Placeholder PSA, BGS, and CGC certification provider coverage
 - Marketplace Profile templates
@@ -55,16 +57,15 @@
 
 ## Current Sprint
 
-Sprint 24: Certification Intelligence Platform
+Sprint 24.2: Final Intelligence Console
 
 Goals:
 
-- Certification Intelligence measures collectible certification characteristics.
-- Certification Intelligence never decides BUY / PASS.
-- Collector Intelligence consumes Certification Intelligence.
-- Strategies consume Collector Intelligence through configurable weights.
-- Negotiation consumes Strategy output.
-- Provider abstraction prepares PSA, BGS, CGC, TAG, SGC, and ARS without scraping or unofficial APIs.
+- Every Intelligence model answers exactly four questions.
+- Remove duplicate Summary and What This Means sections.
+- Explain confidence whenever it is below High.
+- Persist expanded tile state for the current session.
+- Keep Atlas as the exclusive owner of implementation details.
 
 ## Near-Term Roadmap
 

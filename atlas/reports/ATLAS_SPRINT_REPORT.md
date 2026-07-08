@@ -2,37 +2,31 @@
 
 ## Sprint
 
-Sprint 24 - Certification Intelligence Platform
+Sprint 24.2 - Final Intelligence Console
 
 ## Summary
 
-Added Certification Intelligence as a first-class Asset Intelligence model and synchronized Atlas with the new provider abstraction, dependency graph, architecture graph, backlog, and technical debt.
+Finalized the Intelligence Console presentation contract while preserving business engines and Intelligence calculations.
 
 ## Goal
 
-Record Sprint 24 Certification Intelligence architecture while preserving existing application workflows.
+Remove redundant production sections, make confidence model-specific and self-explaining, and add session-scoped expanded tile memory.
 
 ## Files Added
 
-- `lib/intelligence/certification/CertificationEngine.ts`
-- `lib/intelligence/certification/CertificationProvider.ts`
-- `lib/intelligence/certification/CertificationProfile.ts`
-- `lib/intelligence/certification/CertificationIndicator.ts`
-- `lib/intelligence/certification/CertificationRegistry.ts`
-- `lib/intelligence/certification/CertificationTrend.ts`
-- `lib/intelligence/certification/CertificationSource.ts`
-- `tests/certification-intelligence.test.ts`
+- None.
 
 ## Files Modified
 
-- Asset Intelligence Framework, Indicator Registry, Indicator Factory, Card Intelligence, Intelligence Console, tests, docs, and Atlas files.
+- Intelligence Console components.
+- Intelligence Console tests.
+- Sprint documentation and Atlas files.
 
 ## Architecture Changes
 
-- Certification Intelligence now sits before Collector Intelligence in the intelligence dependency graph.
-- Provider abstraction is separate from Identity Providers and Market Providers.
-- Placeholder PSA, BGS, and CGC summaries expose certification characteristics without external calls.
-- Future providers register through `CertificationRegistry`.
+- Expanded Intelligence tiles now display Grade/Confidence, Business Conclusion, Key Signals, and Supporting Evidence only.
+- Confidence below High now includes a business-facing reason.
+- Expanded model id persists in session storage.
 
 ## Documentation Updated
 
@@ -43,31 +37,29 @@ Record Sprint 24 Certification Intelligence architecture while preserving existi
 - DECISIONS
 - AGENT_HANDOFF
 - PROMPTS
+- ATLAS
 - Atlas backlog, project knowledge, architecture snapshot, and sprint report
 
 ## Technical Debt
 
-- Certification population, gem population, gem rate, population trend, and submission saturation are placeholders.
-- Certification premium is metadata-based until official graded sales providers exist.
-- Provider health diagnostics are not implemented yet.
+- Automated browser assertions for expanded tile memory are still future work.
+- Supporting Evidence is still composed in the UI layer rather than a reusable presentation adapter.
 
 ## Known Issues
 
-- No official certification population provider is connected.
-- No scraping or unofficial API path exists by design.
+- Raw Node test runner still cannot resolve `@/` aliases without a project test harness.
 
 ## Tests Added
 
-- Certification Intelligence tests cover Chrome Mox, Black Lotus, Textless Urza's Saga, serialized examples, Masterpieces, and Judge Promos.
-- Framework tests cover Certification model registration.
+- Confidence label mapping coverage remains in Intelligence Console tests.
 
 ## Build Status
 
 - `npm run lint`: passed.
 - `npx tsc --noEmit`: passed.
 - `npm run build`: passed after allowing Next.js to fetch Google font assets.
-- `node --test tests/*.test.ts`: blocked by existing `@/` path alias resolution in the raw Node test runner before assertions execute.
+- Production Intelligence Console implementation-term scan: passed.
 
 ## Suggested Next Sprint
 
-Connect official certification providers when permitted, then add cross-grading and population growth indicators.
+Add browser-level checks for final Intelligence Console section order and expansion memory.

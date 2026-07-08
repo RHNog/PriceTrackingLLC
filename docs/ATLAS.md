@@ -2,6 +2,48 @@
 
 Atlas is the permanent project knowledge base for PriceTrackingLLC.
 
+## Sprint 24.2 Synchronization
+
+Final Intelligence Console UI Contract:
+
+- Grade
+- Model-specific Confidence
+- Business Conclusion
+- Key Signals
+- Supporting Evidence
+
+Rules:
+
+- Summary and What This Means are removed from production panels.
+- Confidence below High must include a plain-language reason.
+- Key Signals are limited to four items.
+- Supporting Evidence contains factual support only.
+- Expanded tile state persists for the current browser session.
+- Atlas remains the exclusive owner of implementation details.
+
+## Sprint 24.1 Synchronization
+
+Layered Information Architecture:
+
+- Layer 1: Decision
+- Layer 2: Explanation
+- Layer 3: Evidence
+- Layer 4: Implementation
+
+Vendor Workspace owns Layers 1-3.
+
+Atlas Inspector owns Layer 4:
+
+- Provider Health
+- Provider Status
+- Version
+- Implementation Details
+- Future Dependencies
+- Internal Signals
+- Debug Information
+
+Nothing is lost. Implementation details are relocated out of production UI.
+
 ## Sprint 24 Synchronization
 
 Certification Intelligence is registered as a first-class Asset Intelligence model.

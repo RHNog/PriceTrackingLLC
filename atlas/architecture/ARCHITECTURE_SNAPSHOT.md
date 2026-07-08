@@ -62,6 +62,10 @@ Certification dependency graph: Certification Intelligence -> Collector Intellig
 
 Future certification providers: PSA, BGS, CGC, TAG, SGC, and ARS through `CertificationRegistry`.
 
+Information architecture rule: Vendor Workspace displays Decision, Explanation, and Evidence. Atlas Inspector displays Implementation details.
+
+Final Intelligence Console rule: expanded panels display Grade/Confidence, Business Conclusion, Key Signals, and Supporting Evidence only.
+
 ## Workflows
 
 - Vendor Workflow Machine.

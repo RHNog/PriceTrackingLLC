@@ -8,6 +8,14 @@ Dependency rule:
 
 Certification Intelligence -> Collector Intelligence -> Strategy -> Negotiation Ladder -> Decision Resolver.
 
+Sprint 24.1 adds layered Intelligence Console presentation.
+
+Vendor Workspace shows Decision, Explanation, and Evidence. Atlas Inspector shows Implementation details such as provider status, versions, health, internal signals, future dependencies, and debug information.
+
+Sprint 24.2 finalizes the Intelligence Console UI contract.
+
+Expanded tiles show Grade/Confidence, Business Conclusion, Key Signals, and Supporting Evidence only. Confidence below High includes a business-facing reason, and expanded tile state persists for the current session.
+
 ## Current Architecture
 
 PriceTrackingLLC is a Next.js, TypeScript, and Tailwind CSS application for professional trading-card buying decisions.

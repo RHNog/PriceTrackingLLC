@@ -625,6 +625,7 @@ export default function VendorWorkspace({
       {isDeveloperMode && process.env.NODE_ENV === "development" ? (
         <AtlasInspector
           assetValidation={assetValidation}
+          cardProfile={pipelineCardProfile}
           isMarketLoading={isMarketLoading}
           marketSnapshot={activeMarketSnapshot}
           query={query}

@@ -2,6 +2,26 @@
 
 This file summarizes major prompts and architectural instructions. It intentionally avoids copying every prompt in full.
 
+## Sprint 24.2
+
+Purpose: finalize Intelligence Console presentation without layout redesign, business logic changes, or intelligence calculation changes.
+
+Core instruction: every Intelligence model should answer what it thinks, how certain it is, why, and what evidence supports it.
+
+Major files affected: Intelligence Console components, tests, and Atlas documentation.
+
+Result: redundant Summary and What This Means sections removed, confidence is model-specific and explained below High, Key Signals and Supporting Evidence are final labels, and expanded tile state persists for the current session.
+
+## Sprint 24.1
+
+Purpose: redesign Intelligence Console information architecture without changing business engines or intelligence calculations.
+
+Core instruction: production users should see business conclusions, not implementation details.
+
+Major files affected: Intelligence Console components, Atlas Inspector, tests, and documentation.
+
+Result: Vendor Workspace shows model name, grade, confidence label, business conclusion, supporting indicators, and evidence. Atlas Inspector retains versions, health, status, future dependencies, internal signals, debug information, and provider matrix.
+
 ## Sprint 24
 
 Purpose: introduce the Certification Intelligence Platform.

@@ -34,6 +34,9 @@ Decision Resolver should remain deterministic after receiving a validated Offer 
 - Certification Intelligence measures collectible certification characteristics only.
 - Certification Provider data must enter through `CertificationRegistry`.
 - Collector Intelligence consumes Certification Intelligence before strategies interpret collector value.
+- Vendor Workspace owns Intelligence layers 1-3: Decision, Explanation, and Evidence.
+- Atlas Inspector owns Intelligence layer 4: Implementation.
+- Final Intelligence Console panels use Grade/Confidence, Business Conclusion, Key Signals, and Supporting Evidence only.
 - Offer Ladder Validator blocks invalid negotiation math before Decision Resolver executes.
 
 ## Permanent Rules
@@ -63,3 +66,54 @@ Technical debt:
 
 - Population, gem population, gem rate, population trend, and submission saturation remain placeholders.
 - Estimated premium is metadata-based until official graded-market providers exist.
+
+## Sprint 24.1 Knowledge
+
+Layered Information Architecture:
+
+- Layer 1: Decision
+- Layer 2: Explanation
+- Layer 3: Evidence
+- Layer 4: Implementation
+
+Vendor Information Model:
+
+- Model name
+- Grade
+- Confidence label
+- Summary
+- Business conclusion
+- Primary supporting indicators
+- Evidence
+
+Atlas Information Model:
+
+- Numeric confidence
+- Version
+- Health
+- Status
+- Internal sources
+- Future dependencies
+- Internal signals
+- Provider status
+- Provider matrix
+- Debug information
+
+## Sprint 24.2 Knowledge
+
+Final Intelligence Console UI Contract:
+
+- Grade
+- Model-specific Confidence
+- Business Conclusion
+- Key Signals
+- Supporting Evidence
+
+Production rules:
+
+- Remove duplicate Summary and What This Means sections.
+- Confidence below High always explains itself.
+- Key Signals are limited to four items.
+- Supporting Evidence is factual.
+- Expanded tile memory is session-scoped.
+- Atlas owns implementation details.

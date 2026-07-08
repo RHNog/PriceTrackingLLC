@@ -55,6 +55,35 @@ export function getIntelligenceGrade(score: number): IntelligenceGrade {
   return "F";
 }
 
+export type IntelligenceConfidenceLabel =
+  | "Very Low"
+  | "Low"
+  | "Moderate"
+  | "High"
+  | "Very High";
+
+export function getConfidenceLabel(
+  confidence: number,
+): IntelligenceConfidenceLabel {
+  if (confidence >= 85) {
+    return "Very High";
+  }
+
+  if (confidence >= 70) {
+    return "High";
+  }
+
+  if (confidence >= 50) {
+    return "Moderate";
+  }
+
+  if (confidence >= 30) {
+    return "Low";
+  }
+
+  return "Very Low";
+}
+
 export default function IntelligenceGradeBadge({ score }: { score: number }) {
   return (
     <span className="inline-flex h-7 min-w-9 items-center justify-center rounded-md border border-cyan-400/30 bg-cyan-400/10 px-2 text-sm font-semibold text-cyan-200">
@@ -62,4 +91,3 @@ export default function IntelligenceGradeBadge({ score }: { score: number }) {
     </span>
   );
 }
-

@@ -4,6 +4,10 @@
 
 ### Added
 
+- Sprint 24.2 finalized Intelligence Console UI contract documentation.
+- Expansion memory, model-specific confidence labels, confidence reason rules, and final section order documentation.
+- Sprint 24.1 layered Intelligence Console documentation.
+- Vendor vs Atlas responsibility split for Decision, Explanation, Evidence, and Implementation layers.
 - Sprint 24 Certification Intelligence Platform documentation.
 - Certification Intelligence philosophy, Provider abstraction, Certification Profile, Collector integration, future provider roadmap, dependency graph, architecture graph, backlog, and technical debt documentation.
 - Sprint 23.2 Pipeline Integrity documentation.
@@ -55,6 +59,10 @@
 
 ### Changed
 
+- Current sprint updated to Sprint 24.2.
+- Intelligence Console documentation now removes redundant Summary and What This Means layers.
+- Intelligence Console documentation now treats implementation details as Atlas-only developer information.
+- Current sprint updated to Sprint 24.1.
 - Current sprint updated to Sprint 24.
 - Documentation now treats Certification Intelligence as a first-class measurement model consumed by Collector Intelligence.
 - Current sprint updated to Sprint 23.2.

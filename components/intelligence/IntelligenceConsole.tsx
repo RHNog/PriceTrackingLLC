@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import IntelligenceDetail from "@/components/intelligence/IntelligenceDetail";
+import { getConfidenceLabel } from "@/components/intelligence/IntelligenceGrade";
 import IntelligenceTile from "@/components/intelligence/IntelligenceTile";
 import type { CardProfile } from "@/lib/engines/cardIntelligence/models/CardProfile";
 import type { IntelligenceModel } from "@/lib/intelligence/framework/IntelligenceModel";
@@ -9,6 +10,8 @@ import type { IntelligenceModel } from "@/lib/intelligence/framework/Intelligenc
 type IntelligenceConsoleProps = {
   cardProfile: CardProfile;
 };
+
+const expandedModelStorageKey = "pricetracking:intelligence-console:expanded-model";
 
 function averageIndicatorScore(model: IntelligenceModel) {
   if (model.indicators.length === 0) {
@@ -23,10 +26,32 @@ function averageIndicatorScore(model: IntelligenceModel) {
   return Math.round(total / model.indicators.length);
 }
 
+function getPresentationScore(cardProfile: CardProfile, model: IntelligenceModel) {
+  if (model.id === "certification-intelligence") {
+    return cardProfile.certificationProfile.overallGrade;
+  }
+
+  return averageIndicatorScore(model);
+}
+
 export default function IntelligenceConsole({
   cardProfile,
 }: IntelligenceConsoleProps) {
-  const [expandedModelId, setExpandedModelId] = useState<string | null>(null);
+  const [expandedModelId, setExpandedModelId] = useState<string | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    return window.sessionStorage.getItem(expandedModelStorageKey);
+  });
+
+  useEffect(() => {
+    if (expandedModelId) {
+      window.sessionStorage.setItem(expandedModelStorageKey, expandedModelId);
+    } else {
+      window.sessionStorage.removeItem(expandedModelStorageKey);
+    }
+  }, [expandedModelId]);
 
   return (
     <section
@@ -38,13 +63,13 @@ export default function IntelligenceConsole({
           Intelligence Console
         </h3>
         <p className="text-xs text-zinc-500">
-          Confidence {cardProfile.overallConfidence}%
+          Confidence {getConfidenceLabel(cardProfile.overallConfidence)}
         </p>
       </div>
 
       <div className="mt-3 grid gap-2">
         {cardProfile.intelligenceModels.map((model) => {
-          const score = averageIndicatorScore(model);
+          const score = getPresentationScore(cardProfile, model);
           const isExpanded = expandedModelId === model.id;
 
           return (
@@ -73,4 +98,3 @@ export default function IntelligenceConsole({
     </section>
   );
 }
-

@@ -2,6 +2,10 @@
 
 ## Major Product And Architecture Decisions
 
+0.2. Final Intelligence Console panels answer exactly four questions: grade/confidence, business conclusion, key signals, and supporting evidence.
+
+0.1. Intelligence Console presentation is layered. Vendor Workspace shows Decision, Explanation, and Evidence; Atlas Inspector owns Implementation details.
+
 0. Certification Intelligence measures collectible characteristics only. It does not decide BUY, NEGOTIATE, PASS, or offer values. Collector Intelligence consumes Certification Intelligence; Strategies consume Collector Intelligence; Negotiation consumes Strategies.
 
 1. PriceTrackingLLC is not a price tracker. It is a decision platform.
@@ -27,6 +31,41 @@ Consequences:
 - Scraping and unofficial APIs are prohibited.
 - Collector Intelligence may consume normalized Certification Profile output.
 - Strategies keep using configurable signal weights.
+
+## Sprint 24.1 - Vendor vs Atlas Information Ownership
+
+Decision:
+
+Production Intelligence Console hides implementation details by default.
+
+Rationale:
+
+Vendor Workspace is for business conclusions during buying. Atlas is the developer surface for framework health, provider readiness, versions, internal signals, and diagnostics.
+
+Consequences:
+
+- Numeric confidence remains internal but production displays confidence labels.
+- Tiles display only name, grade, confidence label, and expand affordance.
+- Expanded model panels prioritize summary, business conclusion, confidence, supporting indicators, and evidence.
+- Version, health, status, provider matrix, internal sources, and future dependencies are Atlas-only.
+
+## Sprint 24.2 - Final Intelligence Console Contract
+
+Decision:
+
+Expanded Intelligence tiles use only four sections: Grade/Confidence, Business Conclusion, Key Signals, and Supporting Evidence.
+
+Rationale:
+
+Summary and What This Means repeated the same conclusion in different words. The console should communicate business conclusions quickly during buying.
+
+Consequences:
+
+- Confidence labels are model-specific.
+- Confidence below High must include a plain-language reason.
+- Key Signals are limited to four items.
+- Supporting Evidence contains factual support only.
+- Expanded tile state persists for the current browser session.
 
 4. Search became the Query Engine. The system interprets intent instead of only matching text.
 

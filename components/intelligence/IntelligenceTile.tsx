@@ -1,4 +1,6 @@
-import IntelligenceGradeBadge from "@/components/intelligence/IntelligenceGrade";
+import IntelligenceGradeBadge, {
+  getConfidenceLabel,
+} from "@/components/intelligence/IntelligenceGrade";
 import type { IntelligenceModel } from "@/lib/intelligence/framework/IntelligenceModel";
 
 type IntelligenceTileProps = {
@@ -30,7 +32,7 @@ export default function IntelligenceTile({
       </span>
       <IntelligenceGradeBadge score={score} />
       <span className="min-w-12 text-right text-sm font-semibold text-zinc-300">
-        {model.confidence}%
+        {getConfidenceLabel(model.confidence)}
       </span>
       <span
         aria-hidden="true"
@@ -41,4 +43,3 @@ export default function IntelligenceTile({
     </button>
   );
 }
-

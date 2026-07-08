@@ -10,6 +10,8 @@
 
 ## Medium Priority
 
+- Add automated UI assertions that Vendor Workspace Intelligence panels contain no implementation terminology.
+- Add automated UI assertions for expanded Intelligence tile session memory.
 - Add Certification provider health diagnostics for PSA, BGS, CGC, TAG, SGC, and ARS.
 - Add Certification cross-grading and population growth indicators.
 - Generate dependency graphs for engines, providers, intelligence models, workflows, and UI boundaries.
@@ -33,6 +35,7 @@
 ## Future Platforms
 
 - Atlas Architecture Graph.
+- Atlas Intelligence Implementation Ledger.
 - Atlas Sprint Autowriter.
 - Atlas Risk Radar.
 - Atlas Documentation Freshness Monitor.
