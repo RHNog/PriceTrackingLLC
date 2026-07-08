@@ -193,3 +193,13 @@ Intelligence History Platform.
 Introduced append-only evaluation history for completed purchase evaluations. Every `READY` evaluation can produce an immutable `EvaluationSnapshot` containing Asset Context generation, identity, printing, variant, condition, Market Context, Buying Strategy, Market Estimate, Offer Ladder, Decision, confidence, and Card Intelligence indicators.
 
 Added `EvaluationHistoryEngine`, `HistoryRepository`, `SnapshotFactory`, and `SnapshotValidator`. Current persistence is local and append-only, with future paths for database storage, analytics, backtesting, strategy replay, market replay, signal validation, simulation, personal buying history, and portfolio tracking.
+
+## Sprint 22
+
+Playability Intelligence Platform.
+
+Introduced `lib/intelligence/playability/` as the first reusable intelligence model that explains why a card has play demand. Playability now has an engine, provider abstraction, provider registry, profile contract, indicator contract, trend contract, and source contract.
+
+The first provider is `ScryfallPlayabilityProvider`, which consumes normalized Scryfall legalities from domain `Card` objects. It produces format indicators for Commander, Modern, Legacy, Vintage, Pioneer, Standard, Pauper, Explorer, and Canadian Highlander, while deck penetration, metagame stability, and trend remain provider-ready placeholders.
+
+`CardProfile` now exposes `playabilityProfile`, Asset Intelligence registers Playability as a live model, the Playability signal consumes profile output, strategies consume the signal through configurable weights, and Vendor Workspace displays tier, format legalities, trend, ban status, and future deck penetration readiness.

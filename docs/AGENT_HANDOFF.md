@@ -8,9 +8,11 @@ It helps trading-card buyers discover opportunities, evaluate in-person purchase
 
 ## Current Development Phase
 
-Current sprint: Sprint 20.1, Vendor Workflow Stabilization.
+Current sprint: Sprint 22, Playability Intelligence Platform.
 
 The app now evaluates a selected card through deterministic Vendor Workflow states, Card Profile, Asset Intelligence models, condition-adjusted market context, strategy-weighted signals, Negotiation Ladder, and deterministic Decision Resolver output.
+
+Playability Intelligence now measures why a card has play demand. It is registered in the Asset Intelligence Framework, backed first by Scryfall legalities, exposed on `CardProfile.playabilityProfile`, and consumed by strategies through configurable `Playability` signal weights.
 
 ## What Has Been Built?
 
@@ -32,6 +34,9 @@ The app now evaluates a selected card through deterministic Vendor Workflow stat
 - Decision Drivers Engine
 - Card Intelligence Engine
 - Asset Intelligence Framework
+- Playability Intelligence Platform
+- Playability Provider Registry
+- Scryfall Playability Provider using legalities
 - Intelligence Model registry
 - Indicator registry
 - Signal Registry
@@ -62,6 +67,8 @@ The app now evaluates a selected card through deterministic Vendor Workflow stat
 - Variant policy vs UI selection separation
 - Decision driver engine vs presentation copy separation
 - Card Intelligence vs recommendation separation
+- Playability vs recommendation separation
+- Playability Provider abstraction and registry
 - Asset Intelligence model contract
 - Indicator contract and status metadata
 - Negotiation Ladder vs Decision Resolver separation
@@ -89,8 +96,10 @@ The app now evaluates a selected card through deterministic Vendor Workflow stat
 - Scryfall prices are daily estimates and must not be treated as live inventory.
 - Do not invent lowest listing, recent sale, or buylist values.
 - Card Intelligence must not negotiate.
+- Playability must not negotiate or decide BUY / PASS.
 - Future intelligence must be registered as an Asset Intelligence model, not built as an isolated scoring engine.
 - Strategies must not read provider data directly.
+- Strategies may consume Playability only through normalized signal/model outputs and configured weights.
 - Negotiation Ladder owns opening offer, target offer, maximum buy price, and walk-away price.
 - Offer Ladder Validator must approve the ladder before Decision Resolver executes.
 - Decision Resolver must return BUY at or below target, NEGOTIATE between target and maximum buy price, and PASS above maximum buy price.
@@ -154,4 +163,4 @@ No sprint is complete until documentation is updated.
 
 ## Suggested Next Step
 
-Market Provider v2 should add true live listings or recent sales from a marketplace-specific provider while preserving normalized `MarketSnapshot` output. Future intelligence work should register models in the Asset Intelligence Framework without changing the Asset Intelligence → Strategy → Negotiation Ladder → Offer Ladder Validation → Decision Resolver contract. Future Condition Intelligence may estimate missing provider condition values only when provider data is unavailable, and provider data must always win. Vendor Workflow follow-up should persist Atlas Inspector snapshots, add richer ARIA active-descendant keyboard focus, and generalize Asset Context plus Workflow Command processing for future workspaces. Evaluation History is now the input for future backtesting, simulation, strategy replay, evaluation replay, Market Context replay, signal validation, personal buying history, and portfolio tracking.
+Next Playability work should add official provider integrations for EDHREC-style deck penetration, MTGGoldfish-style format popularity, and Melee / MTGO / Top8 competitive results without scraping. Market Provider v2 should add true live listings or recent sales from a marketplace-specific provider while preserving normalized `MarketSnapshot` output. Future intelligence work should register models in the Asset Intelligence Framework without changing the Asset Intelligence → Strategy → Negotiation Ladder → Offer Ladder Validation → Decision Resolver contract. Evaluation History is now the input for future backtesting, simulation, strategy replay, evaluation replay, Market Context replay, signal validation, personal buying history, and portfolio tracking.

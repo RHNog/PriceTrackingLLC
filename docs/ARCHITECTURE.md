@@ -702,6 +702,89 @@ Future Simulation Platform:
 
 The Simulation Platform should consume immutable snapshots for backtesting, strategy replay, market replay, signal validation, buying history analysis, and portfolio tracking. It should not mutate old snapshots or recalculate historical recommendations in place.
 
+## Playability Intelligence Platform
+
+Playability Intelligence measures play demand. It does not choose BUY, NEGOTIATE, PASS, opening offers, target offers, or maximum buy prices.
+
+Source files:
+
+- `lib/intelligence/playability/PlayabilityEngine.ts`
+- `lib/intelligence/playability/PlayabilityProvider.ts`
+- `lib/intelligence/playability/PlayabilityRegistry.ts`
+- `lib/intelligence/playability/PlayabilityProfile.ts`
+- `lib/intelligence/playability/PlayabilityIndicator.ts`
+- `lib/intelligence/playability/PlayabilityTrend.ts`
+- `lib/intelligence/playability/PlayabilitySource.ts`
+
+Profile formats:
+
+- Overall
+- Commander
+- Modern
+- Legacy
+- Vintage
+- Pioneer
+- Standard
+- Pauper
+- Explorer
+- Canadian Highlander
+
+Each format indicator exposes score, confidence, trend, availability, data source, legal / restricted / banned / unknown status, last updated timestamp, meta stability, deck penetration readiness, and explanation.
+
+Provider graph:
+
+Playability Intelligence
+
+↓
+
+Playability Engine
+
+↓
+
+Playability Provider Registry
+
+↓
+
+Scryfall Playability Provider
+
+↓
+
+Future providers: EDHREC, MTGGoldfish, Melee, MTGO, Top8
+
+Runtime graph:
+
+Scryfall Legalities
+
+↓
+
+Normalized Card
+
+↓
+
+Playability Profile
+
+↓
+
+Card Profile
+
+↓
+
+Asset Intelligence Framework Indicators
+
+↓
+
+Strategy Signal Weights
+
+↓
+
+Negotiation Ladder
+
+↓
+
+Decision Resolver
+
+Architecture rule: provider data can improve Playability confidence and indicators, but Playability must remain an input to strategies only.
+
 ## Engine Rules
 
 - Business engines must remain provider-independent.
@@ -720,6 +803,7 @@ The Simulation Platform should consume immutable snapshots for backtesting, stra
 - Card Intelligence must not negotiate or choose BUY / PASS.
 - Intelligence models must not make decisions.
 - Future intelligence must use the Asset Intelligence Framework contract.
+- Playability must measure play demand only and must not negotiate or decide BUY / PASS.
 - Negotiation Ladder owns negotiation guidance.
 - Offer Ladder Validator validates negotiation output before Decision Resolver execution.
 - Decision Resolver compares asking price against the Negotiation Ladder.

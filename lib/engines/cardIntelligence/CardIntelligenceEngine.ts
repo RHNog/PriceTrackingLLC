@@ -1,6 +1,7 @@
 import { generateSignals } from "@/lib/engines/cardIntelligence/SignalEngine";
 import type { CardProfile } from "@/lib/engines/cardIntelligence/models/CardProfile";
 import { createAssetIntelligenceModels } from "@/lib/intelligence/framework/AssetIntelligenceFramework";
+import { createPlayabilityProfile } from "@/lib/intelligence/playability/PlayabilityEngine";
 import type { Card } from "@/types/card";
 import type { ConditionProfile } from "@/types/conditionProfile";
 import type { ConditionMarketSnapshot } from "@/types/conditionMarketSnapshot";
@@ -26,7 +27,8 @@ function calculateOverallConfidence(signals: { confidence: number }[]) {
 }
 
 export function createCardProfile(input: CardIntelligenceInput): CardProfile {
-  const signals = generateSignals(input);
+  const playabilityProfile = createPlayabilityProfile(input.printing);
+  const signals = generateSignals({ ...input, playabilityProfile });
   const baseProfile = {
     identity: {
       id: input.printing.name.toLowerCase(),
@@ -39,6 +41,7 @@ export function createCardProfile(input: CardIntelligenceInput): CardProfile {
     marketContext: input.marketContext,
     marketContextSnapshot: input.marketContextSnapshot,
     signals,
+    playabilityProfile,
     intelligenceModels: [],
     overallConfidence: calculateOverallConfidence(signals),
     generatedAt: new Date().toISOString(),

@@ -9,6 +9,12 @@ The format is inspired by "Keep a Changelog".
 ## [Unreleased]
 
 ### Added
+- Sprint 22 Playability Intelligence Platform.
+- `lib/intelligence/playability/` with Playability Engine, Provider abstraction, Registry, Profile, Indicator, Trend, and Source contracts.
+- `ScryfallPlayabilityProvider` using Scryfall legalities as the first provider-backed playability source.
+- Playability Profile with Overall, Commander, Modern, Legacy, Vintage, Pioneer, Standard, Pauper, Explorer, and Canadian Highlander format indicators.
+- Playability indicators for overall playability, Commander strength, competitive strength, casual strength, ban risk, format diversity, meta stability, trend, and future deck penetration.
+- Playability regression coverage for Chrome Mox, Sol Ring, Lightning Bolt, Black Lotus, Counterspell, and Collected Company.
 - Sprint 21 Intelligence History Platform.
 - Evaluation Snapshot, Asset Snapshot, Market Snapshot History, Strategy Snapshot, and Offer Ladder Snapshot types.
 - Evaluation History Engine, History Repository, Snapshot Factory, and Snapshot Validator.
@@ -70,6 +76,12 @@ The format is inspired by "Keep a Changelog".
 - Architecture, roadmap, decision, product spec, prompt history, and documentation changelog files.
 
 ### Changed
+- Playability Intelligence is now a live registered Asset Intelligence model with provider dependency graph metadata.
+- Scryfall card adaptation now preserves legalities for normalized domain cards.
+- Card Profile now exposes `playabilityProfile` alongside signals and framework intelligence models.
+- The Playability signal now consumes Playability Profile output instead of a fixed placeholder score.
+- Vendor Workspace Card Profile panel now displays playability tier, format legalities, trend, ban status, and deck penetration readiness.
+- Seed strategies now consume Playability through configurable signal weights.
 - Completed Vendor Workspace evaluations now create immutable historical intelligence snapshots without changing current UX.
 - Condition changes now dispatch `ChangeCondition`, create a new Asset Context generation, and request a fresh Market Snapshot.
 - `LoadMarketSnapshot` commands now carry Asset Context generation to reject slow responses from older generations.
@@ -132,6 +144,7 @@ The format is inspired by "Keep a Changelog".
 - Clear low-confidence identity candidates can now load printing candidates instead of leaving Vendor Workspace stuck at an identity row.
 
 ### Documented
+- Sprint 22 Playability Intelligence Platform, provider abstraction, format indicators, strategy integration, provider roadmap, dependency graph, backlog, and technical debt.
 - Sprint 21 Intelligence History Platform, immutable history, evaluation snapshot lifecycle, repository abstraction, and future Simulation Platform.
 - Sprint 20.6 regression recovery, Market Provider precedence, condition pricing lifecycle, Asset Context integration, and future Condition Intelligence hooks.
 - Sprint 20.5 Asset Context, context generation, context integrity, Atlas Inspector, Developer Mode, stale-reference invariants, and context-validation backlog.

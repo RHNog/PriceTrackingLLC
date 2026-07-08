@@ -6,6 +6,7 @@ import type {
   Signal,
   SignalName,
 } from "@/lib/engines/cardIntelligence/models/Signal";
+import type { PlayabilityProfile } from "@/lib/intelligence/playability/PlayabilityProfile";
 import type { Card } from "@/types/card";
 import type { ConditionProfile } from "@/types/conditionProfile";
 import type { ConditionMarketSnapshot } from "@/types/conditionMarketSnapshot";
@@ -18,6 +19,7 @@ type SignalFactoryInput = {
   condition: ConditionProfile;
   marketContext: MarketContext;
   marketContextSnapshot: ConditionMarketSnapshot;
+  playabilityProfile?: PlayabilityProfile;
 };
 
 function clampScore(score: number) {
@@ -105,7 +107,9 @@ function scoreSignal(
     Volatility: 50,
     Scarcity: rarityScore * 0.5 + collectorScore * 0.5,
     Demand: 68,
-    Playability: input.printing.game === "Magic" ? 72 : 60,
+    Playability:
+      input.playabilityProfile?.overall.score ??
+      (input.printing.game === "Magic" ? 45 : 0),
     ReprintRisk: collectorScore >= 90 ? 25 : 55,
     MarketConfidence: marketConfidence,
     HistoricalStability: 50,
@@ -149,6 +153,11 @@ function getContributingFactors(
     MarketConfidence: [
       `${input.marketContextSnapshot.selectedPrice.confidence}% market confidence`,
     ],
+    Playability: [
+      input.playabilityProfile?.tier ?? "Unknown playability tier",
+      input.playabilityProfile?.overall.explanation ??
+        "Playability provider data unavailable",
+    ],
     ReprintRisk: [
       input.printing.productFamily ?? "No special product family",
     ],
@@ -165,24 +174,37 @@ export function createSignal(
   input: SignalFactoryInput,
 ): Signal {
   const score = scoreSignal(definition.name, input);
+  const isPlayability = definition.name === "Playability";
+  const playabilityProfile = input.playabilityProfile;
 
   return {
     name: definition.name,
     label: definition.label,
     score,
     confidence:
-      definition.status === "future"
+      isPlayability && playabilityProfile
+        ? playabilityProfile.overall.confidence
+        : definition.status === "future"
         ? 10
         : definition.status === "placeholder"
           ? 40
           : input.marketContextSnapshot.selectedPrice.confidence,
     version: definition.version,
     contributingFactors: getContributingFactors(definition, input),
-    supportingDataSources: definition.supportingDataSources,
+    supportingDataSources:
+      isPlayability && playabilityProfile
+        ? [playabilityProfile.overall.dataSource]
+        : definition.supportingDataSources,
     generatedAt: new Date().toISOString(),
     source: definition.source,
-    explanation: explainSignal(definition, score),
-    status: definition.status,
+    explanation:
+      isPlayability && playabilityProfile
+        ? playabilityProfile.explanation
+        : explainSignal(definition, score),
+    status:
+      isPlayability && playabilityProfile?.overall.availability === "LIVE"
+        ? "live"
+        : definition.status,
   };
 }
 

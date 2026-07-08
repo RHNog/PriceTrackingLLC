@@ -120,6 +120,12 @@
 
 59. Future simulation, replay, and analytics systems consume Evaluation Snapshots instead of recalculating old recommendations in place.
 
+60. Playability Intelligence measures play demand only. It must never decide BUY, NEGOTIATE, PASS, opening offers, target offers, or maximum buy prices.
+
+61. Playability providers plug into `PlayabilityProvider` and `PlayabilityRegistry`; strategies consume normalized Playability outputs through configurable weights.
+
+62. Scryfall legalities are the first Playability provider source. EDHREC, MTGGoldfish, Melee, MTGO, and Top8 are future providers, not scraped data sources.
+
 ## Documentation Rule
 
 Every sprint must update:

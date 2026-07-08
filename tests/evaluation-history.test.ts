@@ -3,6 +3,7 @@ import test from "node:test";
 import type { ReadyPurchaseEvaluation } from "@/lib/engines/evaluation/evaluatePurchase";
 import { EvaluationHistoryEngine } from "@/lib/history/EvaluationHistoryEngine";
 import { HistoryRepository } from "@/lib/history/HistoryRepository";
+import { createPlayabilityProfile } from "@/lib/intelligence/playability/PlayabilityEngine";
 import type { AssetContext } from "@/types/AssetContext";
 import type { Card } from "@/types/card";
 import type { CardConditionCode } from "@/types/conditionProfile";
@@ -163,6 +164,7 @@ function createEvaluation(input: {
         },
       },
       overallConfidence: 90,
+      playabilityProfile: createPlayabilityProfile(input.printing),
       printing: input.printing,
       signals: [],
       variant: input.variant,

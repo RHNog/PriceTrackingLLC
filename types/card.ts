@@ -33,6 +33,7 @@ export interface Card {
   imageUrls?: CardImageUrls;
   identityRelationship?: IdentityRelationship;
   language?: string;
+  legalities?: Record<string, string>;
   productFamily?: string;
   promoTypes?: string[];
   releaseYear?: string;

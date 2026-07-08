@@ -271,3 +271,13 @@ Core instruction: never lose a completed evaluation. Every `READY` evaluation sh
 Major files affected: `types/EvaluationSnapshot.ts`, `types/AssetSnapshot.ts`, `types/MarketSnapshotHistory.ts`, `types/StrategySnapshot.ts`, `types/OfferLadderSnapshot.ts`, `lib/history/`, `features/vendor/components/PurchasePanel.tsx`, `tests/evaluation-history.test.ts`, `docs/`.
 
 Result: Evaluation History Engine, append-only repository abstraction, snapshot factory, snapshot validator, local completed-evaluation recording, snapshot regression tests, and Atlas documentation for future Simulation Platform work.
+
+## Sprint 22
+
+Purpose: introduce the Playability Intelligence Platform.
+
+Core instruction: PriceTrackingLLC should understand why a card is valuable from play demand. Playability measures only; strategies interpret it, the Negotiation Ladder consumes strategies, and the Decision Resolver consumes the ladder.
+
+Major files affected: `lib/intelligence/playability/`, `lib/intelligence/framework/`, `lib/engines/cardIntelligence/`, `lib/providers/identity/adapters/ScryfallAdapter.ts`, `features/vendor/components/CardProfilePanel.tsx`, `tests/playability-intelligence.test.ts`, `docs/`.
+
+Result: provider-ready Playability architecture, Scryfall legalities provider, format indicators, Card Profile integration, framework registration, strategy signal weighting, Vendor Workspace display, and provider roadmap.

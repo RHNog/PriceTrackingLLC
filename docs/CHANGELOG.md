@@ -4,6 +4,8 @@
 
 ### Added
 
+- Sprint 22 Playability Intelligence Platform documentation.
+- Playability provider abstraction, profile, format indicators, provider roadmap, dependency graph, backlog, and technical debt documentation.
 - Sprint 21 Intelligence History Platform documentation.
 - Evaluation Snapshot, immutable history, append-only repository, snapshot lifecycle, and future Simulation Platform documentation.
 - Sprint 20.6 condition-aware market pricing regression recovery documentation.
@@ -43,6 +45,8 @@
 
 ### Changed
 
+- Current sprint updated to Sprint 22.
+- Documentation now treats Playability as measurement consumed by strategies, not a decision engine.
 - Current sprint updated to Sprint 21.
 - Documentation now treats completed evaluations as append-only historical intelligence.
 - Current sprint updated to Sprint 20.6.

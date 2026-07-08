@@ -28,6 +28,9 @@
 - Vendor Workspace VX optimization
 - Card Intelligence Platform
 - Asset Intelligence Framework
+- Playability Intelligence Platform
+- Playability Provider Registry
+- Scryfall legalities as first Playability provider source
 - Condition Resolution
 - Market Context foundation
 - Negotiation Ladder Engine
@@ -39,23 +42,24 @@
 
 ## Current Sprint
 
-Sprint 21: Intelligence History Platform
+Sprint 22: Playability Intelligence Platform
 
 Goals:
 
-- Record completed evaluations as immutable historical intelligence.
-- Keep Vendor Workspace current-state focused while history records completed outcomes.
-- Add append-only repository abstraction for future database, cloud, and analytics storage.
-- Validate snapshots before persistence.
-- Prepare future Simulation Platform, Strategy Replay, Market Replay, and Signal Validation.
+- Explain why a card is valuable from play demand.
+- Keep Playability as measurement only, not BUY / PASS or negotiation logic.
+- Register Playability Intelligence in the Asset Intelligence Framework.
+- Add provider abstraction before integrating EDHREC, MTGGoldfish, Melee, MTGO, or Top8.
+- Use Scryfall legalities as the first live provider-backed input.
+- Surface Playability in Card Profile and strategy signal weights.
 
 ## Near-Term Roadmap
 
-Sprint 21: Live Hot Opportunities
+Sprint 23: Live Hot Opportunities
 
-Sprint 22: Live Marketplace Listings
+Sprint 24: Live Marketplace Listings
 
-Sprint 23: Printing Descriptor Engine
+Sprint 25: Printing Descriptor Engine
 
 ## Future Roadmap
 
@@ -65,6 +69,11 @@ Sprint 23: Printing Descriptor Engine
 - Market Context Engine
 - Asset Intelligence model health dashboard
 - Liquidity Engine
+- EDHREC Playability Provider
+- MTGGoldfish Playability Provider
+- Melee / MTGO / Top8 competitive metagame providers
+- Deck Penetration indicator implementation
+- Meta Stability and Trend provider implementation
 - Historical Analytics Engine
 - Regional valuation
 - Currency normalization

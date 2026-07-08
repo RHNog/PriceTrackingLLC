@@ -1,4 +1,5 @@
 import { createSignals } from "@/lib/engines/cardIntelligence/SignalFactory";
+import type { PlayabilityProfile } from "@/lib/intelligence/playability/PlayabilityProfile";
 import type { Card } from "@/types/card";
 import type { ConditionProfile } from "@/types/conditionProfile";
 import type { ConditionMarketSnapshot } from "@/types/conditionMarketSnapshot";
@@ -11,6 +12,7 @@ type SignalEngineInput = {
   condition: ConditionProfile;
   marketContext: MarketContext;
   marketContextSnapshot: ConditionMarketSnapshot;
+  playabilityProfile?: PlayabilityProfile;
 };
 
 export function generateSignals(input: SignalEngineInput) {

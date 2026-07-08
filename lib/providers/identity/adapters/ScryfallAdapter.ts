@@ -29,6 +29,7 @@ export type ScryfallCardResponse = {
   frame_effects?: string[];
   layout?: string;
   component?: string;
+  legalities?: Record<string, string>;
   promo_types?: string[];
   prices?: ScryfallPriceResponse;
   released_at?: string;
@@ -269,6 +270,7 @@ export function adaptScryfallCard(card: ScryfallCardResponse): Card | null {
       name: card.name,
     }),
     language: getLanguageName(normalized.language),
+    legalities: card.legalities,
     productFamily: card.set_name,
     promoTypes: card.promo_types ?? [],
     releaseYear: card.released_at?.slice(0, 4),

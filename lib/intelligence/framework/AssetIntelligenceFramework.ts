@@ -99,13 +99,32 @@ export const intelligenceModelRegistry: IntelligenceModelDefinition[] = [
     id: "playability-intelligence",
     name: "Playability Intelligence",
     version: "1.0.0",
-    status: "PLACEHOLDER",
-    indicatorIds: ["playability"],
-    inputs: ["Game Knowledge"],
-    outputs: ["playability"],
-    supportingSources: ["Future format providers"],
-    explanation: "Future model for format and deck demand.",
-    dependencyGraph: ["Playability Intelligence", "Format Data", "Future Providers"],
+    status: "LIVE",
+    indicatorIds: [
+      "playability",
+      "commander-strength",
+      "competitive-strength",
+      "casual-strength",
+      "ban-risk",
+      "format-diversity",
+      "meta-stability",
+      "playability-trend",
+    ],
+    inputs: ["Scryfall Legalities", "Card Metadata", "Future Format Providers"],
+    outputs: ["overall playability", "format indicators", "ban status", "trend readiness"],
+    supportingSources: ["Scryfall", "Future format providers"],
+    explanation:
+      "Measures play demand and format availability without deciding buy, pass, or negotiation behavior.",
+    dependencyGraph: [
+      "Playability Intelligence",
+      "Playability Engine",
+      "Playability Provider Registry",
+      "Scryfall Playability Provider",
+      "Future Providers",
+      "Strategy",
+      "Negotiation Ladder",
+      "Decision Resolver",
+    ],
   },
   {
     id: "grading-intelligence",
@@ -237,7 +256,11 @@ export function createAssetIntelligenceModels(
   cardProfile: Omit<CardProfile, "intelligenceModels">,
 ): IntelligenceModel[] {
   const indicators = indicatorRegistry.map((metadata) =>
-    createIndicator({ metadata, signals: cardProfile.signals }),
+    createIndicator({
+      metadata,
+      playabilityProfile: cardProfile.playabilityProfile,
+      signals: cardProfile.signals,
+    }),
   );
 
   return intelligenceModelRegistry.map((definition) => {

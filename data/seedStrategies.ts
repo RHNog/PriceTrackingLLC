@@ -67,6 +67,7 @@ export const seedStrategyProfiles: StrategyProfile[] = [
       FlipPotential: 0.2,
       Liquidity: 0.25,
       MarketConfidence: 0.2,
+      Playability: 0.05,
       Scarcity: 0.15,
     },
     constraints: {
@@ -92,6 +93,7 @@ export const seedStrategyProfiles: StrategyProfile[] = [
       FlipPotential: 0.3,
       Liquidity: 0.25,
       MarketConfidence: 0.15,
+      Playability: 0.05,
       Volatility: 0.1,
     },
     constraints: {
@@ -117,7 +119,7 @@ export const seedStrategyProfiles: StrategyProfile[] = [
       FlipPotential: 0.25,
       Liquidity: 0.3,
       MarketConfidence: 0.15,
-      Playability: 0.05,
+      Playability: 0.25,
     },
     constraints: {
       minimumProfit: 20,
@@ -142,6 +144,7 @@ export const seedStrategyProfiles: StrategyProfile[] = [
       HistoricalStability: 0.1,
       InvestmentPotential: 0.3,
       MarketConfidence: 0.15,
+      Playability: 0.15,
       ReprintRisk: 0.1,
       Scarcity: 0.15,
     },
@@ -170,6 +173,7 @@ export const seedStrategyProfiles: StrategyProfile[] = [
       InvestmentPotential: 0.15,
       Liquidity: 0.15,
       MarketConfidence: 0.2,
+      Playability: 0.05,
       Scarcity: 0.1,
     },
     constraints: {
