@@ -280,4 +280,4 @@ Core instruction: PriceTrackingLLC should understand why a card is valuable from
 
 Major files affected: `lib/intelligence/playability/`, `lib/intelligence/framework/`, `lib/engines/cardIntelligence/`, `lib/providers/identity/adapters/ScryfallAdapter.ts`, `features/vendor/components/CardProfilePanel.tsx`, `tests/playability-intelligence.test.ts`, `docs/`.
 
-Result: provider-ready Playability architecture, Scryfall legalities provider, format indicators, Card Profile integration, framework registration, strategy signal weighting, Vendor Workspace display, and provider roadmap.
+Result: provider-ready Playability architecture, Scryfall legalities provider, format indicators, Card Profile integration, framework registration, strategy signal weighting, Intelligence Console v2, reusable Intelligence Tiles, grade mapping, progressive disclosure, and provider roadmap.

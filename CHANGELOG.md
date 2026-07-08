@@ -9,6 +9,12 @@ The format is inspired by "Keep a Changelog".
 ## [Unreleased]
 
 ### Added
+- Intelligence Console v2 as the reusable presentation layer for Asset Intelligence models.
+- `components/intelligence/IntelligenceConsole.tsx`, `IntelligenceTile.tsx`, `IntelligenceDetail.tsx`, and `IntelligenceGrade.tsx`.
+- Intelligence grade mapping from internal numeric scores to A+ through F presentation grades.
+- Compact collapsed intelligence tiles with name, grade, confidence, and expand affordance.
+- Expanded intelligence detail panels with score, grade, confidence, version, status, summary, factors, sources, trend, future dependencies, and explanation.
+- Intelligence Console grade mapping regression coverage.
 - Sprint 22 Playability Intelligence Platform.
 - `lib/intelligence/playability/` with Playability Engine, Provider abstraction, Registry, Profile, Indicator, Trend, and Source contracts.
 - `ScryfallPlayabilityProvider` using Scryfall legalities as the first provider-backed playability source.
@@ -76,6 +82,10 @@ The format is inspired by "Keep a Changelog".
 - Architecture, roadmap, decision, product spec, prompt history, and documentation changelog files.
 
 ### Changed
+- Card Profile now renders the Intelligence Console instead of bespoke large indicator cards.
+- Intelligence model presentation now uses grades while preserving numeric scores internally.
+- Intelligence confidence remains visually separate from grade.
+- Intelligence Console expands one tile at a time by default.
 - Playability Intelligence is now a live registered Asset Intelligence model with provider dependency graph metadata.
 - Scryfall card adaptation now preserves legalities for normalized domain cards.
 - Card Profile now exposes `playabilityProfile` alongside signals and framework intelligence models.
@@ -144,6 +154,7 @@ The format is inspired by "Keep a Changelog".
 - Clear low-confidence identity candidates can now load printing candidates instead of leaving Vendor Workspace stuck at an identity row.
 
 ### Documented
+- Sprint 22 Intelligence Console v2, Intelligence Tile, grade mapping, confidence separation, and progressive disclosure.
 - Sprint 22 Playability Intelligence Platform, provider abstraction, format indicators, strategy integration, provider roadmap, dependency graph, backlog, and technical debt.
 - Sprint 21 Intelligence History Platform, immutable history, evaluation snapshot lifecycle, repository abstraction, and future Simulation Platform.
 - Sprint 20.6 regression recovery, Market Provider precedence, condition pricing lifecycle, Asset Context integration, and future Condition Intelligence hooks.

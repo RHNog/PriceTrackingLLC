@@ -28,6 +28,9 @@
 - Vendor Workspace VX optimization
 - Card Intelligence Platform
 - Asset Intelligence Framework
+- Intelligence Console v2
+- Intelligence Tile pattern
+- Intelligence grade mapping
 - Playability Intelligence Platform
 - Playability Provider Registry
 - Scryfall legalities as first Playability provider source
@@ -42,7 +45,7 @@
 
 ## Current Sprint
 
-Sprint 22: Playability Intelligence Platform
+Sprint 22: Playability Intelligence Platform and Intelligence Console v2
 
 Goals:
 
@@ -52,6 +55,8 @@ Goals:
 - Add provider abstraction before integrating EDHREC, MTGGoldfish, Melee, MTGO, or Top8.
 - Use Scryfall legalities as the first live provider-backed input.
 - Surface Playability in Card Profile and strategy signal weights.
+- Replace bespoke Card Profile intelligence cards with reusable collapsed Intelligence Tiles.
+- Present scores as grades while keeping confidence separate.
 
 ## Near-Term Roadmap
 
@@ -68,6 +73,7 @@ Sprint 25: Printing Descriptor Engine
 - Currency engine
 - Market Context Engine
 - Asset Intelligence model health dashboard
+- Intelligence Console keyboard and visual regression coverage
 - Liquidity Engine
 - EDHREC Playability Provider
 - MTGGoldfish Playability Provider

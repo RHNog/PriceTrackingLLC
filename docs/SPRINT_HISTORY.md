@@ -196,10 +196,12 @@ Added `EvaluationHistoryEngine`, `HistoryRepository`, `SnapshotFactory`, and `Sn
 
 ## Sprint 22
 
-Playability Intelligence Platform.
+Playability Intelligence Platform and Intelligence Console v2.
 
 Introduced `lib/intelligence/playability/` as the first reusable intelligence model that explains why a card has play demand. Playability now has an engine, provider abstraction, provider registry, profile contract, indicator contract, trend contract, and source contract.
 
 The first provider is `ScryfallPlayabilityProvider`, which consumes normalized Scryfall legalities from domain `Card` objects. It produces format indicators for Commander, Modern, Legacy, Vintage, Pioneer, Standard, Pauper, Explorer, and Canadian Highlander, while deck penetration, metagame stability, and trend remain provider-ready placeholders.
 
-`CardProfile` now exposes `playabilityProfile`, Asset Intelligence registers Playability as a live model, the Playability signal consumes profile output, strategies consume the signal through configurable weights, and Vendor Workspace displays tier, format legalities, trend, ban status, and future deck penetration readiness.
+`CardProfile` now exposes `playabilityProfile`, Asset Intelligence registers Playability as a live model, the Playability signal consumes profile output, strategies consume the signal through configurable weights, and Vendor Workspace displays playability through the reusable Intelligence Console.
+
+Added `components/intelligence/` as the permanent presentation layer for every Asset Intelligence model. The console renders compact collapsed tiles by default, converts scores into A+ through F grades for presentation, keeps confidence separate, and expands one tile at a time into model details without requiring custom UI per intelligence model.

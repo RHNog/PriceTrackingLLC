@@ -785,11 +785,72 @@ Decision Resolver
 
 Architecture rule: provider data can improve Playability confidence and indicators, but Playability must remain an input to strategies only.
 
+## Intelligence Console v2
+
+The Intelligence Console is the permanent presentation layer for Asset Intelligence models.
+
+Source files:
+
+- `components/intelligence/IntelligenceConsole.tsx`
+- `components/intelligence/IntelligenceTile.tsx`
+- `components/intelligence/IntelligenceDetail.tsx`
+- `components/intelligence/IntelligenceGrade.tsx`
+
+Presentation contract:
+
+- Every Intelligence Model renders through the same tile standard.
+- Collapsed tiles show model name, grade, confidence, and expand affordance only.
+- Expanded details show score, grade, confidence, version, status, summary, contributing factors, supporting data sources, trend, future dependencies, and explanation.
+- Only one tile expands at a time by default.
+- Business engines and providers remain presentation-independent.
+- No Intelligence Model should implement its own custom UI.
+
+Grade mapping:
+
+- 95+ = A+
+- 90-94 = A
+- 85-89 = A-
+- 80-84 = B+
+- 75-79 = B
+- 70-74 = B-
+- 65-69 = C+
+- 60-64 = C
+- 55-59 = C-
+- 50-54 = D
+- Below 50 = F
+
+Confidence is displayed separately because grade measures score quality and confidence measures data reliability.
+
+Architecture graph:
+
+Card Profile
+
+↓
+
+Asset Intelligence Models
+
+↓
+
+Intelligence Console
+
+↓
+
+Intelligence Tile
+
+↓
+
+Intelligence Detail
+
+↓
+
+Grade Mapping
+
 ## Engine Rules
 
 - Business engines must remain provider-independent.
 - Query, canonical, intent, entity, and constraint engines must remain independent from React.
 - UI components render data and user controls; they do not calculate business values.
+- Intelligence Console renders intelligence output only and must not create business decisions.
 - UI components dispatch workflow commands; they do not own selected workflow context.
 - UI components do not mutate Asset Context.
 - Asset Context validation must happen before downstream market data is treated as current.
@@ -802,6 +863,7 @@ Architecture rule: provider data can improve Playability confidence and indicato
 - Condition must never affect identity resolution.
 - Card Intelligence must not negotiate or choose BUY / PASS.
 - Intelligence models must not make decisions.
+- Every Intelligence Model must use the Intelligence Tile presentation contract.
 - Future intelligence must use the Asset Intelligence Framework contract.
 - Playability must measure play demand only and must not negotiate or decide BUY / PASS.
 - Negotiation Ladder owns negotiation guidance.

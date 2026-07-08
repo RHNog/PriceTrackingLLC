@@ -8,11 +8,13 @@ It helps trading-card buyers discover opportunities, evaluate in-person purchase
 
 ## Current Development Phase
 
-Current sprint: Sprint 22, Playability Intelligence Platform.
+Current sprint: Sprint 22, Playability Intelligence Platform and Intelligence Console v2.
 
 The app now evaluates a selected card through deterministic Vendor Workflow states, Card Profile, Asset Intelligence models, condition-adjusted market context, strategy-weighted signals, Negotiation Ladder, and deterministic Decision Resolver output.
 
 Playability Intelligence now measures why a card has play demand. It is registered in the Asset Intelligence Framework, backed first by Scryfall legalities, exposed on `CardProfile.playabilityProfile`, and consumed by strategies through configurable `Playability` signal weights.
+
+Card Profile now renders `components/intelligence/IntelligenceConsole.tsx`. Future intelligence models should appear automatically through the shared Intelligence Tile pattern rather than adding custom Card Profile UI.
 
 ## What Has Been Built?
 
@@ -34,6 +36,9 @@ Playability Intelligence now measures why a card has play demand. It is register
 - Decision Drivers Engine
 - Card Intelligence Engine
 - Asset Intelligence Framework
+- Intelligence Console v2
+- Intelligence Tile pattern
+- Intelligence grade mapping
 - Playability Intelligence Platform
 - Playability Provider Registry
 - Scryfall Playability Provider using legalities
@@ -68,6 +73,8 @@ Playability Intelligence now measures why a card has play demand. It is register
 - Decision driver engine vs presentation copy separation
 - Card Intelligence vs recommendation separation
 - Playability vs recommendation separation
+- Intelligence Console vs business engine separation
+- Grade presentation vs numeric score storage separation
 - Playability Provider abstraction and registry
 - Asset Intelligence model contract
 - Indicator contract and status metadata
@@ -97,6 +104,8 @@ Playability Intelligence now measures why a card has play demand. It is register
 - Do not invent lowest listing, recent sale, or buylist values.
 - Card Intelligence must not negotiate.
 - Playability must not negotiate or decide BUY / PASS.
+- Intelligence Console must not calculate recommendations or mutate model output.
+- Every Intelligence Model must use the shared Intelligence Tile presentation contract.
 - Future intelligence must be registered as an Asset Intelligence model, not built as an isolated scoring engine.
 - Strategies must not read provider data directly.
 - Strategies may consume Playability only through normalized signal/model outputs and configured weights.

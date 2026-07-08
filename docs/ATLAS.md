@@ -27,6 +27,8 @@ No sprint is complete until Atlas has been synchronized.
 - Market Providers answer what a selected printing and finish is worth.
 - Card Intelligence produces reusable signals, not recommendations.
 - Asset Intelligence models wrap reusable indicators behind a shared framework contract.
+- Intelligence Console is the shared presentation layer for all Asset Intelligence models.
+- Intelligence Tiles use grade mapping for quick scanning while confidence remains separate.
 - Playability Intelligence measures play demand and never chooses BUY / PASS.
 - Playability providers plug into a registry before strategies consume normalized outputs.
 - Workflow Command Processor controls workflow progression and diagnostics.
@@ -67,6 +69,10 @@ Vendor Workspace
 
 → Asset Intelligence Framework
 
+→ Intelligence Console
+
+→ Intelligence Tile
+
 → Playability Intelligence
 
 → Playability Provider Registry
@@ -100,6 +106,19 @@ Playability dependency rule:
 Playability Intelligence → Strategy → Negotiation Ladder → Offer Ladder Validator → Decision Resolver.
 
 Playability must not skip directly to negotiation or decision.
+
+## Intelligence Console
+
+The Intelligence Console replaces bespoke Card Profile intelligence cards.
+
+Tile rule:
+
+- Collapsed tiles show name, grade, confidence, and expand affordance only.
+- Expanded tiles show full intelligence detail.
+- One tile expands at a time by default.
+- Every current and future Intelligence Model uses this same tile contract.
+
+Grade mapping is presentation-only. Engines retain numeric scores and confidence remains separate from grade.
 
 → Immutable Evaluation Snapshot
 
@@ -539,22 +558,23 @@ Dependency graph metadata is included on each model so future Atlas visualizatio
 4. Add Melee, MTGO, and Top8 providers for competitive metagame results.
 5. Add Deck Penetration implementation with percentage, sample size, confidence, and status.
 6. Add Meta Stability and Trend provider implementations.
-7. Add a Printing Descriptor Engine for provider-neutral printing labels.
-8. Add development-only Vendor Workflow transition inspector.
-9. Add Evaluation Trace replay UI.
-10. Add workflow context inspector.
-11. Add historical backtesting.
-12. Add simulation engine.
-13. Add strategy replay and Market Context replay.
-14. Add Asset Intelligence model diagnostics UI.
-15. Add Liquidity Engine as an Asset Intelligence model.
-16. Add Historical Analytics Engine as an Asset Intelligence model.
-17. Add Market Context Engine.
-18. Add camera, OCR, and barcode entry.
-19. Add ARIA active-descendant support for richer keyboard highlighting.
-20. Add persisted buyer preferences for finish defaults.
-21. Add saved Vendor Workspace chip presets.
-22. Add visual regression coverage for 13-inch and 14-inch laptop viewports.
+7. Add Intelligence Console keyboard and visual regression coverage.
+8. Add a Printing Descriptor Engine for provider-neutral printing labels.
+9. Add development-only Vendor Workflow transition inspector.
+10. Add Evaluation Trace replay UI.
+11. Add workflow context inspector.
+12. Add historical backtesting.
+13. Add simulation engine.
+14. Add strategy replay and Market Context replay.
+15. Add Asset Intelligence model diagnostics UI.
+16. Add Liquidity Engine as an Asset Intelligence model.
+17. Add Historical Analytics Engine as an Asset Intelligence model.
+18. Add Market Context Engine.
+19. Add camera, OCR, and barcode entry.
+20. Add ARIA active-descendant support for richer keyboard highlighting.
+21. Add persisted buyer preferences for finish defaults.
+22. Add saved Vendor Workspace chip presets.
+23. Add visual regression coverage for 13-inch and 14-inch laptop viewports.
 
 ## Technical Debt
 
@@ -571,6 +591,7 @@ Dependency graph metadata is included on each model so future Atlas visualizatio
 - Asset Intelligence model outputs are deterministic wrappers around existing signals until live providers exist.
 - Playability currently uses Scryfall legalities only; deck penetration, trend, and meta stability need future providers.
 - Canadian Highlander playability is registered but waits for a provider.
+- Intelligence Console has build-level coverage and grade mapping tests, but no browser interaction regression test yet.
 - Model health is currently derived from registration status and indicator status.
 - Vendor Workflow diagnostics are rendered in the workspace for development visibility and should later move behind a development-only inspector.
 - Keyboard highlighting uses component state today; richer ARIA active-descendant focus management remains future work.

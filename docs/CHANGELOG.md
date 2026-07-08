@@ -4,6 +4,8 @@
 
 ### Added
 
+- Sprint 22 Intelligence Console v2 documentation.
+- Intelligence Tile, Intelligence Detail, grade mapping, confidence separation, progressive disclosure, and shared presentation contract documentation.
 - Sprint 22 Playability Intelligence Platform documentation.
 - Playability provider abstraction, profile, format indicators, provider roadmap, dependency graph, backlog, and technical debt documentation.
 - Sprint 21 Intelligence History Platform documentation.
@@ -45,6 +47,7 @@
 
 ### Changed
 
+- Documentation now records Intelligence Console as the standard presentation layer for every Asset Intelligence model.
 - Current sprint updated to Sprint 22.
 - Documentation now treats Playability as measurement consumed by strategies, not a decision engine.
 - Current sprint updated to Sprint 21.

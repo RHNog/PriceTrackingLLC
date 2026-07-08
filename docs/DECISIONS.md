@@ -126,6 +126,12 @@
 
 62. Scryfall legalities are the first Playability provider source. EDHREC, MTGGoldfish, Melee, MTGO, and Top8 are future providers, not scraped data sources.
 
+63. Intelligence Console is the permanent UI layer for Asset Intelligence models. Individual models must not create bespoke presentation layouts.
+
+64. Intelligence grades are presentation-only mappings from internal numeric scores. Numeric scores remain available to engines and history.
+
+65. Confidence must remain separate from grade because score quality and data reliability are different concepts.
+
 ## Documentation Rule
 
 Every sprint must update:
