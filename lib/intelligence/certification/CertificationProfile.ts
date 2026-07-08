@@ -22,6 +22,12 @@ export interface CertificationProfile {
   providers: CertificationProviderSummary[];
   futureProviders: FutureCertificationProviderStatus[];
   indicators: Record<CertificationIndicator["name"], CertificationIndicator>;
+  knowledgeGraph: {
+    edgeCount: number;
+    premiumPrintings: string[];
+    reservedList: boolean;
+    roles: string[];
+  };
   explanation: string;
   providerRoadmap: CertificationProviderId[];
   dependencyGraph: string[];

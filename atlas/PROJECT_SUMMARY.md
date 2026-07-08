@@ -24,6 +24,14 @@ Sprint 25.1 adds Evidence Sufficiency.
 
 Intelligence models now declare required, optional, and future evidence. Insufficient required evidence produces Unknown rather than a failing grade, and Atlas Inspector displays missing evidence diagnostics.
 
+Sprint 26 matures Playability Intelligence to Level 3.
+
+Playability now includes a provider-ready adapter, normalized demand dimensions, format analysis, and provider-independent card role signals. Business conclusions explain why players use a card and how that use contributes to market demand.
+
+The Asset Knowledge Graph sprint introduces reusable semantic relationships.
+
+`lib/knowledge/` now models graph nodes, graph edges, queries, relationship registry, relationship resolver, and graph registry. Playability consumes graph roles and semantic relationships for richer reasoning. Certification consumes premium-printing, Reserved List, and collector-role relationships when estimating certification relevance. The graph does not redesign UI, strategy, or negotiation behavior.
+
 ## Current Architecture
 
 PriceTrackingLLC is a Next.js, TypeScript, and Tailwind CSS application for professional trading-card buying decisions.
@@ -46,11 +54,11 @@ Atlas is not part of this runtime architecture. It is an internal companion syst
 
 ## Current Sprint
 
-Atlas Sprint A1
+Asset Knowledge Graph
 
 ## Current Milestone
 
-Internal Development Companion foundation.
+Reusable semantic relationship layer for Intelligence models.
 
 ## Open Issues
 
@@ -58,6 +66,7 @@ Internal Development Companion foundation.
 - Known issues are tracked manually.
 - Repository scanning is available as a standalone TypeScript utility but not connected to a script.
 - Existing test execution needs a formal alias-aware test runner.
+- Knowledge Graph relationship coverage is configured for known examples and should be provider-enriched later.
 
 ## Technical Debt
 
@@ -66,7 +75,8 @@ Internal Development Companion foundation.
 - Live marketplace listings and recent sales are not integrated.
 - Browser visual regression coverage is not active.
 - Atlas has no drift detection yet.
+- Relationship confidence calibration remains future work.
 
 ## Next Recommended Sprint
 
-Atlas Sprint A2: automate scanner execution, write generated summary output, add architecture drift checks, and produce a generated sprint report without touching runtime code.
+Add provider-backed Knowledge Graph relationship enrichment and Atlas graph diagnostics.

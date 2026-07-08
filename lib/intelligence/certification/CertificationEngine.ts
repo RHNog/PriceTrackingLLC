@@ -1,5 +1,7 @@
 import type { Card } from "@/types/card";
 import type { PrintingVariant } from "@/types/printingVariant";
+import { knowledgeGraphRegistry } from "@/lib/knowledge/KnowledgeGraphRegistry";
+import type { AssetKnowledgeGraph } from "@/lib/knowledge/AssetKnowledgeGraph";
 import type { CertificationIndicator } from "@/lib/intelligence/certification/CertificationIndicator";
 import type { CertificationProfile, CertificationTier } from "@/lib/intelligence/certification/CertificationProfile";
 import type {
@@ -29,6 +31,7 @@ function includesAny(values: (string | undefined)[], terms: string[]) {
 function estimateCollectibleCertificationScore(
   printing: Card,
   variant: PrintingVariant,
+  knowledgeGraph: AssetKnowledgeGraph,
 ) {
   const metadata = [
     printing.name,
@@ -66,6 +69,18 @@ function estimateCollectibleCertificationScore(
 
   if (includesAny(metadata, ["foil", "etched", "halo", "surge", "galaxy", "confetti"])) {
     score += 8;
+  }
+
+  if (knowledgeGraph.labelsByKind("Premium Printing").length > 0) {
+    score += 10;
+  }
+
+  if (knowledgeGraph.labelsByKind("Reserved List").length > 0) {
+    score += 8;
+  }
+
+  if (knowledgeGraph.labelsByKind("Role").includes("Collector Card")) {
+    score += 6;
   }
 
   return clampScore(score);
@@ -114,6 +129,7 @@ export class PlaceholderCertificationProvider implements CertificationProvider {
     const grade = estimateCollectibleCertificationScore(
       context.printing,
       context.variant,
+      knowledgeGraphRegistry.resolve(context.printing),
     );
     const premium = clampScore((grade - 50) * 1.6);
     const timestamp = new Date().toISOString();
@@ -173,6 +189,7 @@ export function createCertificationProfile(
   printing: Card,
   variant: PrintingVariant,
 ): CertificationProfile {
+  const knowledgeGraph = knowledgeGraphRegistry.resolve(printing);
   const providerSummaries = currentCertificationProviderIds
     .map((providerId) =>
       certificationRegistry
@@ -205,6 +222,12 @@ export function createCertificationProfile(
     tier: getTier(overallGrade),
     providers: providerSummaries,
     futureProviders,
+    knowledgeGraph: {
+      edgeCount: knowledgeGraph.edges.length,
+      premiumPrintings: knowledgeGraph.labelsByKind("Premium Printing"),
+      reservedList: knowledgeGraph.labelsByKind("Reserved List").length > 0,
+      roles: knowledgeGraph.labelsByKind("Role"),
+    },
     indicators: {
       certificationGrade: createIndicator(
         "certificationGrade",
@@ -277,6 +300,8 @@ export function createCertificationProfile(
       "Certification Intelligence",
       "Certification Engine",
       "Certification Provider Registry",
+      "Asset Knowledge Graph",
+      "Relationship Registry",
       "Placeholder Certification Provider",
       "PSA",
       "BGS",

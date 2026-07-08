@@ -4,6 +4,8 @@
 
 ### Added
 
+- Sprint 26 Playability Intelligence Level 3 documentation.
+- Demand Model, Card Role Model, Playability Provider Adapter, and updated Intelligence Registry documentation.
 - Sprint 25.1 Evidence Sufficiency Framework documentation.
 - Unknown state, evidence requirements, missing-vs-negative evidence, and future provider dependency documentation.
 - Sprint 25 Playability Intelligence Level 2 documentation.
@@ -63,6 +65,8 @@
 
 ### Changed
 
+- Current sprint updated to Sprint 26.
+- Playability documentation now describes explainable player demand intelligence and role-driven demand sources.
 - Current sprint updated to Sprint 25.1.
 - Documentation now states that evidence precedes conclusions and missing evidence is not a failing grade.
 - Current sprint updated to Sprint 25.

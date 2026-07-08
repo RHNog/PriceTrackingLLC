@@ -2,6 +2,11 @@ import type {
   PlayabilityFormat,
   PlayabilityIndicator,
 } from "@/lib/intelligence/playability/PlayabilityIndicator";
+import type {
+  PlayabilityDemandDimensions,
+  PlayabilityFormatAnalysis,
+} from "@/lib/intelligence/playability/PlayabilityDemand";
+import type { PlayabilityRoleSignal } from "@/lib/intelligence/playability/PlayabilityRole";
 
 export type PlayabilityTier = "Excellent" | "High" | "Medium" | "Low";
 
@@ -14,7 +19,19 @@ export interface PlayabilityProfile {
   tier: PlayabilityTier;
   businessConclusion: string;
   confidenceReason: string;
+  demandDimensions: PlayabilityDemandDimensions;
+  formatAnalysis: Partial<Record<PlayabilityFormat, PlayabilityFormatAnalysis>>;
   keySignals: string[];
+  knowledgeGraph: {
+    archetypes: string[];
+    edgeCount: number;
+    formats: string[];
+    nodeCount: number;
+    roles: string[];
+    themes: string[];
+  };
+  providerAdapter: string;
+  roleSignals: PlayabilityRoleSignal[];
   formatWeights: Record<string, number>;
   indicators: {
     overallPlayability: PlayabilityIndicator;

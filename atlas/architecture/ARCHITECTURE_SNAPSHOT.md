@@ -18,6 +18,7 @@ Atlas Sprint A1
 - Evaluation history under `lib/history/`.
 - System readiness under `lib/validation/`.
 - Pipeline integrity under `lib/pipeline/`.
+- Asset Knowledge Graph under `lib/knowledge/`.
 - Evidence Sufficiency Framework under `lib/intelligence/framework/`.
 - Game and query knowledge under `knowledge/` and `data/query/`.
 
@@ -28,6 +29,10 @@ Runtime architecture flows through normalized domain objects:
 Query and identity interpretation -> printing and variant resolution -> certification profile -> market snapshot -> business profile -> readiness and pipeline validation -> card intelligence -> strategy -> negotiation ladder -> offer validation -> decision -> presentation.
 
 Atlas is outside this runtime chain.
+
+Semantic relationship flow:
+
+Asset data -> Relationship Resolver -> Asset Knowledge Graph -> Intelligence models -> normalized Intelligence Profile output.
 
 ## Engines
 
@@ -55,7 +60,9 @@ Provider rule: provider data must be adapted into domain objects before engines 
 - Card Intelligence signals.
 - Playability Intelligence backed by Scryfall legalities.
 - Playability Intelligence Level 2 demand layer backed by configurable format weights and demand hints.
+- Playability Intelligence Level 3 adapter, demand model, and card role model.
 - Certification Intelligence backed by a placeholder provider and provider registry.
+- Asset Knowledge Graph relationship context consumed by Playability and Certification.
 - Future models: Grading, Regional, Behavior, Historical, Volatility, Demand, Scarcity, Liquidity, and other registered intelligence dimensions.
 
 Intelligence rule: intelligence measures asset characteristics. It does not decide BUY, NEGOTIATE, PASS, or offer values.
@@ -71,6 +78,10 @@ Final Intelligence Console rule: expanded panels display Grade/Confidence, Busin
 Playability maturity rule: legality is evidence, not the conclusion. Playability conclusions describe player demand.
 
 Evidence sufficiency rule: required evidence gates grades. Unknown is not failure.
+
+Provider adapter rule: future playability providers normalize evidence into the Playability Profile instead of changing downstream consumers.
+
+Knowledge graph rule: semantic relationships are shared infrastructure. Relationship Registry and Relationship Resolver enrich Intelligence reasoning without changing production UI contracts.
 
 ## Workflows
 

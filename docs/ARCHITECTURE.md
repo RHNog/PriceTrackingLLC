@@ -13,9 +13,44 @@ Top-level structure:
 - `data/`: mocked domain data.
 - `knowledge/`: dictionary-driven TCG knowledge.
 - `config/`: configurable engine thresholds and weights.
+- `lib/knowledge/`: reusable Asset Knowledge Graph, relationship registry, resolver, graph registry, nodes, edges, and queries.
 - `lib/engines/`: provider-independent business and interpretation engines.
 - `lib/providers/`: external or mocked data provider implementations.
 - `lib/intelligence/certification/`: provider-ready Certification Intelligence model.
+
+## Asset Knowledge Graph
+
+The Asset Knowledge Graph is the semantic relationship layer shared by Intelligence models.
+
+Core files:
+
+- `lib/knowledge/AssetKnowledgeGraph.ts`
+- `lib/knowledge/KnowledgeGraphRegistry.ts`
+- `lib/knowledge/RelationshipRegistry.ts`
+- `lib/knowledge/RelationshipResolver.ts`
+- `lib/knowledge/KnowledgeNode.ts`
+- `lib/knowledge/KnowledgeEdge.ts`
+- `lib/knowledge/KnowledgeQuery.ts`
+
+The graph models relationships between an asset and:
+
+- Roles
+- Mechanics
+- Themes
+- Archetypes
+- Strategies
+- Color Identity
+- Tribes
+- Keywords
+- Families
+- Universes Beyond
+- Reserved List
+- Premium Printings
+- Formats
+
+Relationship Registry owns configured semantic knowledge. Relationship Resolver combines configured knowledge with card metadata into an `AssetKnowledgeGraph`. Knowledge Graph Registry is the stable integration point consumed by Intelligence models.
+
+Playability consumes graph roles, archetypes, themes, strategies, and format context for richer player-demand reasoning. Certification consumes premium-printing, Reserved List, and collector-role relationships for certification relevance. The graph does not decide BUY/PASS, strategy behavior, or negotiation terms.
 
 ## App Shell
 
@@ -300,6 +335,55 @@ Future providers:
 - Tournament APIs
 
 No unofficial API integration is allowed.
+
+## Playability Intelligence Level 3
+
+Playability Level 3 adds explainable demand semantics.
+
+Demand Model dimensions:
+
+- Commander Demand
+- Competitive Demand
+- Casual Demand
+- Combo Relevance
+- Staple Status
+- Format Diversity
+- Demand Stability
+- Ban Risk
+- Meta Dependency
+- Demand Resilience
+- Future Demand Readiness
+
+Format Analysis exposes:
+
+- Legality
+- Demand
+- Competitive Weight
+- Casual Weight
+- Trend
+- Confidence
+- Evidence Source
+- Provider Status
+
+Card Role Model:
+
+- Fast Mana
+- Commander Staple
+- Combo Piece
+- Tutor
+- Removal
+- Counterspell
+- Finisher
+- Engine
+- Utility
+- Value Card
+- Ramp
+- Protection
+- Card Draw
+
+Provider Adapter:
+
+`PlaceholderPlayabilityProviderAdapter` normalizes current placeholder-backed evidence into the Playability Profile. Future EDHREC, MTGGoldfish, Melee, MTGO, and Tournament API adapters must normalize into the same profile contract.
 
 ## Evidence Sufficiency Framework
 

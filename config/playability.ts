@@ -1,4 +1,5 @@
 import type { PlayabilityFormat } from "@/lib/intelligence/playability/PlayabilityIndicator";
+import type { PlayabilityRole } from "@/lib/intelligence/playability/PlayabilityRole";
 import type { PlayabilityTrend } from "@/lib/intelligence/playability/PlayabilityTrend";
 
 export type PlayabilityFormatWeight = {
@@ -21,6 +22,7 @@ export type PlayabilityCardDemandHint = {
   confidenceReason: string;
   formatHints: Partial<Record<PlayabilityFormat, PlayabilityFormatDemandHint>>;
   keySignals: string[];
+  roles: PlayabilityRole[];
 };
 
 export const playabilityFormatWeights: Record<
@@ -92,6 +94,7 @@ export const playabilityCardDemandHints: Record<
       },
     },
     keySignals: ["Vintage Power Card", "Low Format Breadth", "Narrow Play Demand"],
+    roles: ["Fast Mana", "Combo Piece", "Utility"],
   },
   "chrome mox": {
     businessConclusion:
@@ -117,6 +120,7 @@ export const playabilityCardDemandHints: Record<
       },
     },
     keySignals: ["Commander Fast Mana", "Legacy Playable", "Stable Demand"],
+    roles: ["Fast Mana", "Combo Piece", "Utility"],
   },
   "collected company": {
     businessConclusion:
@@ -146,6 +150,7 @@ export const playabilityCardDemandHints: Record<
       "Moderate Casual Adoption",
       "Meta Dependent",
     ],
+    roles: ["Engine", "Value Card", "Combo Piece"],
   },
   counterspell: {
     businessConclusion:
@@ -173,6 +178,7 @@ export const playabilityCardDemandHints: Record<
       },
     },
     keySignals: ["Broad Format Diversity", "Stable Demand", "Casual Staple"],
+    roles: ["Counterspell", "Protection", "Utility"],
   },
   "lightning bolt": {
     businessConclusion:
@@ -204,6 +210,42 @@ export const playabilityCardDemandHints: Record<
       },
     },
     keySignals: ["Broad Format Diversity", "Modern Staple", "Stable Demand"],
+    roles: ["Removal", "Utility"],
+  },
+  "mox opal": {
+    businessConclusion:
+      "Mox Opal derives demand primarily from artifact-centric competitive strategies and Commander fast mana applications.",
+    confidenceBonus: 10,
+    confidenceReason:
+      "Artifact archetype usage and Commander adoption providers have not yet been connected.",
+    formatHints: {
+      Commander: {
+        casualRelevanceBonus: 18,
+        demandBonus: 16,
+        keySignals: ["Commander Fast Mana"],
+        trend: "Stable",
+      },
+      Legacy: {
+        competitiveRelevanceBonus: 24,
+        demandBonus: 16,
+        keySignals: ["Artifact Competitive Demand"],
+      },
+      Modern: {
+        competitiveRelevanceBonus: 10,
+        demandBonus: 4,
+        keySignals: ["Banned Competitive History"],
+      },
+    },
+    keySignals: ["Fast Mana", "Combo Enabler", "Artifact Strategy Demand"],
+    roles: [
+      "Fast Mana",
+      "Combo Piece",
+      "Artifact Synergy",
+      "Competitive Staple",
+      "Collector Card",
+      "Engine",
+      "Ramp",
+    ],
   },
   "sol ring": {
     businessConclusion:
@@ -224,5 +266,6 @@ export const playabilityCardDemandHints: Record<
       },
     },
     keySignals: ["Commander Staple", "High Casual Adoption", "Low Competitive Presence"],
+    roles: ["Fast Mana", "Commander Staple", "Ramp"],
   },
 };

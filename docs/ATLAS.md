@@ -2,6 +2,69 @@
 
 Atlas is the permanent project knowledge base for PriceTrackingLLC.
 
+## Asset Knowledge Graph Synchronization
+
+Registered architecture:
+
+- Asset Knowledge Graph
+- Knowledge Node
+- Knowledge Edge
+- Knowledge Query
+- Knowledge Graph Registry
+- Relationship Registry
+- Relationship Resolver
+
+Relationship model:
+
+- Roles
+- Mechanics
+- Themes
+- Archetypes
+- Strategies
+- Color Identity
+- Tribes
+- Keywords
+- Families
+- Universes Beyond
+- Reserved List
+- Premium Printings
+- Formats
+
+Integration points:
+
+- Playability consumes graph relationships for role-aware demand reasoning.
+- Certification consumes graph collector relationships for certification relevance.
+- Atlas owns future graph diagnostics and implementation details.
+
+Rule:
+
+The graph is semantic infrastructure. It does not decide BUY/PASS, strategy, negotiation, or production presentation.
+
+## Sprint 26 Synchronization
+
+Playability Intelligence maturity:
+
+- Previous: Level 2 Meaningful Intelligence.
+- Current: Level 3 Explainable Demand Intelligence.
+
+Registered architecture:
+
+- Playability Provider Adapter
+- Demand Model
+- Card Role Model
+
+Future provider adapters:
+
+- EDHREC
+- MTGGoldfish
+- Melee
+- MTGO
+- Tournament APIs
+
+Rule:
+
+Provider adapters normalize external evidence. Card roles remain provider-independent. Playability measures player demand only.
+
 ## Sprint 25.1 Synchronization
 
 Evidence Sufficiency Framework:

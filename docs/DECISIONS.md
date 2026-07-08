@@ -2,6 +2,10 @@
 
 ## Major Product And Architecture Decisions
 
+0.6. Asset Knowledge Graph is the reusable semantic layer for Intelligence models. Relationship Registry owns configured semantic relationships; models consume the graph but do not mutate strategy, negotiation, or UI behavior.
+
+0.5. Playability card roles are provider-independent. Provider adapters normalize external evidence into roles and demand dimensions; they do not perform strategy or negotiation.
+
 0.4. Evidence precedes conclusion. Unknown is not a failing grade; it means required evidence is insufficient.
 
 0.3. Playability Intelligence measures player demand, not legality alone. Legality is evidence; demand is the conclusion.
@@ -105,6 +109,23 @@ Consequences:
 - Confidence reflects evidence quality.
 - Insufficient required evidence blocks letter grades.
 - Atlas Inspector displays missing evidence and future provider dependencies.
+
+## Sprint 26 - Playability Provider Adapter And Card Roles
+
+Decision:
+
+Playability Level 3 introduces a provider adapter and card role model.
+
+Rationale:
+
+Future providers will report different evidence shapes. The platform needs one normalized Playability Profile contract that explains why players use a card.
+
+Consequences:
+
+- Provider adapters normalize external evidence.
+- Card roles are provider-independent signals.
+- Business conclusions reflect roles and demand sources.
+- Evidence Sufficiency still gates definitive grades.
 
 4. Search became the Query Engine. The system interprets intent instead of only matching text.
 

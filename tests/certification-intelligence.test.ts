@@ -114,9 +114,34 @@ test("requested examples generate Certification Profiles", () => {
     );
     assert.equal(profile.providers[0].source, "Placeholder");
     assert.equal(profile.providers[0].population, null);
+    assert.ok(profile.knowledgeGraph.edgeCount > 0);
     assert.equal(profile.indicators.populationTrend.trend, "Unknown");
+    assert.ok(profile.dependencyGraph.includes("Asset Knowledge Graph"));
     assert.ok(profile.dependencyGraph.includes("Collector Intelligence"));
   }
+});
+
+test("Certification consumes Asset Knowledge Graph collector relationships", () => {
+  const blackLotus = createCertificationProfile(
+    createCard("Black Lotus", { rarity: "Rare" }),
+    createVariant(createCard("Black Lotus", { rarity: "Rare" })),
+  );
+  const serializedSolRing = createCertificationProfile(
+    createCard("Serialized Sol Ring", {
+      rarity: "Mythic",
+      treatment: "Serialized",
+    }),
+    createVariant(
+      createCard("Serialized Sol Ring", {
+        rarity: "Mythic",
+        treatment: "Serialized",
+      }),
+    ),
+  );
+
+  assert.equal(blackLotus.knowledgeGraph.reservedList, true);
+  assert.ok(blackLotus.knowledgeGraph.roles.includes("Collector Card"));
+  assert.ok(serializedSolRing.knowledgeGraph.premiumPrintings.includes("Serialized"));
 });
 
 test("card profile exposes Certification through framework registration", () => {

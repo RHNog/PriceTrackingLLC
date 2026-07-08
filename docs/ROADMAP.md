@@ -41,6 +41,9 @@
 - Final Intelligence Console UI contract
 - Playability Intelligence Level 2
 - Evidence Sufficiency Framework
+- Playability Intelligence Level 3
+- Asset Knowledge Graph
+- Relationship Registry
 - Certification Provider Registry
 - Placeholder PSA, BGS, and CGC certification provider coverage
 - Marketplace Profile templates
@@ -59,15 +62,15 @@
 
 ## Current Sprint
 
-Sprint 25.1: Evidence Sufficiency Framework
+Asset Knowledge Graph
 
 Goals:
 
-- Require every Intelligence model to declare evidence requirements.
-- Distinguish missing evidence from negative evidence.
-- Display Unknown instead of a failing grade when required evidence is insufficient.
-- Let future provider integrations automatically improve evidence sufficiency.
-- Keep Atlas as the owner of implementation evidence diagnostics.
+- Introduce a reusable semantic graph consumed by Intelligence models.
+- Model roles, mechanics, themes, archetypes, strategies, color identity, tribes, keywords, families, Universes Beyond, Reserved List, premium printings, and formats.
+- Connect Playability to graph relationships without redesigning Playability or the Intelligence Console.
+- Connect Certification to collector-relevance relationships without adding certification provider integrations.
+- Preserve the existing Business Conclusion presentation.
 
 ## Near-Term Roadmap
 
@@ -97,6 +100,8 @@ Sprint 27: Printing Descriptor Engine
 - EDHREC Playability Provider
 - MTGGoldfish Playability Provider
 - Melee / MTGO / Top8 competitive metagame providers
+- Provider-backed Knowledge Graph relationship enrichment
+- Relationship confidence calibration from approved providers
 - Tournament API Playability Provider
 - Deck Penetration indicator implementation
 - Meta Stability and Trend provider implementation

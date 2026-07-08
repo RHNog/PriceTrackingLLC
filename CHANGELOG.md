@@ -9,6 +9,16 @@ The format is inspired by "Keep a Changelog".
 ## [Unreleased]
 
 ### Added
+- Asset Knowledge Graph semantic layer under `lib/knowledge/`.
+- Relationship Registry and Relationship Resolver for asset roles, mechanics, themes, archetypes, strategies, color identity, tribes, keywords, families, Universes Beyond, Reserved List, premium printings, and format relationships.
+- Playability Intelligence now consumes Asset Knowledge Graph relationships for role-aware reasoning without UI changes.
+- Certification Intelligence now consumes Asset Knowledge Graph collector relationships for certification relevance without replacing official population providers.
+- Asset Knowledge Graph regression coverage for Mox Opal, Sol Ring, Collected Company, Counterspell, and Black Lotus.
+- Sprint 26 Playability Intelligence Level 3.
+- Playability Provider Adapter for provider-ready normalization of future EDHREC, MTGGoldfish, Melee, MTGO, and Tournament API responses.
+- Card Role Model with roles such as Fast Mana, Commander Staple, Combo Piece, Removal, Counterspell, Engine, Utility, Ramp, Protection, and Card Draw.
+- Playability Demand Model dimensions for Commander Demand, Competitive Demand, Casual Demand, Combo Relevance, Staple Status, Format Diversity, Demand Stability, Ban Risk, Meta Dependency, Demand Resilience, and Future Demand Readiness.
+- Mox Opal playability demand modeling and role-aware regression coverage.
 - Sprint 25.1 Evidence Sufficiency Framework.
 - `EvidenceSufficiencyEngine`, `EvidenceRequirement`, `EvidenceScore`, `EvidenceStatus`, and `EvidenceReport` framework contracts.
 - Evidence requirements for every registered Intelligence model.
@@ -126,6 +136,8 @@ The format is inspired by "Keep a Changelog".
 - Architecture, roadmap, decision, product spec, prompt history, and documentation changelog files.
 
 ### Changed
+- Playability business conclusions now reflect card roles and demand sources instead of generic format summaries.
+- Playability Key Signals now include role-derived signals such as Fast Mana, Combo Enabler, Commander Staple, and Engine.
 - Intelligence confidence now reflects evidence quality before producing a conclusion.
 - Playability and Certification now return Unknown instead of a failing grade when required providers are missing.
 - Missing evidence is no longer treated as negative evidence.
@@ -226,6 +238,7 @@ The format is inspired by "Keep a Changelog".
 - Clear low-confidence identity candidates can now load printing candidates instead of leaving Vendor Workspace stuck at an identity row.
 
 ### Documented
+- Sprint 26 Playability Level 3 demand model, card role model, provider adapter, and Intelligence Registry updates.
 - Sprint 25.1 Evidence Sufficiency philosophy, Unknown state, model evidence requirements, and future provider dependencies.
 - Sprint 25 Playability maturity increase from Level 1 Framework to Level 2 Meaningful Intelligence.
 - Sprint 24.2 final Intelligence Console UI contract, confidence explanation rules, expansion memory, and redundancy removal.

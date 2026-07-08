@@ -36,12 +36,37 @@ Decision Resolver should remain deterministic after receiving a validated Offer 
 - Collector Intelligence consumes Certification Intelligence before strategies interpret collector value.
 - Playability Intelligence measures player demand, not legality alone.
 - Playability format weights live in configuration.
+- Playability Provider Adapter normalizes current and future provider evidence.
+- Card roles are provider-independent Playability signals.
+- Asset Knowledge Graph owns reusable semantic relationships between assets.
+- Relationship Registry owns configured roles, mechanics, themes, archetypes, strategies, color identity, tribes, keywords, families, Universes Beyond, Reserved List, premium printings, and format relationships.
 - Evidence Sufficiency determines whether Intelligence models may issue grades.
 - Unknown means missing evidence, not poor quality.
 - Vendor Workspace owns Intelligence layers 1-3: Decision, Explanation, and Evidence.
 - Atlas Inspector owns Intelligence layer 4: Implementation.
 - Final Intelligence Console panels use Grade/Confidence, Business Conclusion, Key Signals, and Supporting Evidence only.
 - Offer Ladder Validator blocks invalid negotiation math before Decision Resolver executes.
+
+## Asset Knowledge Graph Knowledge
+
+The Asset Knowledge Graph lives under `lib/knowledge/`.
+
+Core contracts:
+
+- `AssetKnowledgeGraph`
+- `KnowledgeNode`
+- `KnowledgeEdge`
+- `KnowledgeQuery`
+- `RelationshipRegistry`
+- `RelationshipResolver`
+- `KnowledgeGraphRegistry`
+
+Integration rules:
+
+- Playability consumes graph roles, archetypes, themes, strategies, and format context.
+- Certification consumes graph premium-printing, Reserved List, and collector-role relationships.
+- Collector Intelligence may consume graph-enriched Certification and future graph facts through normalized Intelligence outputs.
+- The graph does not decide BUY, PASS, strategy, negotiation, or offer values.
 
 ## Permanent Rules
 
@@ -174,3 +199,43 @@ Initial insufficient examples:
 
 - Playability without EDHREC or equivalent demand providers.
 - Certification without PSA, BGS, or CGC provider-backed population data.
+
+## Sprint 26 Knowledge
+
+Playability Intelligence is now Level 3 Explainable Demand Intelligence.
+
+Registered concepts:
+
+- Demand Model.
+- Card Role Model.
+- Playability Provider Adapter.
+
+Demand dimensions:
+
+- Commander Demand.
+- Competitive Demand.
+- Casual Demand.
+- Combo Relevance.
+- Staple Status.
+- Format Diversity.
+- Demand Stability.
+- Ban Risk.
+- Meta Dependency.
+- Demand Resilience.
+- Future Demand Readiness.
+
+Card roles:
+
+- Fast Mana.
+- Commander Staple.
+- Combo Piece.
+- Tutor.
+- Removal.
+- Counterspell.
+- Finisher.
+- Engine.
+- Utility.
+- Value Card.
+- Ramp.
+- Protection.
+- Card Draw.

@@ -8,7 +8,7 @@ It helps trading-card buyers discover opportunities, evaluate in-person purchase
 
 ## Current Development Phase
 
-Current sprint: Sprint 25.1, Evidence Sufficiency Framework.
+Current sprint: Sprint 26, Playability Intelligence Level 3.
 
 The app now evaluates a selected card through deterministic Vendor Workflow states, Card Profile, Asset Intelligence models, condition-adjusted market context, strategy-weighted signals, Negotiation Ladder, and deterministic Decision Resolver output.
 
@@ -31,6 +31,8 @@ Sprint 24.2 finalized the production contract: expanded Intelligence tiles show 
 Sprint 25 matures Playability Intelligence from legality reporting to player demand intelligence. Playability now uses configurable format weights and demand hints to generate business conclusions, key signals, demand level, competitive relevance, casual relevance, trend, and confidence reasons. Do not replace this with BUY/PASS logic.
 
 Sprint 25.1 adds Evidence Sufficiency. Intelligence models must declare required, optional, and future evidence before producing grades. If required evidence is insufficient, production shows Unknown with low confidence and a reason. Missing evidence is not negative evidence.
+
+Sprint 26 adds Playability Level 3 semantics: provider adapter, demand dimensions, format analysis, and card role model. Playability remains demand-only and must not evaluate collectability, negotiation, or BUY/PASS decisions.
 
 ## What Has Been Built?
 
@@ -64,6 +66,7 @@ Sprint 25.1 adds Evidence Sufficiency. Intelligence models must declare required
 - Final Intelligence Console UI contract
 - Playability Intelligence Level 2
 - Evidence Sufficiency Framework
+- Playability Intelligence Level 3
 - Certification Provider Registry
 - Placeholder Certification Provider
 - Offer Policy

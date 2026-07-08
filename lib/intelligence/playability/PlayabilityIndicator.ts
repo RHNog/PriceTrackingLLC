@@ -39,7 +39,8 @@ export type PlayabilityDemandLevel =
   | "High"
   | "Moderate"
   | "Low"
-  | "Very Low";
+  | "Very Low"
+  | "Unknown";
 
 export type PlayabilityRelevanceLevel =
   | "Very High"

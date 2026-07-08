@@ -2,6 +2,16 @@
 
 This file summarizes major prompts and architectural instructions. It intentionally avoids copying every prompt in full.
 
+## Sprint 26
+
+Purpose: mature Playability Intelligence from Level 2 to Level 3.
+
+Core instruction: introduce richer playability semantics without live third-party integrations.
+
+Major files affected: Playability demand/role/adapter contracts, Playability engine/profile, tests, Intelligence Registry metadata, and Atlas documentation.
+
+Result: normalized demand dimensions, provider-ready adapter, card role classification, role-aware conclusions, and key signals.
+
 ## Sprint 25.1
 
 Purpose: introduce the Evidence Sufficiency Framework.

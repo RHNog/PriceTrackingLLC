@@ -3,6 +3,7 @@ import {
   playabilityCardDemandHints,
   playabilityFormatWeights,
 } from "@/config/playability";
+import { knowledgeGraphRegistry } from "@/lib/knowledge/KnowledgeGraphRegistry";
 import type {
   PlayabilityBanStatus,
   PlayabilityDemandLevel,
@@ -11,14 +12,19 @@ import type {
   PlayabilityRelevanceLevel,
 } from "@/lib/intelligence/playability/PlayabilityIndicator";
 import type { PlayabilityProfile, PlayabilityTier } from "@/lib/intelligence/playability/PlayabilityProfile";
+import { PlaceholderPlayabilityProviderAdapter } from "@/lib/intelligence/playability/PlayabilityProviderAdapter";
 import type {
   PlayabilityProvider,
   PlayabilityProviderContext,
 } from "@/lib/intelligence/playability/PlayabilityProvider";
+import type { PlayabilityRoleSignal } from "@/lib/intelligence/playability/PlayabilityRole";
+import type { PlayabilityRole } from "@/lib/intelligence/playability/PlayabilityRole";
 import {
   playabilityFormats,
   playabilityRegistry,
 } from "@/lib/intelligence/playability/PlayabilityRegistry";
+
+const placeholderProviderAdapter = new PlaceholderPlayabilityProviderAdapter();
 
 const scryfallLegalitiesByFormat: Partial<Record<PlayabilityFormat, string>> = {
   Commander: "commander",
@@ -72,7 +78,23 @@ function getLevel(score: number): PlayabilityDemandLevel {
 }
 
 function getRelevanceLevel(score: number): PlayabilityRelevanceLevel {
-  return getLevel(score);
+  if (score >= 85) {
+    return "Very High";
+  }
+
+  if (score >= 70) {
+    return "High";
+  }
+
+  if (score >= 45) {
+    return "Moderate";
+  }
+
+  if (score >= 20) {
+    return "Low";
+  }
+
+  return "Very Low";
 }
 
 function getTier(score: number): PlayabilityTier {
@@ -437,6 +459,8 @@ function getConfidenceReason(card: Card, confidence: number) {
 function getKeySignals(
   card: Card,
   formats: Record<PlayabilityFormat, PlayabilityIndicator>,
+  roles: PlayabilityRoleSignal[],
+  semanticSignals: string[],
 ) {
   const legalFormats = Object.values(formats).filter(
     (indicator) =>
@@ -456,6 +480,8 @@ function getKeySignals(
   return Array.from(
     new Set([
       ...(getDemandHint(card)?.keySignals ?? []),
+      ...roles.map((role) => role.role),
+      ...semanticSignals,
       ...(broadFormatDiversity ? ["Broad Format Diversity"] : []),
       ...strongestSignals,
       formats.Overall.trend === "Increasing" ? "Growing Interest" : "Stable Demand",
@@ -463,7 +489,87 @@ function getKeySignals(
   ).slice(0, 4);
 }
 
+function isPlayabilityRole(role: string): role is PlayabilityRole {
+  return [
+    "Artifact Synergy",
+    "Fast Mana",
+    "Commander Staple",
+    "Combo Piece",
+    "Competitive Staple",
+    "Collector Card",
+    "Tutor",
+    "Removal",
+    "Counterspell",
+    "Finisher",
+    "Engine",
+    "Utility",
+    "Value Card",
+    "Ramp",
+    "Protection",
+    "Card Draw",
+  ].includes(role);
+}
+
+function classifyRoles(card: Card): PlayabilityRoleSignal[] {
+  const graph = knowledgeGraphRegistry.resolve(card);
+  const graphRoles = graph.query({ relationships: ["has_role"] });
+
+  if (graphRoles.length > 0) {
+    return graphRoles.flatMap((relationship) => {
+      if (!isPlayabilityRole(relationship.label)) {
+        return [];
+      }
+
+      return [{
+        confidence: relationship.confidence,
+        explanation: `${card.name} is classified as ${relationship.label.toLowerCase()} from the Asset Knowledge Graph.`,
+        role: relationship.label,
+      }];
+    });
+  }
+
+  const hintRoles = getDemandHint(card)?.roles ?? [];
+
+  if (hintRoles.length > 0) {
+    return hintRoles.map((role) => ({
+      confidence: 70,
+      explanation: `${card.name} is classified as ${role.toLowerCase()} from configured play pattern knowledge.`,
+      role,
+    }));
+  }
+
+  const name = card.name.toLowerCase();
+  const roles: PlayabilityRoleSignal[] = [];
+
+  if (name.includes("bolt")) {
+    roles.push({
+      confidence: 60,
+      explanation: "Name and known function indicate efficient removal.",
+      role: "Removal",
+    });
+  }
+
+  if (name.includes("counter")) {
+    roles.push({
+      confidence: 60,
+      explanation: "Name and known function indicate permission interaction.",
+      role: "Counterspell",
+    });
+  }
+
+  return roles.length > 0
+    ? roles
+    : [
+        {
+          confidence: 35,
+          explanation: "Role classification is waiting for richer provider evidence.",
+          role: "Utility",
+        },
+      ];
+}
+
 export function createPlayabilityProfile(card: Card): PlayabilityProfile {
+  const knowledgeGraph = knowledgeGraphRegistry.resolve(card);
   const formatEntries = playabilityFormats
     .filter((format) => format !== "Overall")
     .map((format) => {
@@ -502,7 +608,19 @@ export function createPlayabilityProfile(card: Card): PlayabilityProfile {
     formatIndicators,
     "Future demand readiness improves as Commander, metagame, and tournament providers are connected.",
   );
-  const keySignals = getKeySignals(card, formats);
+  const roleSignals = classifyRoles(card);
+  const semanticSignals = [
+    ...knowledgeGraph.labelsByKind("Archetype"),
+    ...knowledgeGraph.labelsByKind("Theme"),
+    ...knowledgeGraph.labelsByKind("Strategy"),
+  ];
+  const keySignals = getKeySignals(card, formats, roleSignals, semanticSignals);
+  const normalizedProviderResponse = placeholderProviderAdapter.normalize({
+    card,
+    formatIndicators,
+    keySignals,
+    roles: roleSignals,
+  });
 
   return {
     modelId: "playability-intelligence",
@@ -513,7 +631,19 @@ export function createPlayabilityProfile(card: Card): PlayabilityProfile {
     tier: getTier(overall.score),
     businessConclusion: getBusinessConclusion(card, overall),
     confidenceReason: getConfidenceReason(card, overall.confidence),
+    demandDimensions: normalizedProviderResponse.demandDimensions,
+    formatAnalysis: normalizedProviderResponse.formatAnalysis,
     keySignals,
+    knowledgeGraph: {
+      archetypes: knowledgeGraph.labelsByKind("Archetype"),
+      edgeCount: knowledgeGraph.edges.length,
+      formats: knowledgeGraph.labelsByKind("Format"),
+      nodeCount: knowledgeGraph.nodes.length,
+      roles: knowledgeGraph.labelsByKind("Role"),
+      themes: knowledgeGraph.labelsByKind("Theme"),
+    },
+    providerAdapter: placeholderProviderAdapter.name,
+    roleSignals,
     formatWeights: Object.fromEntries(
       Object.entries(playabilityFormatWeights).map(([format, weight]) => [
         format,
@@ -585,6 +715,11 @@ export function createPlayabilityProfile(card: Card): PlayabilityProfile {
       "Playability Intelligence",
       "Playability Engine",
       "Playability Provider Registry",
+      "Asset Knowledge Graph",
+      "Relationship Registry",
+      "Playability Provider Adapter",
+      "Card Role Model",
+      "Demand Model",
       "Scryfall Legalities",
       "Future Format Providers",
       "Strategy",

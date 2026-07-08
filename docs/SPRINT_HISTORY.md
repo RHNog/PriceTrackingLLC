@@ -2,6 +2,28 @@
 
 This file records logical product milestones. Sprint numbers may not perfectly match commit history.
 
+## Asset Knowledge Graph Sprint
+
+Introduced the Asset Knowledge Graph as a reusable semantic layer for Intelligence models.
+
+- Added `lib/knowledge/` with graph, node, edge, query, registry, relationship registry, and resolver contracts.
+- Modeled card relationships for roles, mechanics, themes, archetypes, strategies, color identity, tribes, keywords, families, Universes Beyond, Reserved List, premium printings, and formats.
+- Added configured semantic relationships for Mox Opal, Sol Ring, Collected Company, Counterspell, and Black Lotus.
+- Integrated Playability Intelligence with graph relationships for richer role-aware reasoning without UI changes.
+- Integrated Certification Intelligence with graph collector relationships for certification relevance while preserving provider gaps for population data.
+- Added regression coverage for graph generation and Intelligence consumption.
+
+## Sprint 26
+
+Playability Intelligence matured from Level 2 to Level 3.
+
+- Added a provider-ready Playability Provider Adapter.
+- Added a normalized Demand Model with Commander, competitive, casual, combo, staple, diversity, stability, ban risk, meta dependency, resilience, and future readiness dimensions.
+- Added a provider-independent Card Role Model.
+- Added role-aware business conclusions and key signals.
+- Added Mox Opal regression coverage.
+- Preserved Evidence Sufficiency and Unknown behavior when provider evidence remains inadequate.
+
 ## Sprint 25.1
 
 Introduced the Evidence Sufficiency Framework.
