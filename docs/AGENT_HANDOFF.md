@@ -8,13 +8,17 @@ It helps trading-card buyers discover opportunities, evaluate in-person purchase
 
 ## Current Development Phase
 
-Current sprint: Sprint 28, Asset Assessment Engine.
+Current sprint: Sprint 29, Intelligence Provider SDK.
 
 The app now evaluates a selected card through deterministic Vendor Workflow states, Card Profile, Asset Intelligence models, condition-adjusted market context, strategy-weighted signals, Negotiation Ladder, and deterministic Decision Resolver output.
 
 Sprint 28 adds Asset Assessment as the canonical interpretation layer. Intelligence models provide evidence, Assessment interprets evidence, Business Profiles apply business context, Strategies apply business objectives, Negotiation consumes strategy-shaped output, and Decision evaluates the validated offer.
 
 `CardProfile.assetAssessment` is now the shared assessment output. It includes overall assessment, overall confidence, evidence coverage, primary drivers, supporting drivers, risk factors, opportunity factors, and business summary.
+
+Sprint 29 adds `lib/providers/sdk/` as the reusable provider lifecycle layer. Providers should supply data only; SDK contracts own normalization, health, cache hooks, diagnostics, evidence mapping, confidence contribution, metadata, retry hooks, and validation hooks.
+
+Planned SDK providers are metadata-only for EDHREC, PSA, BGS, CGC, Cardmarket, TCGplayer, Melee, MTGO, LigaMagic, and eBay. No live integrations, scraping, or unofficial APIs were added.
 
 Playability Intelligence now measures why a card has play demand. It is registered in the Asset Intelligence Framework, backed first by Scryfall legalities, exposed on `CardProfile.playabilityProfile`, and consumed by strategies through configurable `Playability` signal weights.
 
@@ -75,6 +79,7 @@ Asset Assessment must not decide BUY/PASS. It synthesizes evidence into asset un
 - Playability Intelligence Level 3
 - Asset Knowledge Graph
 - Asset Assessment Engine
+- Intelligence Provider SDK
 - Certification Provider Registry
 - Placeholder Certification Provider
 - Offer Policy

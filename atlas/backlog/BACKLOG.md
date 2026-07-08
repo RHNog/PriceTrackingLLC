@@ -3,6 +3,9 @@
 ## High Priority
 
 - Add official-provider Certification population ingestion once permitted sources are selected.
+- Migrate Scryfall Identity Provider to the Provider SDK lifecycle.
+- Migrate Scryfall Market Provider to the Provider SDK lifecycle.
+- Add approved live SDK adapters for EDHREC, PSA, BGS, CGC, Cardmarket, TCGplayer, Melee, MTGO, LigaMagic, and eBay.
 - Add provider-backed relationship enrichment for the Asset Knowledge Graph.
 - Add Assessment driver calibration from Evaluation History outcomes.
 - Add Atlas Assessment diagnostics for drivers, risk factors, and evidence coverage.
@@ -12,6 +15,7 @@
 - Add EDHREC Playability Provider once an approved integration path exists.
 - Add MTGGoldfish, Melee, MTGO, and Tournament API Playability providers once approved integration paths exist.
 - Add provider-specific adapters for EDHREC, MTGGoldfish, Melee, MTGO, and Tournament APIs.
+- Add Provider SDK contract tests for retry and validation failure paths.
 - Add automated validation for Playability role classification.
 - Add generated Evidence Sufficiency reports grouped by Intelligence model.
 - Add a command or script to run `RepositoryScanner` and write generated summaries.

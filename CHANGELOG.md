@@ -9,6 +9,10 @@ The format is inspired by "Keep a Changelog".
 ## [Unreleased]
 
 ### Added
+- Sprint 29 reusable Intelligence Provider SDK.
+- `lib/providers/sdk/` with generic provider client, adapter, evidence, health, coverage, metadata, registry, diagnostics, cache, and result contracts.
+- Planned SDK adapter metadata for EDHREC, PSA, BGS, CGC, Cardmarket, TCGplayer, Melee, MTGO, LigaMagic, and eBay without live integrations.
+- Provider SDK diagnostics in Atlas Inspector for metadata, health, coverage, evidence contribution, lifecycle, and integration gaps.
 - Sprint 28 Asset Assessment Engine.
 - `lib/assessment/` with Asset Assessment engine, registry, evidence, reasoning, confidence, summary, and assessment contracts.
 - Asset Assessment registered as a first-class Asset Intelligence model and Intelligence Console tile.

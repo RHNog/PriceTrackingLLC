@@ -17,7 +17,44 @@ Top-level structure:
 - `lib/assessment/`: Asset Assessment Engine, assessment registry, evidence, reasoning, confidence, summary, and assessment contracts.
 - `lib/engines/`: provider-independent business and interpretation engines.
 - `lib/providers/`: external or mocked data provider implementations.
+- `lib/providers/sdk/`: reusable provider lifecycle SDK and planned provider metadata.
 - `lib/intelligence/certification/`: provider-ready Certification Intelligence model.
+
+## Intelligence Provider SDK
+
+The Provider SDK is the reusable lifecycle layer for future data providers.
+
+Core files:
+
+- `lib/providers/sdk/ProviderClient.ts`
+- `lib/providers/sdk/ProviderAdapter.ts`
+- `lib/providers/sdk/ProviderEvidence.ts`
+- `lib/providers/sdk/ProviderHealth.ts`
+- `lib/providers/sdk/ProviderCoverage.ts`
+- `lib/providers/sdk/ProviderMetadata.ts`
+- `lib/providers/sdk/ProviderRegistry.ts`
+- `lib/providers/sdk/ProviderDiagnostics.ts`
+- `lib/providers/sdk/ProviderCache.ts`
+- `lib/providers/sdk/ProviderResult.ts`
+
+Provider rule:
+
+Providers supply data. The SDK owns normalization, health, caching hooks, diagnostics, evidence mapping, confidence contribution, provider metadata, retry hooks, and validation hooks.
+
+Prepared SDK provider metadata:
+
+- EDHREC
+- PSA
+- BGS
+- CGC
+- Cardmarket
+- TCGplayer
+- Melee
+- MTGO
+- LigaMagic
+- eBay
+
+These adapters are metadata-only and waiting for approved integration paths. They do not scrape, do not call unofficial APIs, and do not change existing provider behavior.
 
 ## Asset Knowledge Graph
 

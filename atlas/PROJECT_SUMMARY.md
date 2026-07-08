@@ -36,6 +36,10 @@ Sprint 28 introduces the Asset Assessment Engine.
 
 `lib/assessment/` now synthesizes Knowledge Graph, Playability, Certification, Collector, Investment, Market, Liquidity, Business Context, and Evidence Sufficiency into one deterministic Asset Assessment. Assessment produces overall assessment, confidence, evidence coverage, primary drivers, supporting drivers, risk factors, opportunity factors, and business summary. Business Profiles and Strategies consume this assessment instead of inspecting individual Intelligence models directly.
 
+Sprint 29 introduces the Intelligence Provider SDK.
+
+`lib/providers/sdk/` now defines the provider lifecycle for future integrations. Providers supply data only; SDK contracts own normalization, health, caching hooks, diagnostics, evidence mapping, confidence contribution, provider metadata, retry hooks, and validation hooks. EDHREC, PSA, BGS, CGC, Cardmarket, TCGplayer, Melee, MTGO, LigaMagic, and eBay are registered as planned metadata-only providers.
+
 ## Current Architecture
 
 PriceTrackingLLC is a Next.js, TypeScript, and Tailwind CSS application for professional trading-card buying decisions.
@@ -45,6 +49,7 @@ The runtime architecture separates:
 - Query and identity interpretation.
 - Printing, finish, and condition resolution.
 - Market provider normalization.
+- Provider SDK lifecycle normalization.
 - Business Profile and Offer Policy assumptions.
 - System Readiness and Pipeline Integrity.
 - Card and Asset Intelligence.
@@ -59,11 +64,11 @@ Atlas is not part of this runtime architecture. It is an internal companion syst
 
 ## Current Sprint
 
-Sprint 28: Asset Assessment Engine
+Sprint 29: Intelligence Provider SDK
 
 ## Current Milestone
 
-Canonical evidence interpretation layer for asset understanding.
+Reusable provider lifecycle infrastructure.
 
 ## Open Issues
 
@@ -73,6 +78,7 @@ Canonical evidence interpretation layer for asset understanding.
 - Existing test execution needs a formal alias-aware test runner.
 - Knowledge Graph relationship coverage is configured for known examples and should be provider-enriched later.
 - Assessment driver weights are deterministic and should be calibrated with future outcome history.
+- Provider SDK adapters are metadata-only until approved integration paths exist.
 
 ## Technical Debt
 
@@ -83,7 +89,8 @@ Canonical evidence interpretation layer for asset understanding.
 - Atlas has no drift detection yet.
 - Relationship confidence calibration remains future work.
 - Assessment source weighting remains configuration-ready future work.
+- Existing Scryfall providers still use their current local provider contracts and should migrate gradually.
 
 ## Next Recommended Sprint
 
-Calibrate Assessment drivers with Evaluation History and add Atlas Assessment diagnostics.
+Migrate existing Scryfall providers into the Provider SDK lifecycle without changing domain outputs.

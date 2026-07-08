@@ -2,6 +2,16 @@
 
 This file summarizes major prompts and architectural instructions. It intentionally avoids copying every prompt in full.
 
+## Sprint 29
+
+Purpose: create a reusable Intelligence Provider SDK.
+
+Core instruction: every future provider should follow the same lifecycle; providers supply data while SDK infrastructure owns normalization, health, caching hooks, diagnostics, evidence mapping, confidence contribution, metadata, retry hooks, and validation hooks.
+
+Major files affected: `lib/providers/sdk/`, Atlas Inspector provider diagnostics, provider SDK tests, and Atlas documentation.
+
+Result: generic provider contracts, planned metadata-only adapters for EDHREC, PSA, BGS, CGC, Cardmarket, TCGplayer, Melee, MTGO, LigaMagic, and eBay, and Atlas-visible provider health, coverage, and evidence contribution.
+
 ## Sprint 28
 
 Purpose: introduce the Asset Assessment Engine.

@@ -2,6 +2,50 @@
 
 Atlas is the permanent project knowledge base for PriceTrackingLLC.
 
+## Sprint 29 Synchronization
+
+Provider SDK architecture:
+
+- Provider Client
+- Provider Adapter
+- Provider Evidence
+- Provider Health
+- Provider Coverage
+- Provider Metadata
+- Provider Registry
+- Provider Diagnostics
+- Provider Cache
+- Provider Result
+
+Prepared provider metadata:
+
+- EDHREC
+- PSA
+- BGS
+- CGC
+- Cardmarket
+- TCGplayer
+- Melee
+- MTGO
+- LigaMagic
+- eBay
+
+SDK responsibilities:
+
+- Normalization
+- Health
+- Caching hooks
+- Diagnostics
+- Evidence mapping
+- Confidence contribution
+- Provider metadata
+- Retry hooks
+- Validation hooks
+
+Rule:
+
+Providers supply data only. The SDK owns lifecycle behavior. Planned providers are metadata-only until approved integration paths exist.
+
 ## Sprint 28 Synchronization
 
 Asset Assessment architecture:

@@ -49,6 +49,9 @@
 - Assessment Drivers
 - Risk Factors
 - Evidence Coverage
+- Intelligence Provider SDK
+- Provider SDK Registry
+- Provider SDK Diagnostics
 - Certification Provider Registry
 - Placeholder PSA, BGS, and CGC certification provider coverage
 - Marketplace Profile templates
@@ -67,15 +70,15 @@
 
 ## Current Sprint
 
-Sprint 28: Asset Assessment Engine
+Sprint 29: Intelligence Provider SDK
 
 Goals:
 
-- Introduce a deterministic assessment layer that synthesizes all Intelligence model evidence.
-- Generate primary drivers, supporting drivers, risk factors, opportunity factors, evidence coverage, confidence, and business summary.
-- Keep Intelligence models as evidence providers only.
-- Make Business Profiles and Strategies consume Asset Assessment rather than individual models.
-- Preserve the Intelligence Console layout and Business Profile design.
+- Introduce a reusable provider lifecycle contract.
+- Keep providers responsible for supplying data only.
+- Move normalization, health, cache hooks, diagnostics, evidence mapping, confidence contribution, metadata, retry hooks, and validation hooks into SDK infrastructure.
+- Prepare planned adapters for EDHREC, PSA, BGS, CGC, Cardmarket, TCGplayer, Melee, MTGO, LigaMagic, and eBay.
+- Avoid live integrations until approved provider paths exist.
 
 ## Near-Term Roadmap
 
@@ -88,6 +91,7 @@ Sprint 27: Printing Descriptor Engine
 ## Future Roadmap
 
 - Market Provider integrations
+- Provider SDK migration for existing Scryfall identity and market providers
 - Pricing normalization
 - Currency engine
 - Market Context Engine

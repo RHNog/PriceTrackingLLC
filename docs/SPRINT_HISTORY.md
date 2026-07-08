@@ -2,6 +2,16 @@
 
 This file records logical product milestones. Sprint numbers may not perfectly match commit history.
 
+## Sprint 29
+
+Introduced the reusable Intelligence Provider SDK.
+
+- Added `lib/providers/sdk/` contracts for provider client, adapter, evidence, health, coverage, metadata, registry, diagnostics, cache, and results.
+- Centralized provider lifecycle responsibilities for normalization, health, caching hooks, diagnostics, evidence mapping, confidence contribution, metadata, retry hooks, and validation hooks.
+- Registered planned SDK adapters for EDHREC, PSA, BGS, CGC, Cardmarket, TCGplayer, Melee, MTGO, LigaMagic, and eBay.
+- Kept all new providers metadata-only with no live integrations, scraping, or unofficial API usage.
+- Added Atlas Inspector Provider SDK diagnostics for health, coverage, evidence contribution, lifecycle status, outputs, and gaps.
+
 ## Sprint 28
 
 Introduced the Asset Assessment Engine as the canonical synthesis layer for asset understanding.

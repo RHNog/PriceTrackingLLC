@@ -2,6 +2,8 @@
 
 ## Major Product And Architecture Decisions
 
+0.8. Future providers must follow the Provider SDK lifecycle. Providers supply data; SDK infrastructure owns normalization, health, cache hooks, diagnostics, evidence mapping, confidence contribution, metadata, retry hooks, and validation hooks.
+
 0.7. Asset Assessment is the canonical interpretation layer for asset evidence. Intelligence models provide evidence; Assessment interprets it; Business Profiles and Strategies consume Assessment.
 
 0.6. Asset Knowledge Graph is the reusable semantic layer for Intelligence models. Relationship Registry owns configured semantic relationships; models consume the graph but do not mutate strategy, negotiation, or UI behavior.

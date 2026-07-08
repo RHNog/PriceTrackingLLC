@@ -2,49 +2,41 @@
 
 ## Sprint
 
-Sprint 28 - Asset Assessment Engine
+Sprint 29 - Intelligence Provider SDK
 
 ## Summary
 
-Introduced the Asset Assessment Engine as the canonical synthesis layer for Intelligence model evidence.
+Introduced the reusable Intelligence Provider SDK for future provider lifecycle consistency.
 
 ## Goal
 
-Generate one deterministic Asset Assessment that downstream Business Profile and Strategy layers can consume.
+Create SDK infrastructure for normalization, health, caching hooks, diagnostics, evidence mapping, confidence contribution, metadata, retry hooks, and validation hooks.
 
 ## Files Added
 
-- `lib/assessment/AssessmentConfidence.ts`
-- `lib/assessment/AssessmentEvidence.ts`
-- `lib/assessment/AssessmentReasoning.ts`
-- `lib/assessment/AssessmentRegistry.ts`
-- `lib/assessment/AssessmentSummary.ts`
-- `lib/assessment/AssetAssessment.ts`
-- `lib/assessment/AssetAssessmentEngine.ts`
-- `tests/asset-assessment.test.ts`
+- `lib/providers/sdk/ProviderAdapter.ts`
+- `lib/providers/sdk/ProviderCache.ts`
+- `lib/providers/sdk/ProviderClient.ts`
+- `lib/providers/sdk/ProviderCoverage.ts`
+- `lib/providers/sdk/ProviderDiagnostics.ts`
+- `lib/providers/sdk/ProviderEvidence.ts`
+- `lib/providers/sdk/ProviderHealth.ts`
+- `lib/providers/sdk/ProviderMetadata.ts`
+- `lib/providers/sdk/ProviderRegistry.ts`
+- `lib/providers/sdk/ProviderResult.ts`
+- `tests/provider-sdk.test.ts`
 
 ## Files Modified
 
-- `components/intelligence/IntelligenceConsole.tsx`
-- `components/intelligence/IntelligenceDetail.tsx`
-- `components/intelligence/IntelligenceTile.tsx`
-- `lib/business/BusinessProfileEngine.ts`
-- `lib/engines/cardIntelligence/CardIntelligenceEngine.ts`
-- `lib/engines/cardIntelligence/models/CardProfile.ts`
-- `lib/engines/evaluation/evaluatePurchase.ts`
-- `lib/engines/negotiation/NegotiationLadderEngine.ts`
-- `lib/engines/strategy/calculateSignalStrategyScore.ts`
-- `lib/intelligence/framework/AssetIntelligenceFramework.ts`
-- `lib/pipeline/PipelineInspector.ts`
-- `tests/evaluation-history.test.ts`
+- `features/vendor/components/AtlasInspector.tsx`
 - Sprint documentation and Atlas files.
 
 ## Architecture Changes
 
-- Added a deterministic assessment layer over registered Intelligence evidence.
-- Asset Assessment produces overall assessment, confidence, evidence coverage, drivers, risks, opportunities, and business summary.
-- Business Profile explanations and Strategy scoring now consume Asset Assessment.
-- Intelligence Console renders Asset Assessment through the existing tile/detail pattern.
+- Added generic provider lifecycle contracts.
+- Registered metadata-only planned providers for EDHREC, PSA, BGS, CGC, Cardmarket, TCGplayer, Melee, MTGO, LigaMagic, and eBay.
+- Atlas Inspector consumes Provider SDK metadata, health, coverage, evidence contribution, lifecycle status, and gaps.
+- No live provider integrations were added.
 
 ## Documentation Updated
 
@@ -60,8 +52,8 @@ Generate one deterministic Asset Assessment that downstream Business Profile and
 
 ## Technical Debt
 
-- Assessment driver weights are deterministic and should later be calibrated against outcomes.
-- Future Intelligence models can extend Assessment through registered framework evidence.
+- Existing Scryfall providers still use legacy provider contracts and should migrate gradually.
+- Planned providers are metadata-only until approved integration paths exist.
 
 ## Known Issues
 
@@ -69,8 +61,7 @@ Generate one deterministic Asset Assessment that downstream Business Profile and
 
 ## Tests Added
 
-- Asset Assessment tests verify Mox Opal, Chrome Mox, Sol Ring, Black Lotus, Collected Company, and Counterspell.
-- Tests verify primary drivers, risk factors, business summary, confidence, Business Profile assessment context, and Strategy assessment scoring.
+- Provider SDK tests verify planned provider registration, metadata, health, coverage, evidence contribution, diagnostics, caching, normalization, and validation lifecycle.
 
 ## Build Status
 
@@ -80,4 +71,4 @@ Generate one deterministic Asset Assessment that downstream Business Profile and
 
 ## Suggested Next Sprint
 
-Calibrate Assessment drivers and add Atlas Assessment diagnostics.
+Migrate Scryfall providers into the Provider SDK lifecycle.

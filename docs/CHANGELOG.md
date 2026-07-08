@@ -4,6 +4,8 @@
 
 ### Added
 
+- Sprint 29 Intelligence Provider SDK documentation.
+- Provider lifecycle, metadata, health, coverage, diagnostics, evidence mapping, confidence contribution, retry hooks, validation hooks, cache hooks, and planned provider documentation.
 - Sprint 28 Asset Assessment Engine documentation.
 - Assessment philosophy, reasoning, evidence interpretation, primary drivers, risk factors, business summary, architecture graph, dependency graph, and Atlas synchronization documentation.
 - Sprint 26 Playability Intelligence Level 3 documentation.
@@ -67,6 +69,8 @@
 
 ### Changed
 
+- Current sprint updated to Sprint 29.
+- Documentation now treats future providers as SDK lifecycle participants that supply data only.
 - Current sprint updated to Sprint 28.
 - Documentation now treats Asset Assessment as the canonical evidence interpretation layer consumed by Business Profiles and Strategies.
 - Current sprint updated to Sprint 26.

@@ -25,6 +25,8 @@ Decision Resolver should remain deterministic after receiving a validated Offer 
 
 - Identity Providers and Market Providers are separate provider families.
 - Provider responses must be normalized before entering engines or UI.
+- Future providers must follow the Provider SDK lifecycle.
+- Providers supply data only; SDK infrastructure owns normalization, health, caching hooks, diagnostics, evidence mapping, confidence contribution, metadata, retry hooks, and validation hooks.
 - Variant Resolution Policy owns automatic finish defaults.
 - Workflow Command Processor owns Vendor Workspace context progression.
 - Asset Context protects downstream state from stale upstream selections.
@@ -110,6 +112,47 @@ Assessment outputs:
 - Business Summary
 
 Unknown evidence reduces confidence only. Unknown evidence does not reduce the quality score, because unknown asset and weak asset must remain separate states.
+
+## Provider SDK Knowledge
+
+The Provider SDK lives under `lib/providers/sdk/`.
+
+Core contracts:
+
+- `ProviderClient`
+- `ProviderAdapter`
+- `ProviderEvidence`
+- `ProviderHealth`
+- `ProviderCoverage`
+- `ProviderMetadata`
+- `ProviderRegistry`
+- `ProviderDiagnostics`
+- `ProviderCache`
+- `ProviderResult`
+
+Prepared metadata-only providers:
+
+- EDHREC
+- PSA
+- BGS
+- CGC
+- Cardmarket
+- TCGplayer
+- Melee
+- MTGO
+- LigaMagic
+- eBay
+
+Lifecycle rule:
+
+Providers supply data only. The SDK owns normalization, health, caching hooks, diagnostics, evidence mapping, confidence contribution, provider metadata, retry hooks, and validation hooks.
+
+Current state:
+
+- Planned providers are metadata-only.
+- No live integrations were added.
+- No scraping or unofficial APIs were added.
+- Atlas Inspector consumes Provider SDK metadata for developer diagnostics.
 
 ## Permanent Rules
 

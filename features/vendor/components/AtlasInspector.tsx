@@ -3,6 +3,7 @@
 import type { AssetContextValidationResult } from "@/lib/workflow/AssetContextValidator";
 import type { CardProfile } from "@/lib/engines/cardIntelligence/models/CardProfile";
 import type { PipelineReport } from "@/lib/pipeline/PipelineReport";
+import { getProviderSdkSnapshot } from "@/lib/providers/sdk/ProviderRegistry";
 import type { ReadinessReport } from "@/lib/validation/ReadinessReport";
 import type { CardConditionCode } from "@/types/conditionProfile";
 import type { MarketSnapshot } from "@/types/marketSnapshot";
@@ -83,6 +84,7 @@ export default function AtlasInspector({
   workflow,
 }: AtlasInspectorProps) {
   const assetContext = workflow.assetContext;
+  const providerSdkSnapshot = getProviderSdkSnapshot();
 
   return (
     <aside className="space-y-3 rounded-lg border border-cyan-900/60 bg-zinc-950 p-4 shadow-lg shadow-cyan-950/20">
@@ -450,6 +452,52 @@ export default function AtlasInspector({
           label="Market Snapshot"
           value={assetContext.marketSnapshotId || "Not loaded"}
         />
+      </InspectorSection>
+
+      <InspectorSection title="Provider SDK">
+        <div className="grid gap-2">
+          {providerSdkSnapshot.diagnostics.map((diagnostic) => (
+            <div
+              key={diagnostic.metadata.id}
+              className="rounded-md border border-zinc-800 bg-zinc-950/60 px-3 py-2"
+            >
+              <div className="grid gap-2 sm:grid-cols-3">
+                <KeyValue label="Provider" value={diagnostic.metadata.name} />
+                <KeyValue label="Domain" value={diagnostic.metadata.domain} />
+                <KeyValue
+                  label="Lifecycle"
+                  value={diagnostic.metadata.lifecycleStatus}
+                />
+                <KeyValue label="Health" value={diagnostic.health.status} />
+                <KeyValue
+                  label="Coverage"
+                  value={diagnostic.coverage.coverageAreas.join(", ")}
+                />
+                <KeyValue
+                  label="Evidence"
+                  value={diagnostic.evidence
+                    .map((item) => item.evidenceType)
+                    .join(", ")}
+                />
+                <KeyValue
+                  label="Gaps"
+                  value={diagnostic.coverage.gaps.join(", ")}
+                />
+                <KeyValue
+                  label="Outputs"
+                  value={diagnostic.metadata.supportedOutputs.join(", ")}
+                />
+                <KeyValue
+                  label="Confidence Contribution"
+                  value={`${diagnostic.evidence.reduce(
+                    (sum, item) => sum + item.confidenceContribution,
+                    0,
+                  )}%`}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
       </InspectorSection>
     </aside>
   );

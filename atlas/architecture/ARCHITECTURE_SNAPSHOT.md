@@ -12,6 +12,7 @@ Atlas Sprint A1
 - Domain contracts under `types/`.
 - Provider-independent engines under `lib/engines/`.
 - External and mock providers under `lib/providers/`.
+- Provider SDK under `lib/providers/sdk/`.
 - Business profile system under `lib/business/`.
 - Workflow command and context systems under `lib/workflow/`.
 - Intelligence framework, Playability model, and Certification model under `lib/intelligence/`.
@@ -53,12 +54,14 @@ Intelligence model evidence -> Evidence Sufficiency -> Asset Assessment Engine -
 
 ## Providers
 
+- Provider SDK lifecycle for metadata, health, coverage, evidence, diagnostics, caching hooks, retry hooks, validation hooks, and normalization.
 - Scryfall Identity Provider.
 - Scryfall Market Provider.
 - Mock Marketplace Provider.
 - TCGplayer, eBay, CardTrader, LigaMagic provider placeholders or abstractions.
+- Planned SDK metadata for EDHREC, PSA, BGS, CGC, Cardmarket, TCGplayer, Melee, MTGO, LigaMagic, and eBay.
 
-Provider rule: provider data must be adapted into domain objects before engines or UI consume it.
+Provider rule: providers supply data only. SDK infrastructure owns lifecycle behavior, and provider data must be adapted into domain objects before engines or UI consume it.
 
 ## Intelligence Models
 
@@ -87,6 +90,8 @@ Playability maturity rule: legality is evidence, not the conclusion. Playability
 Evidence sufficiency rule: required evidence gates grades. Unknown is not failure.
 
 Provider adapter rule: future playability providers normalize evidence into the Playability Profile instead of changing downstream consumers.
+
+Provider SDK rule: future providers must expose metadata, health, coverage, evidence contribution, diagnostics, cache hooks, retry hooks, validation hooks, and normalization through SDK contracts.
 
 Knowledge graph rule: semantic relationships are shared infrastructure. Relationship Registry and Relationship Resolver enrich Intelligence reasoning without changing production UI contracts.
 
