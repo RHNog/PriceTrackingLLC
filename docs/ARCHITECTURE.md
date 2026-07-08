@@ -15,6 +15,7 @@ Top-level structure:
 - `config/`: configurable engine thresholds and weights.
 - `lib/engines/`: provider-independent business and interpretation engines.
 - `lib/providers/`: external or mocked data provider implementations.
+- `lib/intelligence/certification/`: provider-ready Certification Intelligence model.
 
 ## App Shell
 
@@ -89,6 +90,10 @@ Asset Intelligence Framework
 
 ↓
 
+Certification Intelligence
+
+↓
+
 Card Intelligence Models
 
 ↓
@@ -117,6 +122,10 @@ Market Providers answer:
 
 What is this card worth?
 
+Certification Providers answer:
+
+What are the collectible certification characteristics of this asset?
+
 These provider families must stay separate.
 
 Current state:
@@ -127,6 +136,73 @@ Current state:
 - Lowest listing and recent sale data are not live yet.
 - UI components must never know Scryfall response shapes.
 - Provider data must be adapted into domain objects before it reaches engines or UI.
+
+Certification provider rules:
+
+- Certification Intelligence measures characteristics only.
+- Certification Intelligence never decides BUY, NEGOTIATE, or PASS.
+- Current Certification implementation uses a placeholder provider only.
+- PSA, BGS, and CGC are represented as current placeholder-backed providers.
+- TAG, SGC, and ARS are registered as future providers.
+- No scraping or unofficial APIs are allowed.
+- Future providers must register through `CertificationRegistry`.
+
+## Certification Intelligence
+
+Certification Intelligence is a first-class Asset Intelligence model.
+
+Certification flow:
+
+Printing + Variant
+
+↓
+
+Certification Engine
+
+↓
+
+Certification Provider Registry
+
+↓
+
+Certification Profile
+
+↓
+
+Asset Intelligence Framework
+
+↓
+
+Collector Intelligence
+
+↓
+
+Strategy
+
+↓
+
+Negotiation Ladder
+
+↓
+
+Decision Resolver
+
+Certification Profile exposes overall certification grade plus provider-level grade, confidence, population, gem population, gem rate, estimated premium, trend, status, source, and last updated.
+
+Certification indicators:
+
+- Certification Grade
+- Population Scarcity
+- Gem Rate
+- Certification Premium
+- Population Trend
+- Collector Competition
+- Submission Saturation
+
+Future indicators:
+
+- Cross-grading
+- Population Growth
 
 ## Market Price Architecture
 

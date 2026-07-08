@@ -4,6 +4,8 @@
 
 ### Added
 
+- Sprint 24 Certification Intelligence Platform documentation.
+- Certification Intelligence philosophy, Provider abstraction, Certification Profile, Collector integration, future provider roadmap, dependency graph, architecture graph, backlog, and technical debt documentation.
 - Sprint 23.2 Pipeline Integrity documentation.
 - Pipeline Inspector, Offer Policy, first-invalid-stage termination, zero-valued ladder prevention, Business Invariants, architecture graph, technical debt, and Atlas Pipeline Trace documentation.
 - Sprint 23.1 System Readiness Platform documentation.
@@ -53,6 +55,8 @@
 
 ### Changed
 
+- Current sprint updated to Sprint 24.
+- Documentation now treats Certification Intelligence as a first-class measurement model consumed by Collector Intelligence.
 - Current sprint updated to Sprint 23.2.
 - Documentation now treats Offer Policy as owned by Business Profiles and consumed by Offer Ladder.
 - Documentation now treats Pipeline Inspector as the first-invalid-stage diagnostic owner for purchase evaluation.

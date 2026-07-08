@@ -36,6 +36,9 @@
 - Pipeline Integrity
 - Pipeline Inspector
 - Offer Policy extraction
+- Certification Intelligence Platform
+- Certification Provider Registry
+- Placeholder PSA, BGS, and CGC certification provider coverage
 - Marketplace Profile templates
 - Cost Profile assumptions
 - Playability Intelligence Platform
@@ -52,23 +55,24 @@
 
 ## Current Sprint
 
-Sprint 23.2: Pipeline Integrity
+Sprint 24: Certification Intelligence Platform
 
 Goals:
 
-- Inspect the complete evaluation pipeline from Asset Context through Decision.
-- Terminate evaluation at the first invalid or unavailable stage.
-- Prevent zero-valued Offer Ladder outputs from driving PASS decisions.
-- Make Offer Policy explicit and owned by Business Profiles.
-- Keep pipeline diagnostics developer-only in Atlas Inspector.
+- Certification Intelligence measures collectible certification characteristics.
+- Certification Intelligence never decides BUY / PASS.
+- Collector Intelligence consumes Certification Intelligence.
+- Strategies consume Collector Intelligence through configurable weights.
+- Negotiation consumes Strategy output.
+- Provider abstraction prepares PSA, BGS, CGC, TAG, SGC, and ARS without scraping or unofficial APIs.
 
 ## Near-Term Roadmap
 
-Sprint 24: Live Hot Opportunities
+Sprint 25: Live Hot Opportunities
 
-Sprint 25: Live Marketplace Listings
+Sprint 26: Live Marketplace Listings
 
-Sprint 26: Printing Descriptor Engine
+Sprint 27: Printing Descriptor Engine
 
 ## Future Roadmap
 
@@ -82,6 +86,9 @@ Sprint 26: Printing Descriptor Engine
 - Pipeline Report snapshots in Evaluation History
 - Business Profile policy validation before save
 - Asset Intelligence model health dashboard
+- Official certification population providers
+- Certification cross-grading indicator
+- Certification population growth indicator
 - Intelligence Console keyboard and visual regression coverage
 - Liquidity Engine
 - EDHREC Playability Provider

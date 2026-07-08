@@ -2,6 +2,33 @@
 
 Atlas is the permanent project knowledge base for PriceTrackingLLC.
 
+## Sprint 24 Synchronization
+
+Certification Intelligence is registered as a first-class Asset Intelligence model.
+
+Dependency rule:
+
+Certification Intelligence → Collector Intelligence → Strategy → Negotiation Ladder → Decision Resolver.
+
+Provider abstraction:
+
+- `CertificationProvider`
+- `CertificationRegistry`
+- Placeholder provider for PSA, BGS, and CGC.
+- Future providers: TAG, SGC, ARS.
+
+Backlog:
+
+- Official provider-backed population data.
+- Cross-grading indicators.
+- Population growth indicators.
+- Provider health diagnostics.
+
+Technical debt:
+
+- Certification population, gem population, and gem rate are placeholders until official provider data exists.
+- Estimated certification premium is metadata-based and must remain labeled as placeholder.
+
 ## Continuity Rule
 
 Every future sprint must update:

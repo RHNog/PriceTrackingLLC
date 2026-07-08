@@ -1,5 +1,13 @@
 # Project Summary
 
+Sprint 24 adds Certification Intelligence as a first-class Asset Intelligence model.
+
+Certification Intelligence measures collectible certification characteristics through a provider abstraction. Current coverage is placeholder-only for PSA, BGS, and CGC, with TAG, SGC, and ARS registered as future providers. It does not scrape, does not use unofficial APIs, and never decides BUY/PASS.
+
+Dependency rule:
+
+Certification Intelligence -> Collector Intelligence -> Strategy -> Negotiation Ladder -> Decision Resolver.
+
 ## Current Architecture
 
 PriceTrackingLLC is a Next.js, TypeScript, and Tailwind CSS application for professional trading-card buying decisions.

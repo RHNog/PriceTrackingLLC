@@ -14,7 +14,7 @@ Atlas Sprint A1
 - External and mock providers under `lib/providers/`.
 - Business profile system under `lib/business/`.
 - Workflow command and context systems under `lib/workflow/`.
-- Intelligence framework and Playability model under `lib/intelligence/`.
+- Intelligence framework, Playability model, and Certification model under `lib/intelligence/`.
 - Evaluation history under `lib/history/`.
 - System readiness under `lib/validation/`.
 - Pipeline integrity under `lib/pipeline/`.
@@ -24,7 +24,7 @@ Atlas Sprint A1
 
 Runtime architecture flows through normalized domain objects:
 
-Query and identity interpretation -> printing and variant resolution -> market snapshot -> business profile -> readiness and pipeline validation -> card intelligence -> strategy -> negotiation ladder -> offer validation -> decision -> presentation.
+Query and identity interpretation -> printing and variant resolution -> certification profile -> market snapshot -> business profile -> readiness and pipeline validation -> card intelligence -> strategy -> negotiation ladder -> offer validation -> decision -> presentation.
 
 Atlas is outside this runtime chain.
 
@@ -53,9 +53,14 @@ Provider rule: provider data must be adapted into domain objects before engines 
 - Asset Intelligence Framework.
 - Card Intelligence signals.
 - Playability Intelligence backed by Scryfall legalities.
+- Certification Intelligence backed by a placeholder provider and provider registry.
 - Future models: Grading, Regional, Behavior, Historical, Volatility, Demand, Scarcity, Liquidity, and other registered intelligence dimensions.
 
 Intelligence rule: intelligence measures asset characteristics. It does not decide BUY, NEGOTIATE, PASS, or offer values.
+
+Certification dependency graph: Certification Intelligence -> Collector Intelligence -> Strategy -> Negotiation Ladder -> Decision Resolver.
+
+Future certification providers: PSA, BGS, CGC, TAG, SGC, and ARS through `CertificationRegistry`.
 
 ## Workflows
 

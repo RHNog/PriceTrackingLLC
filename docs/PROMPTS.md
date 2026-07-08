@@ -2,6 +2,16 @@
 
 This file summarizes major prompts and architectural instructions. It intentionally avoids copying every prompt in full.
 
+## Sprint 24
+
+Purpose: introduce the Certification Intelligence Platform.
+
+Core instruction: create Certification Intelligence as another first-class Asset Intelligence model that measures collectible certification characteristics and never decides BUY/PASS.
+
+Major files affected: `lib/intelligence/certification/`, Asset Intelligence Framework, Card Intelligence, Intelligence Console, tests, and Atlas documentation.
+
+Result: provider-ready Certification Profile with placeholder PSA, BGS, and CGC coverage, future provider status, Collector Intelligence consumption, and no scraping or unofficial APIs.
+
 ## Sprint 0
 
 Purpose: set up the project.

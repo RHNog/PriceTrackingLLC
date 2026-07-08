@@ -31,6 +31,9 @@ Decision Resolver should remain deterministic after receiving a validated Offer 
 - System Readiness owns prerequisite validation.
 - Pipeline Inspector owns first-invalid-stage diagnostics.
 - Business Profiles own Offer Policy.
+- Certification Intelligence measures collectible certification characteristics only.
+- Certification Provider data must enter through `CertificationRegistry`.
+- Collector Intelligence consumes Certification Intelligence before strategies interpret collector value.
 - Offer Ladder Validator blocks invalid negotiation math before Decision Resolver executes.
 
 ## Permanent Rules
@@ -42,3 +45,21 @@ Decision Resolver should remain deterministic after receiving a validated Offer 
 - Do not add production imports to Atlas.
 - Do not expose Atlas artifacts to customers.
 - Keep canonical sprint, roadmap, architecture, decision, and prompt history in sync through source references and future generation rather than copy-paste drift.
+
+## Sprint 24 Knowledge
+
+Certification Intelligence dependency graph:
+
+Certification Intelligence -> Collector Intelligence -> Strategy -> Negotiation Ladder -> Decision Resolver.
+
+Current provider state:
+
+- Placeholder provider for PSA, BGS, and CGC.
+- Future providers: TAG, SGC, ARS.
+- No scraping.
+- No unofficial APIs.
+
+Technical debt:
+
+- Population, gem population, gem rate, population trend, and submission saturation remain placeholders.
+- Estimated premium is metadata-based until official graded-market providers exist.

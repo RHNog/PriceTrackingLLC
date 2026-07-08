@@ -2,64 +2,72 @@
 
 ## Sprint
 
-Atlas Sprint A1
+Sprint 24 - Certification Intelligence Platform
 
 ## Summary
 
-Created the isolated Atlas companion filesystem under `/atlas`. Atlas is an internal development tool for repository understanding, project memory, sprint intelligence, known-issue tracking, backlog organization, and architecture snapshots.
+Added Certification Intelligence as a first-class Asset Intelligence model and synchronized Atlas with the new provider abstraction, dependency graph, architecture graph, backlog, and technical debt.
 
 ## Goal
 
-Establish Atlas as a companion system that can understand the repository without affecting runtime behavior.
+Record Sprint 24 Certification Intelligence architecture while preserving existing application workflows.
 
 ## Files Added
 
-- `atlas/README.md`
-- `atlas/config/project.json`
-- `atlas/core/RepositoryScanner.ts`
-- `atlas/reports/ATLAS_SPRINT_REPORT.md`
-- `atlas/templates/SPRINT_REPORT_TEMPLATE.md`
-- `atlas/history/KNOWN_ISSUES.md`
-- `atlas/architecture/ARCHITECTURE_SNAPSHOT.md`
-- `atlas/backlog/BACKLOG.md`
-- `atlas/knowledge/PROJECT_KNOWLEDGE.md`
-- `atlas/PROJECT_SUMMARY.md`
+- `lib/intelligence/certification/CertificationEngine.ts`
+- `lib/intelligence/certification/CertificationProvider.ts`
+- `lib/intelligence/certification/CertificationProfile.ts`
+- `lib/intelligence/certification/CertificationIndicator.ts`
+- `lib/intelligence/certification/CertificationRegistry.ts`
+- `lib/intelligence/certification/CertificationTrend.ts`
+- `lib/intelligence/certification/CertificationSource.ts`
+- `tests/certification-intelligence.test.ts`
 
 ## Files Modified
 
-None outside `/atlas`.
+- Asset Intelligence Framework, Indicator Registry, Indicator Factory, Card Intelligence, Intelligence Console, tests, docs, and Atlas files.
 
 ## Architecture Changes
 
-Atlas was added as an isolated internal companion directory. It has no production imports, no runtime dependency, no UI, and no business-engine integration.
+- Certification Intelligence now sits before Collector Intelligence in the intelligence dependency graph.
+- Provider abstraction is separate from Identity Providers and Market Providers.
+- Placeholder PSA, BGS, and CGC summaries expose certification characteristics without external calls.
+- Future providers register through `CertificationRegistry`.
 
 ## Documentation Updated
 
-Atlas documentation was created inside `/atlas`. Existing production and project documentation were not modified for this sprint.
+- CHANGELOG
+- SPRINT_HISTORY
+- ROADMAP
+- ARCHITECTURE
+- DECISIONS
+- AGENT_HANDOFF
+- PROMPTS
+- Atlas backlog, project knowledge, architecture snapshot, and sprint report
 
 ## Technical Debt
 
-- Repository scanning is implemented as a standalone TypeScript utility but is not yet wired into a script.
-- Sprint report synchronization is documented but not automated.
-- Architecture drift detection is future work.
-- Backlog and known-issue lifecycle metadata are manual for now.
+- Certification population, gem population, gem rate, population trend, and submission saturation are placeholders.
+- Certification premium is metadata-based until official graded sales providers exist.
+- Provider health diagnostics are not implemented yet.
 
 ## Known Issues
 
-- Atlas currently summarizes repository structure from file paths only.
-- Scanner output is in-memory; future work should write generated reports.
-- No automated freshness check exists between `docs/` and `atlas/`.
+- No official certification population provider is connected.
+- No scraping or unofficial API path exists by design.
 
 ## Tests Added
 
-None. Atlas A1 adds internal documentation and a standalone scanner utility.
+- Certification Intelligence tests cover Chrome Mox, Black Lotus, Textless Urza's Saga, serialized examples, Masterpieces, and Judge Promos.
+- Framework tests cover Certification model registration.
 
 ## Build Status
 
-- `npx tsc --noEmit`: passed.
 - `npm run lint`: passed.
-- `npm run build`: passed.
+- `npx tsc --noEmit`: passed.
+- `npm run build`: passed after allowing Next.js to fetch Google font assets.
+- `node --test tests/*.test.ts`: blocked by existing `@/` path alias resolution in the raw Node test runner before assertions execute.
 
 ## Suggested Next Sprint
 
-Atlas Sprint A2: add generated report writing, architecture graph output, and documentation freshness checks while preserving total runtime isolation.
+Connect official certification providers when permitted, then add cross-grading and population growth indicators.

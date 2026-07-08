@@ -2,6 +2,18 @@
 
 This file records logical product milestones. Sprint numbers may not perfectly match commit history.
 
+## Sprint 24
+
+Certification Intelligence became a first-class Asset Intelligence model.
+
+- Added provider-ready Certification architecture under `lib/intelligence/certification/`.
+- Added a placeholder provider for PSA, BGS, and CGC with no scraping and no unofficial APIs.
+- Generated Certification Profiles with overall grade, provider grade, confidence, population, gem population, gem rate, estimated premium, trend, status, source, and last updated fields.
+- Added Certification indicators for grade, population scarcity, gem rate, premium, population trend, collector competition, and submission saturation.
+- Updated Collector Intelligence to consume Certification Intelligence while preserving configurable strategy weights.
+- Updated Intelligence Console expanded details for Certification provider status and future providers.
+- Added regression coverage for Chrome Mox, Black Lotus, Textless Urza's Saga, serialized examples, Masterpieces, and Judge Promos.
+
 ## Sprint 0
 
 Project setup, GitHub, Next.js, TypeScript, Tailwind CSS.

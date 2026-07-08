@@ -8,7 +8,7 @@ It helps trading-card buyers discover opportunities, evaluate in-person purchase
 
 ## Current Development Phase
 
-Current sprint: Sprint 23.2, Pipeline Integrity.
+Current sprint: Sprint 24, Certification Intelligence Platform.
 
 The app now evaluates a selected card through deterministic Vendor Workflow states, Card Profile, Asset Intelligence models, condition-adjusted market context, strategy-weighted signals, Negotiation Ladder, and deterministic Decision Resolver output.
 
@@ -21,6 +21,8 @@ Business Profiles now make purchase recommendations business-aware. Vendor Works
 System Readiness now validates Business Profile, Market Snapshot, Card Intelligence, and Strategy prerequisites before Strategy, Offer Ladder, or Decision Resolver execution. Evaluations carry a Readiness Report, production UI shows user-facing blockers, and Atlas Inspector exposes developer-only readiness diagnostics.
 
 Pipeline Integrity now inspects Asset, Market, Business, Cost Profile, Offer Policy, Strategy, Offer Ladder, and Decision stages. Evaluations carry a Pipeline Report, Atlas Inspector shows the first invalid stage in developer mode, and zero-valued Offer Ladder output blocks Decision Resolver execution unless a future feature explicitly defines zero as intended.
+
+Certification Intelligence now measures collectible certification characteristics as a first-class Asset Intelligence model. It exposes a Certification Profile, placeholder PSA/BGS/CGC provider summaries, future TAG/SGC/ARS status, and indicators for grade, population scarcity, gem rate, premium, population trend, collector competition, and submission saturation. It must never decide BUY/PASS; Collector Intelligence consumes it, Strategies consume Collector Intelligence through weights, and Negotiation consumes Strategy output.
 
 ## What Has Been Built?
 
@@ -49,6 +51,9 @@ Pipeline Integrity now inspects Asset, Market, Business, Cost Profile, Offer Pol
 - System Readiness Platform
 - Pipeline Integrity
 - Pipeline Inspector
+- Certification Intelligence Platform
+- Certification Provider Registry
+- Placeholder Certification Provider
 - Offer Policy
 - Readiness Report
 - Configuration Validator

@@ -6,6 +6,7 @@ import type {
   Signal,
   SignalName,
 } from "@/lib/engines/cardIntelligence/models/Signal";
+import type { CertificationProfile } from "@/lib/intelligence/certification/CertificationProfile";
 import type { PlayabilityProfile } from "@/lib/intelligence/playability/PlayabilityProfile";
 import type { Card } from "@/types/card";
 import type { ConditionProfile } from "@/types/conditionProfile";
@@ -19,6 +20,7 @@ type SignalFactoryInput = {
   condition: ConditionProfile;
   marketContext: MarketContext;
   marketContextSnapshot: ConditionMarketSnapshot;
+  certificationProfile?: CertificationProfile;
   playabilityProfile?: PlayabilityProfile;
 };
 
@@ -93,19 +95,27 @@ function scoreSignal(
   input: SignalFactoryInput,
 ) {
   const collectorScore = getCollectorScore(input.printing, input.variant);
+  const certificationScore =
+    input.certificationProfile?.overallGrade ?? collectorScore;
+  const collectorIntelligenceScore = clampScore(
+    collectorScore * 0.7 + certificationScore * 0.3,
+  );
   const rarityScore = getRarityScore(input.printing);
   const conditionScore = getConditionScore(input.condition);
   const marketConfidence = input.marketContextSnapshot.selectedPrice.confidence;
   const marketPrice = input.marketContextSnapshot.selectedPrice.price;
 
   const scores: Record<SignalName, number> = {
-    InvestmentPotential: collectorScore * 0.45 + rarityScore * 0.25 + marketConfidence * 0.3,
+    InvestmentPotential:
+      collectorIntelligenceScore * 0.45 +
+      rarityScore * 0.25 +
+      marketConfidence * 0.3,
     FlipPotential: 70 * 0.45 + marketConfidence * 0.35 + conditionScore * 0.2,
     GradingPotential: conditionScore * 0.65 + collectorScore * 0.35,
-    CollectorAppeal: collectorScore,
+    CollectorAppeal: collectorIntelligenceScore,
     Liquidity: marketPrice >= 25 ? 72 : 56,
     Volatility: 50,
-    Scarcity: rarityScore * 0.5 + collectorScore * 0.5,
+    Scarcity: rarityScore * 0.5 + collectorIntelligenceScore * 0.5,
     Demand: 68,
     Playability:
       input.playabilityProfile?.overall.score ??
@@ -148,6 +158,9 @@ function getContributingFactors(
     CollectorAppeal: [
       input.printing.treatment ?? "Standard treatment",
       input.printing.productFamily ?? "Main set",
+      input.certificationProfile
+        ? `${input.certificationProfile.modelName} ${input.certificationProfile.tier}`
+        : "Certification Intelligence unavailable",
     ],
     Liquidity: [input.marketContext.country, input.marketContext.currency],
     MarketConfidence: [

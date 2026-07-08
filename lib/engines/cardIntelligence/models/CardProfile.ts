@@ -1,4 +1,5 @@
 import type { Signal } from "@/lib/engines/cardIntelligence/models/Signal";
+import type { CertificationProfile } from "@/lib/intelligence/certification/CertificationProfile";
 import type { IntelligenceModel } from "@/lib/intelligence/framework/IntelligenceModel";
 import type { PlayabilityProfile } from "@/lib/intelligence/playability/PlayabilityProfile";
 import type { Card } from "@/types/card";
@@ -20,6 +21,7 @@ export interface CardProfile {
   marketContextSnapshot: ConditionMarketSnapshot;
   signals: Signal[];
   intelligenceModels: IntelligenceModel[];
+  certificationProfile: CertificationProfile;
   playabilityProfile: PlayabilityProfile;
   overallConfidence: number;
   generatedAt: string;

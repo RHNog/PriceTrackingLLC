@@ -17,9 +17,15 @@ function unique(values: string[]) {
 }
 
 function getTrend(cardProfile: CardProfile, model: IntelligenceModel) {
-  return model.id === "playability-intelligence"
-    ? cardProfile.playabilityProfile.overall.trend
-    : "Unknown";
+  if (model.id === "certification-intelligence") {
+    return cardProfile.certificationProfile.indicators.populationTrend.trend;
+  }
+
+  if (model.id === "playability-intelligence") {
+    return cardProfile.playabilityProfile.overall.trend;
+  }
+
+  return "Unknown";
 }
 
 function DetailRow({ label, value }: { label: string; value: string }) {
@@ -84,6 +90,69 @@ function PlayabilityFormats({ cardProfile }: { cardProfile: CardProfile }) {
   );
 }
 
+function formatNullableNumber(value: number | null) {
+  return value === null ? "Pending" : `${value}`;
+}
+
+function formatNullablePercent(value: number | null) {
+  return value === null ? "Pending" : `${value}%`;
+}
+
+function CertificationProviders({ cardProfile }: { cardProfile: CardProfile }) {
+  const certification = cardProfile.certificationProfile;
+
+  return (
+    <div className="rounded-md bg-zinc-950/60 px-3 py-2">
+      <p className="text-xs text-zinc-500">Certification Providers</p>
+      <div className="mt-2 grid gap-2">
+        {certification.providers.map((provider) => (
+          <div
+            key={provider.providerId}
+            className="grid gap-2 rounded-md bg-zinc-900 px-2 py-2 text-xs text-zinc-400 sm:grid-cols-[auto_repeat(8,minmax(0,1fr))]"
+          >
+            <span className="font-semibold text-zinc-200">
+              {provider.providerName}
+            </span>
+            <span>Grade {getIntelligenceGrade(provider.grade)}</span>
+            <span>Confidence {provider.confidence}%</span>
+            <span>Population {formatNullableNumber(provider.population)}</span>
+            <span>Gem {formatNullableNumber(provider.gemPopulation)}</span>
+            <span>Gem Rate {formatNullablePercent(provider.gemRate)}</span>
+            <span>Premium {formatNullablePercent(provider.estimatedPremium)}</span>
+            <span>Trend {provider.trend}</span>
+            <span>Status {provider.status}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FutureCertificationProviders({
+  cardProfile,
+}: {
+  cardProfile: CardProfile;
+}) {
+  return (
+    <div className="rounded-md bg-zinc-950/60 px-3 py-2">
+      <p className="text-xs text-zinc-500">Future Provider Status</p>
+      <div className="mt-2 grid gap-2 sm:grid-cols-3">
+        {cardProfile.certificationProfile.futureProviders.map((provider) => (
+          <div
+            key={provider.providerId}
+            className="rounded-md bg-zinc-900 px-2 py-1.5 text-xs text-zinc-400"
+          >
+            <span className="font-semibold text-zinc-200">
+              {provider.providerName}
+            </span>{" "}
+            {provider.status}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function IntelligenceDetail({
   cardProfile,
   model,
@@ -99,6 +168,7 @@ export default function IntelligenceDetail({
   const futureDependencies = unique(
     model.indicators.flatMap((indicator) => indicator.futureDependencies),
   );
+  const isCertification = model.id === "certification-intelligence";
   const isPlayability = model.id === "playability-intelligence";
 
   return (
@@ -141,6 +211,68 @@ export default function IntelligenceDetail({
         </div>
       ) : null}
 
+      {isCertification ? (
+        <div className="mt-2 grid gap-2">
+          <div className="grid gap-2 sm:grid-cols-3">
+            <DetailRow
+              label="Overall Grade"
+              value={getIntelligenceGrade(
+                cardProfile.certificationProfile.overallGrade,
+              )}
+            />
+            <DetailRow
+              label="Population"
+              value={joinValues(
+                cardProfile.certificationProfile.providers.map(
+                  (provider) =>
+                    `${provider.providerName}: ${formatNullableNumber(
+                      provider.population,
+                    )}`,
+                ),
+              )}
+            />
+            <DetailRow
+              label="Gem Rate"
+              value={joinValues(
+                cardProfile.certificationProfile.providers.map(
+                  (provider) =>
+                    `${provider.providerName}: ${formatNullablePercent(
+                      provider.gemRate,
+                    )}`,
+                ),
+              )}
+            />
+            <DetailRow
+              label="Premium"
+              value={joinValues(
+                cardProfile.certificationProfile.providers.map(
+                  (provider) =>
+                    `${provider.providerName}: ${formatNullablePercent(
+                      provider.estimatedPremium,
+                    )}`,
+                ),
+              )}
+            />
+            <DetailRow
+              label="Trend"
+              value={cardProfile.certificationProfile.indicators.populationTrend.trend}
+            />
+            <DetailRow
+              label="Source"
+              value={joinValues(
+                unique(
+                  cardProfile.certificationProfile.providers.map(
+                    (provider) => provider.source,
+                  ),
+                ),
+              )}
+            />
+          </div>
+          <CertificationProviders cardProfile={cardProfile} />
+          <FutureCertificationProviders cardProfile={cardProfile} />
+        </div>
+      ) : null}
+
       <div className="mt-2 grid gap-2 lg:grid-cols-3">
         <DetailList label="Contributing Factors" items={contributingFactors} />
         <DetailList label="Supporting Data Sources" items={supportingSources} />
@@ -156,4 +288,3 @@ export default function IntelligenceDetail({
     </div>
   );
 }
-

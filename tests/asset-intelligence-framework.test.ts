@@ -63,6 +63,7 @@ test("registers current and future intelligence models", () => {
 
   assert.ok(modelIds.includes("market-intelligence"));
   assert.ok(modelIds.includes("collector-intelligence"));
+  assert.ok(modelIds.includes("certification-intelligence"));
   assert.ok(modelIds.includes("investment-intelligence"));
   assert.ok(modelIds.includes("liquidity-intelligence"));
   assert.ok(modelIds.includes("reprint-risk"));
@@ -97,6 +98,7 @@ test("creates intelligence models with confidence and dependency graph", () => {
 
   assert.ok(collector);
   assert.ok(collector.confidence >= 0);
+  assert.ok(collector.dependencyGraph.includes("Certification Intelligence"));
   assert.ok(collector.dependencyGraph.includes("Scryfall"));
   assert.ok(collector.indicators.length > 0);
 });

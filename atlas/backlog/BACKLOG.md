@@ -2,6 +2,7 @@
 
 ## High Priority
 
+- Add official-provider Certification population ingestion once permitted sources are selected.
 - Add a command or script to run `RepositoryScanner` and write generated summaries.
 - Generate `ATLAS_SPRINT_REPORT.md` from git status, repository scan data, and canonical docs.
 - Add architecture drift detection between `docs/ARCHITECTURE.md` and repository structure.
@@ -9,6 +10,8 @@
 
 ## Medium Priority
 
+- Add Certification provider health diagnostics for PSA, BGS, CGC, TAG, SGC, and ARS.
+- Add Certification cross-grading and population growth indicators.
 - Generate dependency graphs for engines, providers, intelligence models, workflows, and UI boundaries.
 - Add documentation freshness checks for sprint history, roadmap, decisions, prompts, and architecture docs.
 - Add a generated technical-debt report grouped by subsystem.
@@ -22,6 +25,7 @@
 
 ## Research
 
+- Evaluate official certification population data access patterns without scraping or unofficial APIs.
 - Evaluate static import graph tooling that can remain internal-only.
 - Explore AST-based boundary checks for production imports from Atlas.
 - Explore comparing Evaluation History and Pipeline Reports once persistence exists.

@@ -4,6 +4,7 @@ import type { ReadyPurchaseEvaluation } from "@/lib/engines/evaluation/evaluateP
 import { EvaluationHistoryEngine } from "@/lib/history/EvaluationHistoryEngine";
 import { HistoryRepository } from "@/lib/history/HistoryRepository";
 import { getDefaultBusinessProfile } from "@/lib/business/BusinessProfileRegistry";
+import { createCertificationProfile } from "@/lib/intelligence/certification/CertificationEngine";
 import { createPlayabilityProfile } from "@/lib/intelligence/playability/PlayabilityEngine";
 import { createReadinessReport } from "@/lib/validation/ReadinessReport";
 import type { AssetContext } from "@/types/AssetContext";
@@ -168,6 +169,10 @@ function createEvaluation(input: {
         },
       },
       overallConfidence: 90,
+      certificationProfile: createCertificationProfile(
+        input.printing,
+        input.variant,
+      ),
       playabilityProfile: createPlayabilityProfile(input.printing),
       printing: input.printing,
       signals: [],

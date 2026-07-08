@@ -9,6 +9,14 @@ The format is inspired by "Keep a Changelog".
 ## [Unreleased]
 
 ### Added
+- Sprint 24 Certification Intelligence Platform.
+- `lib/intelligence/certification/` with Certification Engine, Provider abstraction, Registry, Profile, Indicator, Trend, and Source contracts.
+- Placeholder Certification Provider for PSA, BGS, and CGC without scraping or unofficial APIs.
+- Certification Profile with overall grade, provider grades, confidence, population placeholders, gem rate readiness, estimated premium, trend, source, and last-updated fields.
+- Certification indicators for certification grade, population scarcity, gem rate, certification premium, population trend, collector competition, and submission saturation.
+- Certification Intelligence registered as a first-class Asset Intelligence model.
+- Intelligence Console expanded Certification detail with provider rows and future provider status.
+- Certification regression coverage for Chrome Mox, Black Lotus, Textless Urza's Saga, serialized examples, Masterpieces, and Judge Promos.
 - Sprint 23.2 Pipeline Integrity.
 - `lib/pipeline/` with Pipeline Inspector, Pipeline Stage, Pipeline Report, and Pipeline Validation contracts.
 - Developer-only Atlas Pipeline Trace for Asset, Market, Business, Offer Policy, Strategy, Offer Ladder, and Decision stages.
@@ -99,6 +107,8 @@ The format is inspired by "Keep a Changelog".
 - Architecture, roadmap, decision, product spec, prompt history, and documentation changelog files.
 
 ### Changed
+- Collector Intelligence now consumes Certification Intelligence as a measured input while strategies continue to use configurable signal weights.
+- Current sprint updated to Sprint 24.
 - Offer Ladder now consumes Offer Policy extracted from the selected Business Profile instead of relying on scattered business thresholds.
 - Evaluation now attaches a Pipeline Report so developer diagnostics can identify the first invalid stage instead of only the final symptom.
 - Online Marketplace default minimum profit now reflects low-dollar marketplace buys so valid low-value opportunities do not collapse the Offer Ladder to zero.
@@ -184,6 +194,7 @@ The format is inspired by "Keep a Changelog".
 - Clear low-confidence identity candidates can now load printing candidates instead of leaving Vendor Workspace stuck at an identity row.
 
 ### Documented
+- Sprint 24 Certification Intelligence philosophy, provider abstraction, profile, dependency graph, architecture graph, backlog, and technical debt.
 - Sprint 23.2 Pipeline Inspector, Offer Policy, Pipeline Integrity, Business Invariants, technical debt, and architecture graph.
 - Sprint 23.1 System Readiness Platform, validation layers, readiness pipeline, configuration validation, user-facing error improvements, dependency graph, backlog, and technical debt.
 - Sprint 23 Business Profiles Platform, marketplace templates, cost profiles, offer ladder integration, business-aware recommendations, dependency graph, backlog, and technical debt.

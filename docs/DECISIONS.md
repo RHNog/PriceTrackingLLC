@@ -2,11 +2,31 @@
 
 ## Major Product And Architecture Decisions
 
+0. Certification Intelligence measures collectible characteristics only. It does not decide BUY, NEGOTIATE, PASS, or offer values. Collector Intelligence consumes Certification Intelligence; Strategies consume Collector Intelligence; Negotiation consumes Strategies.
+
 1. PriceTrackingLLC is not a price tracker. It is a decision platform.
 
 2. Identity and pricing are separate domains. Identity Providers and Market Providers are different provider families.
 
 3. Provider data must be adapted and normalized before entering the domain model.
+
+## Sprint 24 - Certification Provider Abstraction
+
+Decision:
+
+Certification providers are a separate provider family from Identity Providers and Market Providers.
+
+Rationale:
+
+Certification ecosystem data describes graded population, gem rates, provider status, and premiums. Those are collectible characteristics, not identity or market-price facts.
+
+Consequences:
+
+- Future PSA, BGS, CGC, TAG, SGC, and ARS integrations register through `CertificationRegistry`.
+- Current implementation uses placeholder provider output only.
+- Scraping and unofficial APIs are prohibited.
+- Collector Intelligence may consume normalized Certification Profile output.
+- Strategies keep using configurable signal weights.
 
 4. Search became the Query Engine. The system interprets intent instead of only matching text.
 
