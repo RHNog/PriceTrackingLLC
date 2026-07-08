@@ -4,6 +4,8 @@
 
 ### Added
 
+- Scryfall Market Provider v1 documentation.
+- Market estimate architecture notes.
 - Printing variant architecture notes for multi-finish printings.
 - Product specification for the current decision-operating-system positioning.
 - Architecture overview covering routes, features, engines, providers, and data flow.
@@ -16,6 +18,7 @@
 ### Changed
 
 - Documentation is now part of sprint completion.
+- Roadmap now points Market Provider v2 toward live listings and recent sales.
 
 ### Fixed
 

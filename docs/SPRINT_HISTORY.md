@@ -95,3 +95,9 @@ Improved punctuation normalization, Textless knowledge recognition, and low-conf
 ### Targeted Printing Variant Fix
 
 Introduced explicit printing finish variants. Multi-finish printings now keep finish selection unresolved until the query or user selects a finish, while explicit queries such as `urza's saga secret lair foil` and `urza's saga secret lair nonfoil` select the correct variant.
+
+## Sprint 14
+
+First Live Market Provider.
+
+Added Scryfall Market Provider v1, normalized market price snapshots, and Vendor Workspace support for daily Scryfall market estimates. Lowest listing and recent sale remain unavailable until Market Provider v2 adds true marketplace inventory or sales data.

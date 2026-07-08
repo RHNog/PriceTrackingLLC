@@ -8,9 +8,9 @@ It helps trading-card buyers discover opportunities, evaluate in-person purchase
 
 ## Current Development Phase
 
-Current sprint: Sprint 13 plus targeted Vendor Workspace printing variant fix.
+Current sprint: Sprint 14, First Live Market Provider.
 
-The app has a strong interpretation architecture but still uses mocked market pricing.
+The app now uses Scryfall daily market estimates in Vendor Workspace, but live lowest listing and recent sale data are still unavailable.
 
 ## What Has Been Built?
 
@@ -24,6 +24,8 @@ The app has a strong interpretation architecture but still uses mocked market pr
 - Developer Identity Explorer
 - Visual card confirmation in Vendor Workspace
 - Printing finish variants with unresolved finish blocking in Vendor Workspace
+- Scryfall Market Provider v1 for daily market estimates
+- Internal market snapshot API
 
 ## What Should Not Be Changed Casually?
 
@@ -34,6 +36,7 @@ The app has a strong interpretation architecture but still uses mocked market pr
 - Condition and grading preservation rules
 - Domain-model image adaptation rules
 - Printing-vs-finish-variant separation
+- Market estimate vs live listing separation
 
 ## Important Architectural Rules
 
@@ -43,6 +46,8 @@ The app has a strong interpretation architecture but still uses mocked market pr
 - Provider data must be normalized before entering domain objects.
 - Query and constraint logic must stay deterministic and explainable.
 - Multi-finish printings must not default to Foil or Nonfoil.
+- Scryfall prices are daily estimates and must not be treated as live inventory.
+- Do not invent lowest listing, recent sale, or buylist values.
 - Tailwind CSS only.
 - No external libraries unless explicitly requested.
 
@@ -90,4 +95,4 @@ No sprint is complete until documentation is updated.
 
 ## Suggested Next Step
 
-Sprint 14 should add the first live Market Provider while preserving provider-independent business engines.
+Market Provider v2 should add true live listings or recent sales from a marketplace-specific provider while preserving normalized `MarketSnapshot` output.

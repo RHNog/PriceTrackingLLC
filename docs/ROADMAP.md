@@ -20,22 +20,22 @@
 - Constraint Satisfaction
 - Prefix Matching and Progressive Query Resolution
 - Progressive printing refinement
+- Scryfall Market Provider v1
+- Vendor Workspace daily market estimates
 
 ## Current Sprint
 
-Sprint 13: Visual Printing Confirmation + Documentation Recovery
+Sprint 14: First Live Market Provider
 
 Goals:
 
-- Add card images to Vendor Workspace.
-- Add Scryfall image adaptation to normalized card data.
-- Recover documentation for developers and future AI agents.
+- Use Scryfall daily market estimates in Vendor Workspace.
+- Keep live listings and recent sales out of scope until Market Provider v2.
+- Preserve provider-independent evaluation engines.
 
 ## Near-Term Roadmap
 
-Sprint 14: First Live Market Provider
-
-Sprint 15: Live Vendor Evaluation
+Sprint 15: Live Marketplace Listings
 
 Sprint 16: Live Hot Opportunities
 

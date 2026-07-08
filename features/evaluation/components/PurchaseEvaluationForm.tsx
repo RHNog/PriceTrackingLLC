@@ -8,6 +8,7 @@ import {
 } from "@/lib/engines/evaluation/evaluatePurchase";
 import type { Card } from "@/types/card";
 import type { Listing } from "@/types/listing";
+import type { MarketPrice } from "@/types/marketPrice";
 import type { Strategy } from "@/types/strategy";
 import type { StrategyProfile } from "@/types/strategyProfile";
 
@@ -27,6 +28,23 @@ function findMarketListingForCard(listings: Listing[], cardId: string) {
   return listings
     .filter((listing) => listing.cardId === cardId)
     .sort((first, second) => second.price - first.price)[0];
+}
+
+function toManualMarketPrice(listing: Listing): MarketPrice {
+  return {
+    id: `manual-market-price:${listing.id}`,
+    cardId: listing.cardId,
+    printingId: listing.cardId,
+    variantId: `${listing.cardId}:manual`,
+    providerId: listing.marketplaceId,
+    source: "Mock market estimate",
+    currency: "USD",
+    finish: "Unknown",
+    price: listing.price,
+    priceType: "manual",
+    updatedAt: listing.updatedAt,
+    confidence: 50,
+  };
 }
 
 export default function PurchaseEvaluationForm({
@@ -68,7 +86,7 @@ export default function PurchaseEvaluationForm({
     setEvaluation(
       evaluatePurchase({
         card: selectedCard,
-        currentMarketListing,
+        marketPrice: toManualMarketPrice(currentMarketListing),
         purchasePrice: Number(purchasePrice),
         strategyProfile: selectedProfile,
       }),

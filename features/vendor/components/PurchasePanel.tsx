@@ -8,7 +8,8 @@ import {
 } from "@/lib/engines/evaluation/evaluatePurchase";
 import type { Card } from "@/types/card";
 import type { FormEvent } from "react";
-import type { Listing } from "@/types/listing";
+import type { MarketPrice } from "@/types/marketPrice";
+import type { MarketSnapshot } from "@/types/marketSnapshot";
 import type { PrintingVariant } from "@/types/printingVariant";
 import type { Strategy } from "@/types/strategy";
 import type { StrategyProfile } from "@/types/strategyProfile";
@@ -17,9 +18,9 @@ type PurchasePanelProps = {
   askingPrice: string;
   availableVariants: PrintingVariant[];
   card: Card;
-  currentMarketListing?: Listing;
-  lowestListing?: Listing;
-  recentSale?: Listing;
+  isMarketLoading: boolean;
+  marketPrice?: MarketPrice;
+  marketSnapshot?: MarketSnapshot;
   selectedStrategy?: Strategy;
   selectedStrategyProfile?: StrategyProfile;
   evaluation: PurchaseEvaluation | null;
@@ -44,13 +45,22 @@ function MarketStat({ label, value }: MarketStatProps) {
   );
 }
 
+function MarketTextStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md bg-zinc-950/60 p-3">
+      <p className="text-xs text-zinc-500">{label}</p>
+      <p className="mt-1 font-semibold text-zinc-300">{value}</p>
+    </div>
+  );
+}
+
 export default function PurchasePanel({
   askingPrice,
   availableVariants,
   card,
-  currentMarketListing,
-  lowestListing,
-  recentSale,
+  isMarketLoading,
+  marketPrice,
+  marketSnapshot,
   selectedStrategy,
   selectedStrategyProfile,
   evaluation,
@@ -60,7 +70,7 @@ export default function PurchasePanel({
   selectedVariant,
 }: PurchasePanelProps) {
   const canEvaluate = Boolean(
-    currentMarketListing &&
+    marketPrice &&
     selectedStrategyProfile &&
     Number(askingPrice) > 0 &&
     selectedVariant,
@@ -68,30 +78,22 @@ export default function PurchasePanel({
   const requiresFinishSelection = availableVariants.length > 1 && !selectedVariant;
   const marketStats = [
     {
-      label: "Current Market Price",
-      value: currentMarketListing?.price,
-    },
-    {
-      label: "Lowest Listing",
-      value: lowestListing?.price,
-    },
-    {
-      label: "Recent Sale Price",
-      value: recentSale?.price,
+      label: "Current Market Estimate",
+      value: marketPrice?.price,
     },
   ];
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!currentMarketListing || !selectedStrategyProfile || !selectedVariant) {
+    if (!marketPrice || !selectedStrategyProfile || !selectedVariant) {
       return;
     }
 
     onEvaluationChange(
       evaluatePurchase({
         card,
-        currentMarketListing,
+        marketPrice,
         purchasePrice: Number(askingPrice),
         strategyProfile: selectedStrategyProfile,
       }),
@@ -140,6 +142,35 @@ export default function PurchasePanel({
               value={stat.value}
             />
           ))}
+          <MarketTextStat
+            label="Lowest Listing"
+            value="Coming in Market Provider v2"
+          />
+          <MarketTextStat
+            label="Recent Sale Price"
+            value="Coming in Market Provider v2"
+          />
+        </div>
+
+        <div className="mt-3 text-xs text-zinc-500">
+          {isMarketLoading ? (
+            <p>Loading Scryfall market estimate...</p>
+          ) : marketSnapshot?.errorMessage ? (
+            <p>{marketSnapshot.errorMessage}</p>
+          ) : !selectedVariant ? (
+            <p>Select a finish variant to load a market estimate.</p>
+          ) : marketPrice ? (
+            <p>
+              {marketSnapshot?.sourceLabel}: {marketPrice.currency}{" "}
+              {marketPrice.priceType.replace("_", " ")} for{" "}
+              {marketPrice.finish}. Scryfall prices are daily market estimates
+              and may not reflect live marketplace availability.
+            </p>
+          ) : (
+            <p>
+              No market estimate available for this selected printing / finish.
+            </p>
+          )}
         </div>
 
         {availableVariants.length > 0 ? (

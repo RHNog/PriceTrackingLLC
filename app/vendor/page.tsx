@@ -6,10 +6,8 @@ import {
   seedStrategyProfiles,
 } from "@/data/seedStrategies";
 import VendorWorkspace, {
-  type VendorMarketSnapshot,
 } from "@/features/vendor/components/VendorWorkspace";
 import { ScryfallProvider } from "@/lib/providers/identity/ScryfallProvider";
-import { MockMarketProvider } from "@/lib/providers/market/MockMarketProvider";
 
 async function getIdentityCards() {
   const identityProvider = new ScryfallProvider();
@@ -20,14 +18,6 @@ async function getIdentityCards() {
 
 export default async function VendorPage() {
   const cards = await getIdentityCards();
-  const marketProvider = new MockMarketProvider();
-  const marketSnapshots: VendorMarketSnapshot[] = await Promise.all(
-    cards.map(async (card) => ({
-      cardId: card.id,
-      listings: await marketProvider.getListings(card.id),
-      recentSales: await marketProvider.getRecentSales(card.id),
-    })),
-  );
 
   return (
     <AppShell selectedNavItem="Vendor Workspace">
@@ -44,7 +34,6 @@ export default async function VendorPage() {
         <VendorWorkspace
           cards={cards}
           defaultStrategyId={defaultStrategyId}
-          marketSnapshots={marketSnapshots}
           strategies={seedStrategies}
           strategyProfiles={seedStrategyProfiles}
         />

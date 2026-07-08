@@ -8,6 +8,7 @@ const allMarketplaces = [
   "ebay",
   "ligamagic",
   "cardtrader",
+  "scryfall-market",
 ];
 
 export const defaultStrategyId = "custom";

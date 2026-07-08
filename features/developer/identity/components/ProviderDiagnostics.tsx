@@ -1,3 +1,5 @@
+import { adaptScryfallMarketSnapshot } from "@/lib/providers/market/adapters/ScryfallMarketAdapter";
+import type { ScryfallCardResponse } from "@/lib/providers/identity/adapters/ScryfallAdapter";
 import type { IdentitySearchResponse } from "@/lib/engines/search/searchIdentityCards";
 
 type ProviderDiagnosticsProps = {
@@ -15,6 +17,16 @@ const pipelineStages = [
   "Finish Variant Resolved",
 ];
 
+function isScryfallCardResponse(value: unknown): value is ScryfallCardResponse {
+  return typeof value === "object" && value !== null && "id" in value;
+}
+
+function getRawPrices(rawResponse?: ScryfallCardResponse) {
+  return rawResponse?.prices
+    ? JSON.stringify(rawResponse.prices)
+    : "None";
+}
+
 export default function ProviderDiagnostics({
   response,
 }: ProviderDiagnosticsProps) {
@@ -25,6 +37,15 @@ export default function ProviderDiagnostics({
     printingResolution?.selectedPrinting ??
     printingResolution?.printingCandidates[0]?.printing;
   const selectedVariant = printingResolution?.selectedVariant;
+  const rawSelectedPrinting = response.diagnostics.rawResponses.find(
+    (raw): raw is ScryfallCardResponse =>
+      isScryfallCardResponse(raw) && raw.id === selectedPrinting?.id,
+  );
+  const marketSnapshot =
+    rawSelectedPrinting && selectedVariant
+      ? adaptScryfallMarketSnapshot(rawSelectedPrinting, selectedVariant)
+      : undefined;
+  const mappedMarketPrice = marketSnapshot?.prices[0];
   const selectedCandidate =
     response.intent.identityCandidates.find(
       (candidate) =>
@@ -375,6 +396,39 @@ export default function ProviderDiagnostics({
               ? "Yes"
               : "No"
           }
+        />
+        <Diagnostic label="Market Provider" value="Scryfall Market Provider" />
+        <Diagnostic
+          label="Price Source"
+          value="Scryfall Daily Market Estimate"
+        />
+        <Diagnostic
+          label="Raw Scryfall Price Fields"
+          value={getRawPrices(rawSelectedPrinting)}
+        />
+        <Diagnostic
+          label="Selected Market Finish"
+          value={selectedVariant?.finish ?? "Unresolved"}
+        />
+        <Diagnostic
+          label="Mapped Market Price"
+          value={
+            mappedMarketPrice
+              ? `${mappedMarketPrice.currency} ${mappedMarketPrice.price}`
+              : "Missing"
+          }
+        />
+        <Diagnostic
+          label="Mapped Price Type"
+          value={mappedMarketPrice?.priceType ?? "None"}
+        />
+        <Diagnostic
+          label="Market Price Missing"
+          value={marketSnapshot?.priceMissing ? "Yes" : "No"}
+        />
+        <Diagnostic
+          label="Market Provider Response Time"
+          value={`${marketSnapshot?.durationMs ?? 0}ms`}
         />
         <Diagnostic
           label="Image URL Selected"

@@ -90,9 +90,29 @@ These provider families must stay separate.
 Current state:
 
 - Scryfall is the first Identity Provider.
-- Market pricing is still mocked.
+- Scryfall is the first Market Provider.
+- Scryfall market data is daily affiliate market estimate data, not live listing inventory.
+- Lowest listing and recent sale data are not live yet.
 - UI components must never know Scryfall response shapes.
 - Provider data must be adapted into domain objects before it reaches engines or UI.
+
+## Market Price Architecture
+
+Market Providers answer what a selected printing and finish variant is worth.
+
+Scryfall Market Provider v1 maps Scryfall Card price fields into normalized `MarketSnapshot` data:
+
+- `prices.usd` → Nonfoil USD market estimate
+- `prices.usd_foil` → Foil USD market estimate
+- `prices.usd_etched` → Etched USD market estimate
+- `prices.eur` → Nonfoil EUR market estimate
+- `prices.eur_foil` → Foil EUR market estimate
+- `prices.eur_etched` → Etched EUR market estimate
+- `prices.tix` → MTGO TIX market estimate
+
+Null prices are ignored. The application must not invent prices, live listings, recent sales, or buylist values.
+
+Vendor Workspace receives normalized `MarketSnapshot` data from the internal market API and passes `MarketPrice` into the Evaluation Engine.
 
 ## Image Architecture
 
@@ -138,3 +158,4 @@ Special foil treatments such as Halo, Surge, Galaxy, and Confetti are modeled as
 - UI components render data and user controls; they do not calculate business values.
 - Dictionaries and config files should evolve before parser logic is rewritten.
 - Finish selection must be resolved by domain data and constraints, not by UI defaults.
+- Scryfall prices must be labeled as market estimates, never live inventory.

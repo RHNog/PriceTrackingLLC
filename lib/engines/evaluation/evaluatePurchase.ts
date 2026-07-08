@@ -3,13 +3,13 @@ import { calculateOpportunityRanking } from "@/lib/engines/ranking/calculateOppo
 import { passesStrategyConstraints } from "@/lib/engines/strategy/applyStrategy";
 import type { Card } from "@/types/card";
 import type { Decision } from "@/types/decision";
-import type { Listing } from "@/types/listing";
+import type { MarketPrice } from "@/types/marketPrice";
 import type { OpportunityRanking } from "@/types/opportunity";
 import type { StrategyProfile } from "@/types/strategyProfile";
 
 type EvaluatePurchaseInput = {
   card: Card;
-  currentMarketListing: Listing;
+  marketPrice: MarketPrice;
   purchasePrice: number;
   strategyProfile: StrategyProfile;
 };
@@ -81,7 +81,7 @@ export function evaluatePurchase(
   // TODO: Offline mode.
   const profit = calculateNetProfit({
     purchasePrice: input.purchasePrice,
-    sellPrice: input.currentMarketListing.price,
+    sellPrice: input.marketPrice.price,
     marketplaceFees: MARKETPLACE_FEES,
     shippingCost: SHIPPING_COST,
   });
@@ -95,14 +95,14 @@ export function evaluatePurchase(
     weights: input.strategyProfile.rankingWeights,
   });
   const maximumPurchasePrice = calculateMaximumPurchasePrice(
-    input.currentMarketListing.price,
+    input.marketPrice.price,
     MARKETPLACE_FEES,
     SHIPPING_COST,
     input.strategyProfile.constraints.minimumProfit,
   );
   const passesConstraints = passesStrategyConstraints(input.strategyProfile, {
     game: input.card.game,
-    marketplaceId: input.currentMarketListing.marketplaceId,
+    marketplaceId: input.marketPrice.providerId,
     profit: profit.netProfit,
     roi,
     purchasePrice: input.purchasePrice,

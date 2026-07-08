@@ -8,45 +8,22 @@ import type { PurchaseEvaluation } from "@/lib/engines/evaluation/evaluatePurcha
 import { searchPrintings } from "@/lib/engines/search/searchPrintings";
 import type { Card } from "@/types/card";
 import type { CardIdentity } from "@/types/cardIdentity";
-import type { Listing } from "@/types/listing";
+import type { MarketSnapshot } from "@/types/marketSnapshot";
 import type { ResolvedIntent } from "@/types/resolvedIntent";
 import type { SearchResult } from "@/types/searchResult";
 import type { Strategy } from "@/types/strategy";
 import type { StrategyProfile } from "@/types/strategyProfile";
 import type { PrintingVariant } from "@/types/printingVariant";
 
-export type VendorMarketSnapshot = {
-  cardId: string;
-  listings: Listing[];
-  recentSales: Listing[];
-};
-
 type VendorWorkspaceProps = {
   cards: Card[];
   defaultStrategyId: string;
-  marketSnapshots: VendorMarketSnapshot[];
   strategies: Strategy[];
   strategyProfiles: StrategyProfile[];
 };
 
 function findById<T extends { id: string }>(items: T[], id: string) {
   return items.find((item) => item.id === id);
-}
-
-function findMarketSnapshot(snapshots: VendorMarketSnapshot[], cardId: string) {
-  return snapshots.find((snapshot) => snapshot.cardId === cardId);
-}
-
-function findHighestListing(listings: Listing[]) {
-  return [...listings].sort((first, second) => second.price - first.price)[0];
-}
-
-function findLowestListing(listings: Listing[]) {
-  return [...listings].sort((first, second) => first.price - second.price)[0];
-}
-
-function findRecentSale(snapshot?: VendorMarketSnapshot) {
-  return snapshot?.recentSales[0] ?? findHighestListing(snapshot?.listings ?? []);
 }
 
 function getVariants(card?: Card) {
@@ -79,7 +56,6 @@ function createInitialResults(cards: Card[]): SearchResult<CardIdentity>[] {
 export default function VendorWorkspace({
   cards,
   defaultStrategyId,
-  marketSnapshots,
   strategies,
   strategyProfiles,
 }: VendorWorkspaceProps) {
@@ -97,6 +73,8 @@ export default function VendorWorkspace({
     SearchResult<CardIdentity>[]
   >([]);
   const [resolvedIntent, setResolvedIntent] = useState<ResolvedIntent>();
+  const [marketSnapshot, setMarketSnapshot] = useState<MarketSnapshot>();
+  const [isMarketLoading, setIsMarketLoading] = useState(false);
   const initialResults = useMemo(() => createInitialResults(cards), [cards]);
   const searchResults = query.trim() ? providerResults : initialResults;
 
@@ -184,26 +162,72 @@ export default function VendorWorkspace({
   const selectedProfile = selectedStrategy
     ? findById(strategyProfiles, selectedStrategy.profileId)
     : undefined;
-  const selectedSnapshot = selectedCard
-    ? findMarketSnapshot(marketSnapshots, selectedCard.id)
-    : undefined;
-  const marketSnapshot = selectedSnapshot ?? marketSnapshots[0];
-  const currentMarketListing = findHighestListing(
-    marketSnapshot?.listings ?? [],
-  );
-  const lowestListing = findLowestListing(marketSnapshot?.listings ?? []);
-  const recentSale = findRecentSale(marketSnapshot);
+  const activeMarketSnapshot =
+    marketSnapshot?.printingId === selectedCard?.id &&
+    marketSnapshot?.variantId === selectedVariant?.id
+      ? marketSnapshot
+      : undefined;
+  const marketPrice = activeMarketSnapshot?.prices[0];
+
+  useEffect(() => {
+    if (!selectedCard || !selectedVariant) {
+      return;
+    }
+
+    const controller = new AbortController();
+    const printingId = selectedCard.id;
+    const variantId = selectedVariant.id;
+
+    async function loadMarketSnapshot() {
+      setIsMarketLoading(true);
+
+      try {
+        const response = await fetch(
+          `/api/market/snapshot?printingId=${encodeURIComponent(
+            printingId,
+          )}&variantId=${encodeURIComponent(variantId)}`,
+          { signal: controller.signal },
+        );
+        const snapshot = (await response.json()) as MarketSnapshot;
+
+        setMarketSnapshot(snapshot);
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          setMarketSnapshot({
+            printingId,
+            variantId,
+            prices: [],
+            providerId: "scryfall-market",
+            updatedAt: new Date().toISOString(),
+            sourceLabel: "Scryfall Daily Market Estimate",
+            errorMessage:
+              error instanceof Error
+                ? error.message
+                : "Unknown market provider error.",
+            priceMissing: true,
+          });
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsMarketLoading(false);
+        }
+      }
+    }
+
+    loadMarketSnapshot();
+
+    return () => controller.abort();
+  }, [selectedCard, selectedVariant]);
 
   function handleSelectCard(identity: CardIdentity) {
     const firstPrinting = identity.printings[0];
-    const snapshot = findMarketSnapshot(marketSnapshots, firstPrinting.id);
-    const lowestPrice = findLowestListing(snapshot?.listings ?? [])?.price;
 
     setSelectedCardId(identity.id);
     setSelectedPrintingId(firstPrinting.id);
     setSelectedVariantId(getOnlyVariant(firstPrinting)?.id ?? "");
     setPrintingQuery("");
-    setAskingPrice(lowestPrice ? String(lowestPrice) : "");
+    setAskingPrice("");
+    setMarketSnapshot(undefined);
     setEvaluation(null);
   }
 
@@ -216,6 +240,7 @@ export default function VendorWorkspace({
 
     setSelectedPrintingId(printingId);
     setSelectedVariantId(getOnlyVariant(printing)?.id ?? "");
+    setMarketSnapshot(undefined);
     setEvaluation(null);
   }
 
@@ -283,9 +308,9 @@ export default function VendorWorkspace({
           askingPrice={askingPrice}
           card={selectedCard}
           availableVariants={availableVariants}
-          currentMarketListing={currentMarketListing}
-          lowestListing={lowestListing}
-          recentSale={recentSale}
+          isMarketLoading={isMarketLoading}
+          marketPrice={marketPrice}
+          marketSnapshot={activeMarketSnapshot}
           selectedStrategy={selectedStrategy}
           selectedStrategyProfile={selectedProfile}
           evaluation={evaluation}
@@ -293,6 +318,7 @@ export default function VendorWorkspace({
           onEvaluationChange={setEvaluation}
           onVariantChange={(variantId) => {
             setSelectedVariantId(variantId);
+            setMarketSnapshot(undefined);
             setEvaluation(null);
           }}
           selectedVariant={selectedVariant ?? null}

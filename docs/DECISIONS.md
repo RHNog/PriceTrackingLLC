@@ -28,7 +28,11 @@
 
 13. Vendor Workspace must not auto-select a finish unless the query or source data makes the finish unambiguous.
 
-14. Future adaptive systems should learn vocabulary and behavior without changing core parser logic.
+14. Scryfall pricing is a daily market estimate source. It must not be represented as live listings, recent sales, or buylist data.
+
+15. Purchase evaluation should consume normalized market prices, not provider-specific response shapes or listing-shaped placeholders.
+
+16. Future adaptive systems should learn vocabulary and behavior without changing core parser logic.
 
 ## Documentation Rule
 

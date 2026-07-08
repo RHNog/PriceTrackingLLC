@@ -30,11 +30,22 @@ export type ScryfallCardResponse = {
   layout?: string;
   component?: string;
   promo_types?: string[];
+  prices?: ScryfallPriceResponse;
   released_at?: string;
   set?: string;
   type_line?: string;
   image_uris?: ScryfallImageUris;
   card_faces?: ScryfallCardFace[];
+};
+
+export type ScryfallPriceResponse = {
+  eur?: string | null;
+  eur_etched?: string | null;
+  eur_foil?: string | null;
+  tix?: string | null;
+  usd?: string | null;
+  usd_etched?: string | null;
+  usd_foil?: string | null;
 };
 
 function formatFinish(finish: string) {
