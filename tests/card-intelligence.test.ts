@@ -5,6 +5,7 @@ import { resolveDecision } from "@/lib/engines/negotiation/DecisionResolver";
 import { evaluatePurchase } from "@/lib/engines/evaluation/evaluatePurchase";
 import { createConditionMarketSnapshot } from "@/lib/engines/market/createConditionMarketSnapshot";
 import { createNegotiationLadder } from "@/lib/engines/negotiation/NegotiationLadderEngine";
+import { validateOfferLadder } from "@/lib/engines/negotiation/OfferLadderValidator";
 import { calculateSignalStrategyScore } from "@/lib/engines/strategy/calculateSignalStrategyScore";
 import {
   defaultStrategyId,
@@ -20,6 +21,10 @@ import type { Card } from "@/types/card";
 import type { MarketPrice } from "@/types/marketPrice";
 import type { PrintingVariant } from "@/types/printingVariant";
 import type { StrategyProfile } from "@/types/strategyProfile";
+import type {
+  PurchaseEvaluation,
+  ReadyPurchaseEvaluation,
+} from "@/lib/engines/evaluation/evaluatePurchase";
 
 const testCard: Card = {
   id: "test-urza",
@@ -81,6 +86,12 @@ function evaluate(condition: CardConditionCode, purchasePrice: number) {
   });
 }
 
+function assertReady(
+  evaluation: PurchaseEvaluation,
+): asserts evaluation is ReadyPurchaseEvaluation {
+  assert.equal(evaluation.status, "READY");
+}
+
 function getProfileById(id: string) {
   return seedStrategyProfiles.find((profile) => profile.id === id) as
     | StrategyProfile
@@ -139,6 +150,8 @@ test("changing condition changes decision", () => {
   const nearMint = evaluate("NM", 150);
   const lightlyPlayed = evaluate("LP", 150);
 
+  assertReady(nearMint);
+  assertReady(lightlyPlayed);
   assert.equal(nearMint.decision.action, "BUY");
   assert.equal(lightlyPlayed.decision.action, "NEGOTIATE");
 });
@@ -163,6 +176,8 @@ test("changing strategy changes negotiation ladder", () => {
     strategyProfile: getProfileById("high-profit-profile") ?? getDefaultProfile(),
   });
 
+  assertReady(custom);
+  assertReady(highProfit);
   assert.notEqual(
     custom.negotiationLadder.maximumBuyPrice,
     highProfit.negotiationLadder.maximumBuyPrice,
@@ -215,6 +230,8 @@ test("changing finish changes negotiation ladder", () => {
     strategyProfile: getDefaultProfile(),
   });
 
+  assertReady(nonfoil);
+  assertReady(foil);
   assert.notEqual(
     nonfoil.negotiationLadder.maximumBuyPrice,
     foil.negotiationLadder.maximumBuyPrice,
@@ -225,6 +242,8 @@ test("BUY and PASS decisions cannot contradict the negotiation ladder", () => {
   const nearMint = evaluate("NM", 150);
   const damaged = evaluate("DMG", 150);
 
+  assertReady(nearMint);
+  assertReady(damaged);
   assert.ok(nearMint.askingPrice <= nearMint.negotiationLadder.maximumBuyPrice);
   assert.notEqual(nearMint.decision.action, "PASS");
   assert.ok(damaged.askingPrice > damaged.negotiationLadder.maximumBuyPrice);
@@ -239,23 +258,32 @@ test("decision resolver enforces exact negotiation ladder zones", () => {
     walkAwayPrice: 106,
     explanation: [],
   };
+  const validation = validateOfferLadder({
+    ladder: negotiationLadder,
+    negotiationMargin: negotiationLadder.maximumBuyPrice - 90,
+    recommendedOffer: negotiationLadder.targetOffer,
+  });
+
+  assert.ok(validation.validatedLadder);
 
   assert.equal(
-    resolveDecision({ askingPrice: 90, negotiationLadder }),
+    resolveDecision({ askingPrice: 90, negotiationLadder: validation.validatedLadder }),
     "BUY",
   );
   assert.equal(
-    resolveDecision({ askingPrice: 100, negotiationLadder }),
+    resolveDecision({ askingPrice: 100, negotiationLadder: validation.validatedLadder }),
     "NEGOTIATE",
   );
   assert.equal(
-    resolveDecision({ askingPrice: 108, negotiationLadder }),
+    resolveDecision({ askingPrice: 108, negotiationLadder: validation.validatedLadder }),
     "PASS",
   );
 });
 
 test("signals remain independent measurements", () => {
-  const profile = evaluate("NM", 150).cardProfile;
+  const evaluation = evaluate("NM", 150);
+  assertReady(evaluation);
+  const profile = evaluation.cardProfile;
 
   assert.equal(profile.signals.length, 12);
   assert.ok(profile.signals.every((signal) => "score" in signal));
@@ -271,7 +299,9 @@ test("signals remain independent measurements", () => {
 });
 
 test("strategies consume signal weights", () => {
-  const profile = evaluate("NM", 150).cardProfile;
+  const evaluation = evaluate("NM", 150);
+  assertReady(evaluation);
+  const profile = evaluation.cardProfile;
   const collectorStrategy = {
     ...getDefaultProfile(),
     signalWeights: { CollectorAppeal: 1 },
@@ -285,4 +315,79 @@ test("strategies consume signal weights", () => {
     calculateSignalStrategyScore(collectorStrategy, profile.signals),
     calculateSignalStrategyScore(riskStrategy, profile.signals),
   );
+});
+
+test("evaluation with positive spread returns positive profit and not PASS", () => {
+  const marketPrice = {
+    ...testMarketPrice,
+    price: 88.42,
+  };
+  const evaluation = evaluatePurchase({
+    card: testCard,
+    condition: "NM",
+    marketContext: defaultMarketContext,
+    marketPrice,
+    purchasePrice: 40,
+    selectedVariant: testVariant,
+    strategyProfile: getDefaultProfile(),
+  });
+
+  assertReady(evaluation);
+  assert.ok(evaluation.estimatedProfit > 0);
+  assert.ok(evaluation.negotiationLadder.maximumBuyPrice > 0);
+  assert.notEqual(evaluation.decision.action, "PASS");
+});
+
+test("evaluation above market ladder returns PASS", () => {
+  const marketPrice = {
+    ...testMarketPrice,
+    price: 88.42,
+  };
+  const evaluation = evaluatePurchase({
+    card: testCard,
+    condition: "NM",
+    marketContext: defaultMarketContext,
+    marketPrice,
+    purchasePrice: 140,
+    selectedVariant: testVariant,
+    strategyProfile: getDefaultProfile(),
+  });
+
+  assertReady(evaluation);
+  assert.equal(evaluation.decision.action, "PASS");
+});
+
+test("missing market estimate returns unavailable evaluation", () => {
+  const evaluation = evaluatePurchase({
+    card: testCard,
+    condition: "NM",
+    marketContext: defaultMarketContext,
+    marketPrice: {
+      ...testMarketPrice,
+      price: Number.NaN,
+    },
+    purchasePrice: 40,
+    selectedVariant: testVariant,
+    strategyProfile: getDefaultProfile(),
+  });
+
+  assert.equal(evaluation.status, "UNAVAILABLE");
+  assert.equal(evaluation.reason, "Incomplete market data.");
+});
+
+test("invalid offer ladder prevents decision resolver execution", () => {
+  const validation = validateOfferLadder({
+    ladder: {
+      openingOffer: 90,
+      targetOffer: 80,
+      maximumBuyPrice: 100,
+      walkAwayPrice: 100,
+      explanation: [],
+    },
+    negotiationMargin: 60,
+    recommendedOffer: 80,
+  });
+
+  assert.equal(validation.status, "INVALID");
+  assert.equal(validation.validatedLadder, null);
 });

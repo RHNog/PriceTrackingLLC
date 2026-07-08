@@ -1,4 +1,5 @@
 import type { Signal } from "@/lib/engines/cardIntelligence/models/Signal";
+import type { IntelligenceModel } from "@/lib/intelligence/framework/IntelligenceModel";
 import type { Card } from "@/types/card";
 import type { ConditionProfile } from "@/types/conditionProfile";
 import type { ConditionMarketSnapshot } from "@/types/conditionMarketSnapshot";
@@ -17,6 +18,7 @@ export interface CardProfile {
   marketContext: MarketContext;
   marketContextSnapshot: ConditionMarketSnapshot;
   signals: Signal[];
+  intelligenceModels: IntelligenceModel[];
   overallConfidence: number;
   generatedAt: string;
 }

@@ -191,3 +191,83 @@ Core instruction: stop evaluating price alone; evaluate Card, Printing, Variant,
 Major files affected: `lib/engines/cardIntelligence/`, `lib/engines/negotiation/`, `lib/engines/decision/`, `lib/engines/evaluation/`, `types/`, `features/vendor/`, `tests/`, `docs/`.
 
 Result: Card Profile, Signal Registry, signal versioning, condition-adjusted market snapshots, Market Context foundation, Negotiation Ladder Engine, deterministic Decision Resolver invariants, Vendor Workspace condition selection, and Card Profile signal panel.
+
+## Sprint 20
+
+Purpose: introduce the Asset Intelligence Framework.
+
+Core instruction: stop creating isolated scoring engines; every future intelligence platform should plug into one model and indicator framework. Intelligence Models measure asset dimensions, strategies consume models, Negotiation Ladder consumes strategies, and Decision Resolver consumes the ladder.
+
+Major files affected: `lib/intelligence/framework/`, `lib/engines/cardIntelligence/`, `features/vendor/`, `tests/`, `docs/`.
+
+Result: Asset Intelligence Framework, Intelligence Model contract, Indicator contract, model registry, indicator registry, model health, status metadata, dependency graph metadata, and Vendor Workspace compatibility through `CardProfile.intelligenceModels`.
+
+## Sprint 20.1
+
+Purpose: stabilize Vendor Workspace with a deterministic workflow state machine.
+
+Core instruction: do not redesign the UI or change business logic. Separate candidate, highlighted, and selected identities; apply the Single Printing Rule; add diagnostics; and guarantee every successful identity selection reaches `ReadyForEvaluation` or `Error`.
+
+Major files affected: `types/VendorWorkflowState.ts`, `lib/workflow/VendorWorkflowMachine.ts`, `features/vendor/`, `tests/`, `docs/`.
+
+Result: deterministic Vendor Workflow states, identity highlight vs selection separation, Single Printing Rule auto-progression, workflow diagnostics, loading and error states, and regression tests for the key workflow paths.
+
+## Sprint 20.2
+
+Purpose: introduce Evaluation Integrity.
+
+Core instruction: incorrect decisions are worse than missing decisions. Validate Offer Ladder output, prevent fallback zero calculations, trace every intermediate calculation, and ensure Decision Resolver consumes validated output only.
+
+Major files affected: `lib/engines/evaluation/`, `lib/engines/negotiation/`, `lib/engines/profit/`, `features/vendor/`, `features/evaluation/`, `tests/`, `docs/`.
+
+Result: Offer Ladder Validator, explicit ready/unavailable/invalid evaluation states, Profit Trace, Offer Ladder Trace, Strategy Trace, Decision Trace, development-only Evaluation Trace UI, and evaluation integrity regression coverage.
+
+## Sprint 20.3
+
+Purpose: stabilize workflow ownership.
+
+Core instruction: workflow owns selected state; UI renders workflow context. Add workflow events, context invalidation, atomic rejected transitions, and diagnostics for invalidated/loaded objects.
+
+Major files affected: `types/WorkflowEvent.ts`, `types/VendorWorkflowState.ts`, `lib/workflow/`, `features/vendor/`, `tests/`, `docs/`.
+
+Result: Vendor Workflow Machine owns highlighted identity, selected identity, selected printing, selected variant, selected condition, selected strategy, and asking price. Context invalidation is centralized and rejected transitions no longer partially update UI context.
+
+## Sprint 20.4
+
+Purpose: replace Workflow Event architecture with Workflow Command architecture.
+
+Core instruction: users perform commands and the Workflow Engine performs transitions. UI components dispatch commands such as `SelectCard`, `SelectPrinting`, `SelectVariant`, `SelectCondition`, `ChangeStrategy`, `EnterAskingPrice`, and `ResetWorkspace`; the command processor owns state, invalidation, Single Printing Rule behavior, and diagnostics.
+
+Major files affected: `lib/workflow/commands/`, `types/VendorWorkflowState.ts`, `features/vendor/`, `tests/vendor-workflow-machine.test.ts`, `docs/`.
+
+Result: command-driven Vendor Workspace orchestration with automatic context invalidation, rejected command safety, command logs, and reusable command architecture for future workspaces.
+
+## Sprint 20.5
+
+Purpose: introduce Asset Context Integrity and Atlas Developer Tools.
+
+Core instruction: every evaluation is performed on one generated asset context: identity, printing, variant, condition, market context, card intelligence, offer ladder, and decision. The workflow owns context generation and validation; production UI does not expose diagnostics.
+
+Major files affected: `types/AssetContext.ts`, `lib/workflow/AssetContextValidator.ts`, `lib/workflow/commands/`, `features/vendor/`, `tests/vendor-workflow-machine.test.ts`, `docs/`.
+
+Result: Asset Context generation, stale market snapshot rejection, context validation, development-only Atlas Inspector, and production Vendor Workspace diagnostics removal.
+
+## Sprint 20.6
+
+Purpose: restore condition-aware market pricing after the Asset Context refactor.
+
+Core instruction: preserve existing condition pricing behavior. Condition changes must create a new Asset Context generation, invalidate downstream objects, request a fresh Market Snapshot, and feed the existing condition-aware market snapshot pipeline without placeholder pricing.
+
+Major files affected: `lib/workflow/commands/`, `features/vendor/`, `tests/vendor-workflow-machine.test.ts`, `docs/`.
+
+Result: `ChangeCondition` command, generation-aware `LoadMarketSnapshot`, restored NM/LP/MP/HP/DMG market refresh, Atlas Inspector provider trace additions, and documented Market Provider precedence.
+
+## Sprint 21
+
+Purpose: introduce the Intelligence History Platform.
+
+Core instruction: never lose a completed evaluation. Every `READY` evaluation should become an immutable, append-only historical intelligence snapshot without changing Vendor Workspace UX, Offer Ladder calculations, or Card Intelligence calculations.
+
+Major files affected: `types/EvaluationSnapshot.ts`, `types/AssetSnapshot.ts`, `types/MarketSnapshotHistory.ts`, `types/StrategySnapshot.ts`, `types/OfferLadderSnapshot.ts`, `lib/history/`, `features/vendor/components/PurchasePanel.tsx`, `tests/evaluation-history.test.ts`, `docs/`.
+
+Result: Evaluation History Engine, append-only repository abstraction, snapshot factory, snapshot validator, local completed-evaluation recording, snapshot regression tests, and Atlas documentation for future Simulation Platform work.

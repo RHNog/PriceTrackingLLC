@@ -1,11 +1,11 @@
 import { resolveDecision } from "@/lib/engines/negotiation/DecisionResolver";
-import type { NegotiationLadder } from "@/lib/engines/negotiation/NegotiationLadder";
+import type { ValidatedOfferLadder } from "@/lib/engines/negotiation/OfferLadderValidator";
 
 export type DecisionAction = "BUY" | "NEGOTIATE" | "PASS";
 
 type DecisionEngineInput = {
   askingPrice: number;
-  offerLadder: NegotiationLadder;
+  offerLadder: ValidatedOfferLadder;
   passesStrategyConstraints?: boolean;
   score?: number;
 };

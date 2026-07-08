@@ -1,15 +1,25 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import AtlasInspector from "@/features/vendor/components/AtlasInspector";
 import CardSearchPalette from "@/features/vendor/components/CardSearchPalette";
 import PrintingResults from "@/features/vendor/components/PrintingResults";
 import PurchasePanel from "@/features/vendor/components/PurchasePanel";
-import { toPrintingConstraints } from "@/lib/engines/constraints/satisfyPrintingConstraints";
 import { searchPrintings } from "@/lib/engines/search/searchPrintings";
-import { resolvePrintingVariant } from "@/lib/engines/variantResolution/VariantResolutionPolicy";
+import { createWorkflowCommand } from "@/lib/workflow/commands/WorkflowCommand";
+import {
+  createMarketSnapshotId,
+  validateAssetContext,
+} from "@/lib/workflow/AssetContextValidator";
+import {
+  initialVendorWorkflowSnapshot,
+  processWorkflowCommand,
+} from "@/lib/workflow/VendorWorkflowMachine";
 import type { Card } from "@/types/card";
 import type { CardIdentity } from "@/types/cardIdentity";
+import type { CardConditionCode } from "@/types/conditionProfile";
 import type { MarketSnapshot } from "@/types/marketSnapshot";
+import type { PrintingMatchCandidate } from "@/types/printingResolution";
 import type { ResolvedIntent } from "@/types/resolvedIntent";
 import type { SearchResult } from "@/types/searchResult";
 import type { Strategy } from "@/types/strategy";
@@ -31,22 +41,36 @@ function getVariants(card?: Card) {
   return card?.finishVariants ?? [];
 }
 
-function getPolicyVariant(card?: Card, intent?: ResolvedIntent) {
-  const variants = getVariants(card);
-
-  if (!card) {
-    return undefined;
-  }
-
-  return resolvePrintingVariant({
-    availableVariants: variants,
-    constraints: toPrintingConstraints(intent?.resolvedConstraints ?? []),
-    printing: card,
-  }).selectedVariant ?? undefined;
-}
-
 function findVariant(variants: PrintingVariant[], variantId: string) {
   return variants.find((variant) => variant.id === variantId);
+}
+
+function createPrintingCandidate(printing: Card): PrintingMatchCandidate {
+  const finishVariants = printing.finishVariants ?? [];
+  const printingFinishes = printing.availableFinishes ?? [];
+  const availableFinishes =
+    printingFinishes.length > 0
+      ? printingFinishes
+      : finishVariants.length > 0
+        ? finishVariants.map((variant) => variant.finish)
+        : [printing.finish];
+
+  return {
+    availableFinishes,
+    confidence: 50,
+    explanation: [
+      {
+        label: "Identity printing",
+        passed: true,
+        value: printing.set,
+      },
+    ],
+    finishVariants,
+    matchedConstraints: [],
+    printing,
+    relaxedConstraints: [],
+    unmatchedConstraints: [],
+  };
 }
 
 const printingFilterChips = [
@@ -104,24 +128,39 @@ export default function VendorWorkspace({
   strategyProfiles,
 }: VendorWorkspaceProps) {
   const [query, setQuery] = useState("");
-  const [selectedCardId, setSelectedCardId] = useState(
-    cards[0]?.name.toLowerCase() ?? "",
-  );
-  const [selectedPrintingId, setSelectedPrintingId] = useState("");
-  const [selectedVariantId, setSelectedVariantId] = useState("");
   const [printingQuery, setPrintingQuery] = useState("");
   const [activePrintingFilters, setActivePrintingFilters] = useState<string[]>([]);
   const [searchFocusKey, setSearchFocusKey] = useState(0);
-  const [askingPrice, setAskingPrice] = useState("");
-  const [strategyId, setStrategyId] = useState(defaultStrategyId);
   const [providerResults, setProviderResults] = useState<
     SearchResult<CardIdentity>[]
   >([]);
   const [resolvedIntent, setResolvedIntent] = useState<ResolvedIntent>();
   const [marketSnapshot, setMarketSnapshot] = useState<MarketSnapshot>();
+  const [isDeveloperMode, setIsDeveloperMode] = useState(false);
   const [isMarketLoading, setIsMarketLoading] = useState(false);
+  const [workflow, setWorkflow] = useState({
+    ...initialVendorWorkflowSnapshot,
+    context: {
+      ...initialVendorWorkflowSnapshot.context,
+      selectedStrategyId: defaultStrategyId,
+    },
+  });
   const initialResults = useMemo(() => createInitialResults(cards), [cards]);
   const searchResults = query.trim() ? providerResults : initialResults;
+  const workflowContext = workflow.context;
+  const askingPrice = workflowContext.askingPrice;
+  const highlightedCardId = workflowContext.highlightedIdentityId;
+  const selectedCardId = workflowContext.selectedIdentityId;
+  const selectedPrintingId = workflowContext.selectedPrintingId;
+  const selectedVariantId = workflowContext.selectedVariantId;
+  const selectedCondition = workflowContext.selectedCondition as CardConditionCode;
+  const strategyId = workflowContext.selectedStrategyId;
+
+  function dispatchCommand(
+    command: Parameters<typeof processWorkflowCommand>[1],
+  ) {
+    setWorkflow((current) => processWorkflowCommand(current, command).workflow);
+  }
 
   useEffect(() => {
     const normalizedQuery = query.trim();
@@ -141,20 +180,19 @@ export default function VendorWorkspace({
         intent?: ResolvedIntent;
         results?: SearchResult<CardIdentity>[];
       };
+      const results = payload.results ?? [];
 
       setResolvedIntent(payload.intent);
-      setProviderResults(payload.results ?? []);
-      setSelectedPrintingId(
-        payload.intent?.printingResolution?.selectedPrinting?.id ??
-          (payload.intent?.printingResolution?.shouldAutoCommit
-            ? payload.intent?.printingResolution?.printingCandidates[0]?.printing.id
-            : "") ??
-          "",
-      );
-      setSelectedVariantId(
-        payload.intent?.printingResolution?.shouldAutoCommitVariant
-          ? payload.intent?.printingResolution?.selectedVariant?.id ?? ""
-          : "",
+      setProviderResults(results);
+      dispatchCommand(
+        createWorkflowCommand(
+          "LoadSearchResults",
+          {
+            resolvedIntent: payload.intent,
+            results: results.map((result) => result.item),
+          },
+          "SearchEngine",
+        ),
       );
     }
 
@@ -163,22 +201,39 @@ export default function VendorWorkspace({
         console.error(error);
         setResolvedIntent(undefined);
         setProviderResults([]);
+        dispatchCommand(
+          createWorkflowCommand(
+            "ReportWorkflowError",
+            {
+              errorMessage:
+                error instanceof Error
+                  ? error.message
+                  : "Unable to search cards.",
+            },
+            "SearchEngine",
+          ),
+        );
       }
     });
 
     return () => controller.abort();
+    // Workflow progression is intentionally command-driven inside the search callback.
   }, [query]);
 
   const selectedIdentity =
-    searchResults.find((result) => result.item.id === selectedCardId)?.item ??
-    (query.trim() ? resolvedIntent?.selectedIdentity : undefined) ??
-    searchResults[0]?.item;
+    searchResults.find((result) => result.item.id === selectedCardId)?.item;
   const printingResults = selectedIdentity
     ? searchPrintings(printingQuery, selectedIdentity.printings)
     : [];
   const constraintPrintingCandidates =
     resolvedIntent?.printingResolution?.printingCandidates ?? [];
-  const filteredPrintingCandidates = constraintPrintingCandidates.filter(
+  const identityPrintingCandidates =
+    selectedIdentity?.printings.map(createPrintingCandidate) ?? [];
+  const availablePrintingCandidates =
+    constraintPrintingCandidates.length > 0
+      ? constraintPrintingCandidates
+      : identityPrintingCandidates;
+  const filteredPrintingCandidates = availablePrintingCandidates.filter(
     (candidate) => {
       const filterText = getPrintingFilterText(candidate);
       const matchesChips = activePrintingFilters.every((filter) =>
@@ -194,37 +249,39 @@ export default function VendorWorkspace({
   const selectedConstraintPrinting =
     filteredPrintingCandidates.find(
       (candidate) => candidate.printing.id === selectedPrintingId,
-    )?.printing ??
-    (resolvedIntent?.printingResolution?.shouldAutoCommit
-      ? resolvedIntent?.printingResolution?.selectedPrinting
-      : undefined) ??
-    (resolvedIntent?.printingResolution?.shouldAutoCommit
-      ? filteredPrintingCandidates[0]?.printing
-      : undefined);
+    )?.printing;
   const selectedCard =
     selectedConstraintPrinting ??
-    (resolvedIntent?.printingResolution?.shouldAutoCommit
-      ? printingResults[0]?.item
-      : undefined);
+    printingResults.find((result) => result.item.id === selectedPrintingId)?.item;
   const availableVariants = getVariants(selectedCard);
-  const resolvedSelectedVariant =
-    resolvedIntent?.printingResolution?.selectedVariant;
   const selectedVariant =
-    findVariant(availableVariants, selectedVariantId) ??
-    (resolvedSelectedVariant?.printingId === selectedCard?.id
-      ? resolvedSelectedVariant
-      : undefined) ??
-    getPolicyVariant(selectedCard, resolvedIntent);
+    findVariant(availableVariants, selectedVariantId);
   const selectedStrategy = findById(strategies, strategyId) ?? strategies[0];
   const selectedProfile = selectedStrategy
     ? findById(strategyProfiles, selectedStrategy.profileId)
     : undefined;
+  const marketSnapshotId = marketSnapshot
+    ? createMarketSnapshotId({
+        printingId: marketSnapshot.printingId,
+        providerId: marketSnapshot.providerId,
+        updatedAt: marketSnapshot.updatedAt,
+        variantId: marketSnapshot.variantId,
+      })
+    : "";
   const activeMarketSnapshot =
     marketSnapshot?.printingId === selectedCard?.id &&
-    marketSnapshot?.variantId === selectedVariant?.id
+    marketSnapshot?.variantId === selectedVariant?.id &&
+    marketSnapshotId === workflow.assetContext.marketSnapshotId
       ? marketSnapshot
       : undefined;
   const marketPrice = activeMarketSnapshot?.prices[0];
+  const assetValidation = validateAssetContext({
+    assetContext: workflow.assetContext,
+    identity: selectedIdentity,
+    marketSnapshot: activeMarketSnapshot,
+    printing: selectedCard,
+    variant: selectedVariant,
+  });
 
   useEffect(() => {
     if (!selectedCard || !selectedVariant) {
@@ -234,6 +291,7 @@ export default function VendorWorkspace({
     const controller = new AbortController();
     const printingId = selectedCard.id;
     const variantId = selectedVariant.id;
+    const assetContextGeneration = workflow.assetContext.generation;
 
     async function loadMarketSnapshot() {
       setIsMarketLoading(true);
@@ -248,6 +306,19 @@ export default function VendorWorkspace({
         const snapshot = (await response.json()) as MarketSnapshot;
 
         setMarketSnapshot(snapshot);
+        dispatchCommand(
+          createWorkflowCommand(
+            "LoadMarketSnapshot",
+            {
+              assetContextGeneration,
+              printingId: snapshot.printingId,
+              providerId: snapshot.providerId,
+              updatedAt: snapshot.updatedAt,
+              variantId: snapshot.variantId,
+            },
+            "MarketProvider",
+          ),
+        );
       } catch (error) {
         if (!controller.signal.aborted) {
           setMarketSnapshot({
@@ -263,6 +334,20 @@ export default function VendorWorkspace({
                 : "Unknown market provider error.",
             priceMissing: true,
           });
+          dispatchCommand(
+            createWorkflowCommand(
+              "ReportWorkflowError",
+              {
+                errorMessage:
+                  error instanceof Error
+                    ? error.message
+                    : "Unable to load market estimate.",
+                identityCount: searchResults.length,
+                printingCount: filteredPrintingCandidates.length,
+              },
+              "MarketProvider",
+            ),
+          );
         }
       } finally {
         if (!controller.signal.aborted) {
@@ -274,18 +359,41 @@ export default function VendorWorkspace({
     loadMarketSnapshot();
 
     return () => controller.abort();
-  }, [selectedCard, selectedVariant]);
+    // Market loading is tied to Asset Context generation so condition changes refresh it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCard, selectedVariant, workflow.assetContext.generation]);
+
+  useEffect(() => {
+    function handleDeveloperShortcut(event: KeyboardEvent) {
+      const isDeveloperShortcut =
+        event.shiftKey &&
+        event.key.toLowerCase() === "d" &&
+        (event.metaKey || event.ctrlKey);
+
+      if (!isDeveloperShortcut) {
+        return;
+      }
+
+      event.preventDefault();
+      setIsDeveloperMode((current) => !current);
+    }
+
+    window.addEventListener("keydown", handleDeveloperShortcut);
+
+    return () => window.removeEventListener("keydown", handleDeveloperShortcut);
+  }, []);
 
   function handleSelectCard(identity: CardIdentity) {
-    const firstPrinting = identity.printings[0];
-
-    setSelectedCardId(identity.id);
-    setSelectedPrintingId(firstPrinting.id);
-    setSelectedVariantId(getPolicyVariant(firstPrinting, resolvedIntent)?.id ?? "");
     setPrintingQuery("");
     setActivePrintingFilters([]);
-    setAskingPrice("");
     setMarketSnapshot(undefined);
+    dispatchCommand(
+      createWorkflowCommand("SelectCard", {
+        identity,
+        identityCount: searchResults.length,
+        resolvedIntent,
+      }),
+    );
   }
 
   function handleSelectPrinting(printingId: string) {
@@ -295,27 +403,54 @@ export default function VendorWorkspace({
       )?.printing ??
       printingResults.find((result) => result.item.id === printingId)?.item;
 
-    setSelectedPrintingId(printingId);
-    setSelectedVariantId(getPolicyVariant(printing, resolvedIntent)?.id ?? "");
     setMarketSnapshot(undefined);
+    if (!printing) {
+      dispatchCommand(
+        createWorkflowCommand("ReportWorkflowError", {
+          errorMessage: "Selected printing is no longer available.",
+          identityCount: searchResults.length,
+          printingCount: filteredPrintingCandidates.length,
+        }),
+      );
+      return;
+    }
+
+    dispatchCommand(
+      createWorkflowCommand("SelectPrinting", {
+        identityCount: searchResults.length,
+        printing,
+        printingCount: filteredPrintingCandidates.length,
+        resolvedIntent,
+      }),
+    );
   }
 
   function handleStrategyChange(nextStrategyId: string) {
-    setStrategyId(nextStrategyId);
+    dispatchCommand(
+      createWorkflowCommand("ChangeStrategy", { strategyId: nextStrategyId }),
+    );
   }
 
   function resetWorkflow() {
     setQuery("");
-    setSelectedCardId(cards[0]?.name.toLowerCase() ?? "");
-    setSelectedPrintingId("");
-    setSelectedVariantId("");
     setPrintingQuery("");
     setActivePrintingFilters([]);
-    setAskingPrice("");
     setProviderResults([]);
     setResolvedIntent(undefined);
     setMarketSnapshot(undefined);
+    dispatchCommand(createWorkflowCommand("ResetWorkspace", {}));
     setSearchFocusKey((value) => value + 1);
+  }
+
+  function handleQueryChange(nextQuery: string) {
+    setQuery(nextQuery);
+    setMarketSnapshot(undefined);
+
+    if (!nextQuery.trim()) {
+      dispatchCommand(createWorkflowCommand("ResetWorkspace", {}));
+    } else {
+      dispatchCommand(createWorkflowCommand("SearchCards", { query: nextQuery }));
+    }
   }
 
   function togglePrintingFilter(filter: string) {
@@ -344,6 +479,27 @@ export default function VendorWorkspace({
     handleSelectPrinting(filteredPrintingCandidates[nextIndex].printing.id);
   }
 
+  function moveIdentityHighlight(direction: 1 | -1) {
+    if (searchResults.length === 0) {
+      return;
+    }
+
+    const currentIndex = Math.max(
+      0,
+      searchResults.findIndex((result) => result.item.id === highlightedCardId),
+    );
+    const nextIndex =
+      (currentIndex + direction + searchResults.length) % searchResults.length;
+    const identity = searchResults[nextIndex].item;
+
+    dispatchCommand(
+      createWorkflowCommand("HighlightCard", {
+        identity,
+        identityCount: searchResults.length,
+      }),
+    );
+  }
+
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -358,19 +514,39 @@ export default function VendorWorkspace({
         target?.tagName === "TEXTAREA" ||
         target?.tagName === "SELECT";
 
-      if (isTypingTarget) {
+      if (isTypingTarget && target?.getAttribute("type") !== "search") {
         return;
       }
 
       if (event.key === "ArrowDown") {
         event.preventDefault();
-        movePrintingSelection(1);
+        if (selectedCardId) {
+          movePrintingSelection(1);
+        } else {
+          moveIdentityHighlight(1);
+        }
         return;
       }
 
       if (event.key === "ArrowUp") {
         event.preventDefault();
-        movePrintingSelection(-1);
+        if (selectedCardId) {
+          movePrintingSelection(-1);
+        } else {
+          moveIdentityHighlight(-1);
+        }
+        return;
+      }
+
+      if (event.key === "Enter" && !selectedCardId && highlightedCardId) {
+        event.preventDefault();
+        const identity = searchResults.find(
+          (result) => result.item.id === highlightedCardId,
+        )?.item;
+
+        if (identity) {
+          handleSelectCard(identity);
+        }
         return;
       }
 
@@ -389,15 +565,28 @@ export default function VendorWorkspace({
     <div className="space-y-6">
       <CardSearchPalette
         focusKey={searchFocusKey}
+        highlightedCardId={highlightedCardId}
         interpretationSummary={
           query.trim() ? resolvedIntent?.resolutionExplanation : undefined
         }
         query={query}
         results={searchResults}
-        selectedCardId={selectedIdentity?.id ?? ""}
-        onQueryChange={setQuery}
+        selectedCardId={selectedCardId}
+        onQueryChange={handleQueryChange}
         onSelectCard={handleSelectCard}
       />
+
+      {isDeveloperMode && process.env.NODE_ENV === "development" ? (
+        <AtlasInspector
+          assetValidation={assetValidation}
+          isMarketLoading={isMarketLoading}
+          marketSnapshot={activeMarketSnapshot}
+          query={query}
+          resolvedIntent={resolvedIntent}
+          selectedCondition={selectedCondition}
+          workflow={workflow}
+        />
+      ) : null}
 
       <label className="block max-w-xs space-y-2">
         <span className="block text-sm font-medium text-zinc-300">
@@ -463,16 +652,33 @@ export default function VendorWorkspace({
           {selectedCard ? (
             <PurchasePanel
               askingPrice={askingPrice}
+              assetContext={workflow.assetContext}
               card={selectedCard}
               availableVariants={availableVariants}
               isMarketLoading={isMarketLoading}
               marketPrice={marketPrice}
               marketSnapshot={activeMarketSnapshot}
+              selectedCondition={
+                selectedCondition
+              }
               selectedStrategy={selectedStrategy}
               selectedStrategyProfile={selectedProfile}
-              onAskingPriceChange={setAskingPrice}
+              onAskingPriceChange={(price) =>
+                dispatchCommand(
+                  createWorkflowCommand("EnterAskingPrice", {
+                    askingPrice: price,
+                  }),
+                )
+              }
+              onConditionChange={(condition) =>
+                dispatchCommand(
+                  createWorkflowCommand("ChangeCondition", { condition }),
+                )
+              }
               onVariantChange={(variantId) => {
-                setSelectedVariantId(variantId);
+                dispatchCommand(
+                  createWorkflowCommand("SelectVariant", { variantId }),
+                );
                 setMarketSnapshot(undefined);
               }}
               selectedVariant={selectedVariant ?? null}

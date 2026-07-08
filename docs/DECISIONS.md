@@ -48,23 +48,77 @@
 
 23. Card Intelligence must never decide BUY, NEGOTIATE, or PASS. It only produces reusable signals.
 
-24. Strategies interpret Card Intelligence signals through explicit signal weights.
+24. Future intelligence must always become a registered Asset Intelligence model.
 
-25. Negotiation Ladder is the single source of truth for negotiation guidance.
+25. Every Intelligence Model must expose the shared model contract.
 
-26. Decision Resolver compares asking price against the Negotiation Ladder and must not contradict it.
+26. Every Indicator must expose the shared indicator contract.
 
-27. If asking price is less than or equal to Target Offer, the decision must be BUY.
+27. Strategies interpret intelligence outputs through explicit weights and must not read provider data directly.
 
-28. If asking price is greater than Target Offer and less than or equal to Maximum Buy Price, the decision must be NEGOTIATE.
+28. Negotiation Ladder is the single source of truth for negotiation guidance.
 
-29. If asking price is greater than Maximum Buy Price, the decision must be PASS.
+29. Decision Resolver compares asking price against the Negotiation Ladder and must not contradict it.
 
-30. Condition influences market estimate, Negotiation Ladder, Card Intelligence, and purchase evaluation, but never identity resolution.
+30. If asking price is less than or equal to Target Offer, the decision must be BUY.
 
-31. Signal versions protect future intelligence changes from breaking the architecture.
+31. If asking price is greater than Target Offer and less than or equal to Maximum Buy Price, the decision must be NEGOTIATE.
 
-32. Future adaptive systems should learn vocabulary and behavior without changing core parser logic.
+32. If asking price is greater than Maximum Buy Price, the decision must be PASS.
+
+33. Condition influences market estimate, Negotiation Ladder, Card Intelligence, and purchase evaluation, but never identity resolution.
+
+34. Signal and indicator versions protect future intelligence changes from breaking the architecture.
+
+35. Future adaptive systems should learn vocabulary and behavior without changing core parser logic.
+
+36. Vendor Workspace progression must be controlled by a deterministic workflow state machine, not scattered component booleans.
+
+37. Identity candidates, highlighted identity, and selected identity are separate states. Highlighting is navigation intent; selection is workflow commitment.
+
+38. An identity with exactly one printing should activate the Single Printing Rule and continue toward evaluation automatically.
+
+39. Every successful Vendor Workspace identity selection must reach either `ReadyForEvaluation` or `Error`.
+
+40. Vendor Workflow events describe user or system actions. UI components must not dispatch events that directly mirror internal states.
+
+41. Decision Resolver must consume a validated Offer Ladder. It must not execute when Maximum Buy Price is unavailable.
+
+42. Zero is not unknown. Missing evaluation data must become `UNAVAILABLE`, `INVALID`, or `WAITING_FOR_DATA`, not `0`.
+
+43. Evaluation Trace is the source of debugging truth for profit, strategy, offer ladder, validation, and decision reasoning.
+
+44. Workflow Command Processor owns workflow context. UI components dispatch commands and render workflow context.
+
+45. Context invalidation belongs in `ContextInvalidationEngine`, not in React components.
+
+46. Rejected workflow commands must leave workflow-owned context unchanged.
+
+47. Commands describe user or system intent. The workflow engine, not the UI, decides state transitions and invalidation.
+
+48. Single Printing Rule execution belongs in command processing so selected one-printing identities cannot leave stale or half-selected UI context.
+
+49. Asset Context is the source of truth for evaluation ownership. Every visible identity, printing, variant, market snapshot, card profile, offer ladder, and decision must belong to the same context generation.
+
+50. Production Vendor Workspace must not expose workflow states, command logs, context ids, timing, or developer diagnostics.
+
+51. Atlas Inspector owns developer diagnostics and must be gated behind development mode.
+
+52. Stale downstream objects must be rejected or hidden instead of rendered with the current selection.
+
+53. Market Providers have precedence for pricing. If provider data exists, future Condition Intelligence must not override it.
+
+54. Condition changes are upstream Asset Context changes. They must create a new generation and request a fresh market snapshot before evaluation is treated as current.
+
+55. Future condition inference may fill provider gaps only. It must be traceable and clearly marked as fallback data.
+
+56. Evaluation history is immutable. Snapshots are append-only and must never be edited or overwritten.
+
+57. Only completed evaluations create Evaluation Snapshots. Context changes are history events, not snapshots.
+
+58. Business engines do not write history. History records engine output after evaluation completes.
+
+59. Future simulation, replay, and analytics systems consume Evaluation Snapshots instead of recalculating old recommendations in place.
 
 ## Documentation Rule
 

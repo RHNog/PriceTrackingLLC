@@ -26,14 +26,30 @@ No sprint is complete until Atlas has been synchronized.
 - Identity Providers answer what a card is.
 - Market Providers answer what a selected printing and finish is worth.
 - Card Intelligence produces reusable signals, not recommendations.
+- Asset Intelligence models wrap reusable indicators behind a shared framework contract.
+- Workflow Command Processor controls workflow progression and diagnostics.
+- Context Invalidation Engine clears downstream dependencies from commands.
+- Asset Context owns the current evaluation identity, printing, variant, condition, market, card profile, offer ladder, decision, and generation.
+- Atlas Inspector owns developer diagnostics.
+- Market Provider data always has precedence over future inferred condition pricing.
+- Completed evaluations become immutable Evaluation Snapshots.
 - Strategies interpret signals.
 - Negotiation Ladder converts strategy into negotiation guidance.
+- Offer Ladder Validator checks negotiation math before decisions.
 - Decision Resolver compares asking price against the Negotiation Ladder.
 - Business engines own decisions; UI renders normalized data.
 
 ## Dependency Graph
 
 Vendor Workspace
+
+→ Workflow Command Processor
+
+→ Context Invalidation Engine
+
+→ Asset Context
+
+→ Asset Context Validator
 
 → Query / Identity / Intent / Constraint Engines
 
@@ -43,7 +59,11 @@ Vendor Workspace
 
 → Market Provider
 
+→ Condition-Aware Market Snapshot
+
 → Market Context
+
+→ Asset Intelligence Framework
 
 → Card Intelligence Engine
 
@@ -51,9 +71,15 @@ Vendor Workspace
 
 → Negotiation Ladder Engine
 
+→ Offer Ladder Validator
+
 → Purchase Evaluation Engine
 
 → Decision Resolver
+
+→ Evaluation History Engine
+
+→ Immutable Evaluation Snapshot
 
 → Decision Drivers
 
@@ -90,6 +116,231 @@ Vendor Workspace should update decisions automatically after a short input debou
 ### Keyboard-Safe Shortcuts
 
 ESC can reset the workflow globally. Arrow and Enter shortcuts should only act when the user is not typing into an input, textarea, or select.
+
+### Workflow Command Architecture
+
+Vendor Workspace progression is deterministic and tracked through `types/VendorWorkflowState.ts` and `lib/workflow/commands/WorkflowCommandProcessor.ts`.
+
+Commands describe intent:
+
+- `SearchCards`
+- `LoadSearchResults`
+- `HighlightCard`
+- `SelectCard`
+- `SelectPrinting`
+- `SelectVariant`
+- `SelectCondition`
+- `ChangeStrategy`
+- `EnterAskingPrice`
+- `Evaluate`
+- `ResetWorkspace`
+- `ReportWorkflowError`
+
+Workflow states:
+
+- `Idle`
+- `Searching`
+- `CandidatesFound`
+- `IdentityHighlighted`
+- `IdentitySelected`
+- `PrintingsLoaded`
+- `PrintingSelected`
+- `VariantResolved`
+- `ConditionResolved`
+- `ReadyForEvaluation`
+- `Evaluating`
+- `EvaluationComplete`
+- `Error`
+
+Workflow invariant:
+
+Every successful identity selection must reach either `ReadyForEvaluation` or `Error`.
+
+Identity rows must preserve three distinct meanings:
+
+- Suggested: a search candidate.
+- Highlighted: current keyboard or navigation target.
+- Selected: committed identity for printing and evaluation.
+
+Single Printing Rule:
+
+If a selected identity has exactly one printing, Vendor Workspace should auto-select that printing, resolve the finish variant and condition, load market intelligence, and prepare evaluation. If the printing, market estimate, or supported finish cannot be resolved, the workflow should enter `Error`.
+
+### Workflow Ownership
+
+Workflow owns:
+
+- Highlighted Identity
+- Selected Identity
+- Selected Printing
+- Selected Variant
+- Selected Condition
+- Market Context
+- Selected Strategy
+- Asking Price
+
+UI components may dispatch workflow commands. They must render workflow context and must not own selected workflow state.
+
+### Asset Context Integrity
+
+Asset Context is the generated reference chain for one purchase evaluation:
+
+Identity
+
+→ Printing
+
+→ Variant
+
+→ Condition
+
+→ Market Context
+
+→ Market Snapshot
+
+→ Card Profile
+
+→ Offer Ladder
+
+→ Decision
+
+Workflow Command Processor owns Asset Context and increments `generation` whenever upstream context changes. Objects from older generations are stale automatically.
+
+`lib/workflow/AssetContextValidator.ts` classifies context as:
+
+- `Valid`
+- `Invalid`
+- `Incomplete`
+
+Business invariants:
+
+- Selected identity must own the selected printing.
+- Selected printing must own the selected variant.
+- Market snapshot must match selected printing and variant.
+- Card Profile, Offer Ladder, and Decision ids must reference the same generation.
+- Stale market snapshots are rejected before they can drive evaluation.
+
+### Condition Pricing Lifecycle
+
+Condition changes are Asset Context changes.
+
+Flow:
+
+ChangeCondition command
+
+→ New Asset Context generation
+
+→ Downstream invalidation
+
+→ Market Provider request
+
+→ Market Snapshot attached to matching generation
+
+→ Existing condition-aware market snapshot pipeline
+
+→ Card Intelligence
+
+→ Offer Ladder
+
+→ Decision Resolver
+
+Provider precedence rule:
+
+If a Market Provider can supply real pricing data, that data must be used. Future Condition Intelligence may only fill gaps when provider data is unavailable, and it must never override provider data.
+
+TODO:
+
+- Add provider-native condition price support when marketplaces expose it.
+- Add Condition Intelligence fallback only for missing provider data.
+- Add provider-vs-inference trace snapshots to Atlas Inspector.
+
+### Atlas Inspector
+
+Developer diagnostics live in Atlas Inspector, not production Vendor Workspace.
+
+Activation:
+
+- Cmd+Shift+D on macOS
+- Ctrl+Shift+D elsewhere
+
+Panels:
+
+- Workflow
+- Asset Context
+- Query Parser
+- Canonical Resolution
+- Intent Resolution
+- Printing Resolution
+- Card Intelligence
+- Offer Ladder
+- Decision Trace
+- Performance
+- Provider Trace
+
+### Intelligence History Platform
+
+Every completed `READY` evaluation is historical intelligence.
+
+Snapshot lifecycle:
+
+Completed Evaluation
+
+→ Snapshot Factory
+
+→ Snapshot Validator
+
+→ History Repository
+
+→ Immutable Evaluation Snapshot
+
+Snapshots capture:
+
+- timestamp
+- Asset Context generation
+- identity
+- printing
+- variant
+- condition
+- Market Context
+- Buying Strategy
+- Market Estimate
+- Offer Ladder
+- Decision
+- confidence
+- Card Intelligence indicators
+
+Rules:
+
+- Snapshots are immutable.
+- History is append-only.
+- Incomplete snapshots are rejected.
+- Business engines never mutate history.
+- Vendor Workspace reads current state only.
+
+Future systems consume this history:
+
+- Backtesting
+- Strategy Replay
+- Market Replay
+- Signal Validation
+- Simulation Platform
+- Personal Buying History
+- Portfolio Tracking
+
+### Context Invalidation
+
+`lib/workflow/commands/ContextInvalidationEngine.ts` clears downstream dependencies automatically.
+
+Invalidation rules:
+
+- Changing Identity invalidates Printing, Variant, Condition, Market Estimate, Card Intelligence, Offer Ladder, Decision, and Evaluation.
+- Changing Printing invalidates Variant, Condition, Market Estimate, Card Intelligence, Offer Ladder, Decision, and Evaluation.
+- Changing Variant invalidates Market Estimate, Card Intelligence, Offer Ladder, Decision, and Evaluation.
+- Changing Condition invalidates Market Estimate, Card Intelligence, Offer Ladder, Decision, and Evaluation.
+- Changing Market Context invalidates Market Estimate, Card Intelligence, Offer Ladder, Decision, and Evaluation.
+- Changing Strategy invalidates Offer Ladder, Decision, and Evaluation.
+- Changing Asking Price invalidates Decision and Evaluation.
+
+Rejected workflow commands must leave workflow context unchanged.
 
 ### Card Intelligence Signals
 
@@ -152,25 +403,131 @@ The Decision Resolver must never contradict the Negotiation Ladder.
 - Asking price less than or equal to Target Offer must produce BUY.
 - Asking price greater than Target Offer and less than or equal to Maximum Buy Price must produce NEGOTIATE.
 - Asking price greater than Maximum Buy Price must produce PASS.
+- Opening Offer must be less than or equal to Target Offer.
+- Target Offer must be less than or equal to Maximum Buy Price.
+- Recommended Offer must be less than or equal to Maximum Buy Price.
+- Decision Resolver may execute only when Maximum Buy Price exists and the Offer Ladder is valid.
+- Missing calculations must be represented as unavailable or invalid, never as fallback zero.
 - Condition can change the market estimate, ladder, and decision.
 - Card Intelligence cannot make a recommendation by itself.
+
+### Evaluation Integrity
+
+Evaluation pipeline:
+
+Card → Printing → Variant → Condition → Market Context → Asset Intelligence → Strategy → Offer Ladder → Offer Ladder Validation → Decision Resolver → Vendor Workspace.
+
+`lib/engines/negotiation/OfferLadderValidator.ts` validates the Offer Ladder before any decision can be resolved. It checks missing values, impossible values, negative values, ordering, recommended offer bounds, and negotiation margin warnings.
+
+Evaluation Trace records:
+
+- Market Estimate
+- Profit Before Costs
+- Costs
+- Profit After Costs
+- Card Intelligence Signals
+- Strategy Inputs
+- Offer Ladder
+- Decision Zone
+- Decision
+- Validation Status
+
+Production UI must show user-safe unavailable messages. Development UI may expose trace details.
 
 ### Signal Versioning
 
 Every Card Intelligence signal includes version, confidence, contributing factors, supporting data sources, and generation timestamp. Future signal improvements should add versions instead of breaking the `Signal` contract.
 
+### Asset Intelligence Framework
+
+Every future intelligence platform must register an Intelligence Model under `lib/intelligence/framework/`.
+
+Model contract:
+
+- id
+- name
+- version
+- status
+- confidence
+- lastUpdated
+- inputs
+- outputs
+- indicators
+- supporting sources
+- health
+- explanation
+- dependency graph
+
+Indicator contract:
+
+- id
+- name
+- score
+- confidence
+- version
+- status
+- data sources
+- contributing factors
+- last updated
+- explanation
+- future dependencies
+
+Indicator statuses:
+
+- LIVE
+- ESTIMATED
+- PLACEHOLDER
+- WAITING_FOR_PROVIDER
+- DISABLED
+- UNKNOWN
+
+Model health:
+
+- Healthy
+- Partial
+- Missing Data
+- Unavailable
+- Deprecated
+- Experimental
+
+Current and future registered models:
+
+- Market Intelligence
+- Collector Intelligence
+- Investment Intelligence
+- Liquidity Intelligence
+- Reprint Risk
+- Market Confidence
+- Playability Intelligence
+- Grading Intelligence
+- Regional Intelligence
+- Behavior Intelligence
+- Historical Intelligence
+- Volatility Intelligence
+- Demand Intelligence
+- Scarcity Intelligence
+
+Dependency graph metadata is included on each model so future Atlas visualizations can show provider and model dependencies.
+
 ## Backlog
 
 1. Add live marketplace listings and recent sales.
 2. Add a Printing Descriptor Engine for provider-neutral printing labels.
-3. Add Liquidity Engine.
-4. Add Historical Analytics Engine.
-5. Add Market Context Engine.
-6. Add camera, OCR, and barcode entry.
-7. Add ARIA active-descendant support for richer keyboard highlighting.
-8. Add persisted buyer preferences for finish defaults.
-9. Add saved Vendor Workspace chip presets.
-10. Add visual regression coverage for 13-inch and 14-inch laptop viewports.
+3. Add development-only Vendor Workflow transition inspector.
+4. Add Evaluation Trace replay UI.
+5. Add workflow context inspector.
+6. Add historical backtesting.
+7. Add simulation engine.
+8. Add strategy replay and Market Context replay.
+9. Add Asset Intelligence model diagnostics UI.
+10. Add Liquidity Engine as an Asset Intelligence model.
+11. Add Historical Analytics Engine as an Asset Intelligence model.
+12. Add Market Context Engine.
+13. Add camera, OCR, and barcode entry.
+14. Add ARIA active-descendant support for richer keyboard highlighting.
+15. Add persisted buyer preferences for finish defaults.
+16. Add saved Vendor Workspace chip presets.
+17. Add visual regression coverage for 13-inch and 14-inch laptop viewports.
 
 ## Technical Debt
 
@@ -184,3 +541,10 @@ Every Card Intelligence signal includes version, confidence, contributing factor
 - Condition multipliers are fixed seed values and should become strategy or marketplace configurable.
 - Market Context is a static default until the Market Context Engine exists.
 - Negotiation Ladder uses fixed fee and shipping assumptions inherited from the current Profit Engine setup.
+- Asset Intelligence model outputs are deterministic wrappers around existing signals until live providers exist.
+- Model health is currently derived from registration status and indicator status.
+- Vendor Workflow diagnostics are rendered in the workspace for development visibility and should later move behind a development-only inspector.
+- Keyboard highlighting uses component state today; richer ARIA active-descendant focus management remains future work.
+- Evaluation Trace is in-memory only until replay and persistence infrastructure exists.
+- Offer Ladder Validator uses deterministic local rules; future marketplace-specific constraints may extend validation.
+- Workflow context currently stores ids and primitive UI workflow values; future shared workspaces may add typed context adapters.

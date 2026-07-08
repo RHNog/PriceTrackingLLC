@@ -6,8 +6,11 @@ import EvaluationSummary from "@/features/vendor/components/EvaluationSummary";
 import { createCardProfile } from "@/lib/engines/cardIntelligence/CardIntelligenceEngine";
 import { evaluatePurchase } from "@/lib/engines/evaluation/evaluatePurchase";
 import { createConditionMarketSnapshot } from "@/lib/engines/market/createConditionMarketSnapshot";
+import { evaluationHistoryEngine } from "@/lib/history/EvaluationHistoryEngine";
+import { createMarketSnapshotId } from "@/lib/workflow/AssetContextValidator";
+import type { AssetContext } from "@/types/AssetContext";
 import type { Card } from "@/types/card";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   conditionProfiles,
   findConditionProfile,
@@ -22,14 +25,17 @@ import type { StrategyProfile } from "@/types/strategyProfile";
 
 type PurchasePanelProps = {
   askingPrice: string;
+  assetContext: AssetContext;
   availableVariants: PrintingVariant[];
   card: Card;
   isMarketLoading: boolean;
   marketPrice?: MarketPrice;
   marketSnapshot?: MarketSnapshot;
+  selectedCondition: CardConditionCode;
   selectedStrategy?: Strategy;
   selectedStrategyProfile?: StrategyProfile;
   onAskingPriceChange: (price: string) => void;
+  onConditionChange: (condition: CardConditionCode) => void;
   onVariantChange: (variantId: string) => void;
   selectedVariant: PrintingVariant | null;
 };
@@ -60,19 +66,23 @@ function MarketTextStat({ label, value }: { label: string; value: string }) {
 
 export default function PurchasePanel({
   askingPrice,
+  assetContext,
   availableVariants,
   card,
   isMarketLoading,
   marketPrice,
   marketSnapshot,
+  selectedCondition,
   selectedStrategy,
   selectedStrategyProfile,
   onAskingPriceChange,
+  onConditionChange,
   onVariantChange,
   selectedVariant,
 }: PurchasePanelProps) {
   const [debouncedAskingPrice, setDebouncedAskingPrice] = useState(askingPrice);
-  const [condition, setCondition] = useState<CardConditionCode>("NM");
+  const lastRecordedSnapshotKey = useRef("");
+  const condition = selectedCondition;
   const canEvaluate = Boolean(
     marketPrice &&
     selectedStrategyProfile &&
@@ -135,12 +145,60 @@ export default function PurchasePanel({
     selectedVariant,
   ]);
   const evaluationToShow = liveEvaluation;
+  const historySnapshotKey =
+    evaluationToShow?.status === "READY" && marketSnapshot && selectedStrategyProfile
+      ? [
+          assetContext.id,
+          assetContext.generation,
+          askingPrice,
+          selectedStrategyProfile.id,
+          createMarketSnapshotId({
+            printingId: marketSnapshot.printingId,
+            providerId: marketSnapshot.providerId,
+            updatedAt: marketSnapshot.updatedAt,
+            variantId: marketSnapshot.variantId,
+          }),
+          evaluationToShow.decision.action,
+        ].join(":")
+      : "";
   const marketStats = [
     {
       label: "Current Market Estimate",
       value: conditionMarketPrice?.price,
     },
   ];
+
+  useEffect(() => {
+    if (
+      !historySnapshotKey ||
+      !marketSnapshot ||
+      !selectedStrategyProfile ||
+      evaluationToShow?.status !== "READY"
+    ) {
+      return;
+    }
+
+    if (lastRecordedSnapshotKey.current === historySnapshotKey) {
+      return;
+    }
+
+    const result = evaluationHistoryEngine.recordCompletedEvaluation({
+      assetContext,
+      evaluation: evaluationToShow,
+      marketSnapshot,
+      strategyProfile: selectedStrategyProfile,
+    });
+
+    if (result.recorded) {
+      lastRecordedSnapshotKey.current = historySnapshotKey;
+    }
+  }, [
+    assetContext,
+    evaluationToShow,
+    historySnapshotKey,
+    marketSnapshot,
+    selectedStrategyProfile,
+  ]);
 
   return (
     <section className="space-y-4 lg:sticky lg:top-6">
@@ -255,7 +313,7 @@ export default function PurchasePanel({
                     <button
                       key={profile.code}
                       type="button"
-                      onClick={() => setCondition(profile.code)}
+                      onClick={() => onConditionChange(profile.code)}
                       className={`rounded-md border px-3 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
                         isSelected
                           ? "border-cyan-400 bg-cyan-400 text-zinc-950"

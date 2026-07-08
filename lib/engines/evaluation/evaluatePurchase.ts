@@ -8,6 +8,10 @@ import { createConditionMarketSnapshot } from "@/lib/engines/market/createCondit
 import { resolveDecision } from "@/lib/engines/negotiation/DecisionResolver";
 import type { NegotiationLadder } from "@/lib/engines/negotiation/NegotiationLadder";
 import { createNegotiationLadder } from "@/lib/engines/negotiation/NegotiationLadderEngine";
+import {
+  validateOfferLadder,
+  type OfferLadderValidation,
+} from "@/lib/engines/negotiation/OfferLadderValidator";
 import { calculateNetProfit } from "@/lib/engines/profit/calculateNetProfit";
 import { calculateOpportunityRanking } from "@/lib/engines/ranking/calculateOpportunityRanking";
 import { calculateSignalStrategyScore } from "@/lib/engines/strategy/calculateSignalStrategyScore";
@@ -38,7 +42,53 @@ type EvaluatePurchaseInput = {
   strategyProfile: StrategyProfile;
 };
 
-export type PurchaseEvaluation = {
+export type EvaluationStatus =
+  | "READY"
+  | "UNAVAILABLE"
+  | "INVALID"
+  | "WAITING_FOR_DATA";
+
+export type EvaluationTrace = {
+  decisionTrace: {
+    businessInvariantChecks: string[];
+    decisionZone: string;
+    reason: string;
+    sellerAskingPrice: number;
+  };
+  offerLadderTrace: {
+    calculatedMaximumBuyPrice: number | null;
+    calculatedOpeningOffer: number | null;
+    calculatedTargetOffer: number | null;
+    cardIntelligenceInputs: string[];
+    negotiationMargin: number | null;
+    recommendedOffer: number | null;
+    strategyWeights: string[];
+  };
+  pipeline: string[];
+  profitTrace: {
+    conditionAdjustment: string;
+    estimatedFees: number | null;
+    estimatedShipping: number | null;
+    finalExpectedProfit: number | null;
+    profitAfterCosts: number | null;
+    profitBeforeCosts: number | null;
+    rawMarketEstimate: number | null;
+    strategyAdjustments: string[];
+    variantAdjustment: string;
+  };
+  strategyTrace: {
+    issues: string[];
+    passedConstraints: boolean | null;
+    score: number | null;
+  };
+  validation: {
+    errors: string[];
+    status: EvaluationStatus;
+    warnings: string[];
+  };
+};
+
+export type ReadyPurchaseEvaluation = {
   askingPrice: number;
   cardProfile: CardProfile;
   confidence: number;
@@ -56,18 +106,116 @@ export type PurchaseEvaluation = {
   roi: number;
   selectedPrinting: Card;
   selectedVariant: PrintingVariant;
+  status: "READY";
   strategyReason: string;
+  trace: EvaluationTrace;
+  validation: OfferLadderValidation;
 };
+
+export type UnavailablePurchaseEvaluation = {
+  askingPrice: number;
+  marketEstimate?: MarketPrice;
+  reason: string;
+  selectedPrinting: Card;
+  selectedVariant: PrintingVariant;
+  status: Exclude<EvaluationStatus, "READY">;
+  trace: EvaluationTrace;
+};
+
+export type PurchaseEvaluation =
+  | ReadyPurchaseEvaluation
+  | UnavailablePurchaseEvaluation;
 
 const MARKETPLACE_FEES = 46;
 const SHIPPING_COST = 18;
 
 function calculateRoi(profit: number, purchasePrice: number) {
-  if (purchasePrice <= 0) {
+  if (purchasePrice <= 0 || !Number.isFinite(purchasePrice)) {
     return 0;
   }
 
   return Math.round((profit / purchasePrice) * 1000) / 10;
+}
+
+const pipeline = [
+  "Card",
+  "Printing",
+  "Variant",
+  "Condition",
+  "Market Context",
+  "Asset Intelligence",
+  "Strategy",
+  "Offer Ladder",
+  "Offer Ladder Validation",
+  "Decision Resolver",
+  "Vendor Workspace",
+];
+
+function isPositiveFinite(value: number) {
+  return Number.isFinite(value) && value > 0;
+}
+
+function createUnavailableEvaluation(input: {
+  askingPrice: number;
+  marketEstimate?: MarketPrice;
+  reason: string;
+  selectedPrinting: Card;
+  selectedVariant: PrintingVariant;
+  status: Exclude<EvaluationStatus, "READY">;
+  trace?: Partial<EvaluationTrace>;
+}): UnavailablePurchaseEvaluation {
+  return {
+    askingPrice: input.askingPrice,
+    marketEstimate: input.marketEstimate,
+    reason: input.reason,
+    selectedPrinting: input.selectedPrinting,
+    selectedVariant: input.selectedVariant,
+    status: input.status,
+    trace: {
+      decisionTrace: {
+        businessInvariantChecks: [],
+        decisionZone: "Unavailable",
+        reason: input.reason,
+        sellerAskingPrice: input.askingPrice,
+        ...input.trace?.decisionTrace,
+      },
+      offerLadderTrace: {
+        calculatedMaximumBuyPrice: null,
+        calculatedOpeningOffer: null,
+        calculatedTargetOffer: null,
+        cardIntelligenceInputs: [],
+        negotiationMargin: null,
+        recommendedOffer: null,
+        strategyWeights: [],
+        ...input.trace?.offerLadderTrace,
+      },
+      pipeline,
+      profitTrace: {
+        conditionAdjustment: "Unavailable",
+        estimatedFees: null,
+        estimatedShipping: null,
+        finalExpectedProfit: null,
+        profitAfterCosts: null,
+        profitBeforeCosts: null,
+        rawMarketEstimate: input.marketEstimate?.price ?? null,
+        strategyAdjustments: [],
+        variantAdjustment: "Unavailable",
+        ...input.trace?.profitTrace,
+      },
+      strategyTrace: {
+        issues: [input.reason],
+        passedConstraints: null,
+        score: null,
+        ...input.trace?.strategyTrace,
+      },
+      validation: {
+        errors: [input.reason],
+        status: input.status,
+        warnings: [],
+        ...input.trace?.validation,
+      },
+    },
+  };
 }
 
 function calculateConfidence(input: {
@@ -105,6 +253,28 @@ export function evaluatePurchase(
   // TODO: Camera mode and voice mode.
   // TODO: Bulk evaluation.
   // TODO: Offline mode.
+  if (!isPositiveFinite(input.marketPrice.price)) {
+    return createUnavailableEvaluation({
+      askingPrice: input.purchasePrice,
+      marketEstimate: input.marketPrice,
+      reason: "Incomplete market data.",
+      selectedPrinting: input.card,
+      selectedVariant: input.selectedVariant,
+      status: "UNAVAILABLE",
+    });
+  }
+
+  if (!isPositiveFinite(input.purchasePrice)) {
+    return createUnavailableEvaluation({
+      askingPrice: input.purchasePrice,
+      marketEstimate: input.marketPrice,
+      reason: "Current asking price is unavailable.",
+      selectedPrinting: input.card,
+      selectedVariant: input.selectedVariant,
+      status: "WAITING_FOR_DATA",
+    });
+  }
+
   const condition = findConditionProfile(input.condition ?? "NM");
   const conditionMarketSnapshot = createConditionMarketSnapshot(
     input.marketPrice,
@@ -144,6 +314,70 @@ export function evaluatePurchase(
     shippingCost: SHIPPING_COST,
     strategyProfile: input.strategyProfile,
   });
+  const recommendedOffer = Math.min(
+    negotiationLadder.targetOffer,
+    negotiationLadder.maximumBuyPrice,
+  );
+  const negotiationMargin =
+    negotiationLadder.maximumBuyPrice - input.purchasePrice;
+  const ladderValidation = validateOfferLadder({
+    ladder: negotiationLadder,
+    negotiationMargin,
+    recommendedOffer,
+  });
+  const profitTrace = {
+    conditionAdjustment: `${condition.code} multiplier ${condition.marketMultiplier}`,
+    estimatedFees: profit.trace.estimatedFees,
+    estimatedShipping: profit.trace.estimatedShipping,
+    finalExpectedProfit: profit.trace.finalExpectedProfit,
+    profitAfterCosts: profit.trace.profitAfterCosts,
+    profitBeforeCosts: profit.trace.profitBeforeCosts,
+    rawMarketEstimate: input.marketPrice.price,
+    strategyAdjustments: [
+      `Minimum profit ${input.strategyProfile.constraints.minimumProfit}`,
+      `Minimum ROI ${input.strategyProfile.constraints.minimumROI}`,
+    ],
+    variantAdjustment: `${input.selectedVariant.finish} via ${input.selectedVariant.source}`,
+  };
+  const offerLadderTrace = {
+    calculatedMaximumBuyPrice: negotiationLadder.maximumBuyPrice,
+    calculatedOpeningOffer: negotiationLadder.openingOffer,
+    calculatedTargetOffer: negotiationLadder.targetOffer,
+    cardIntelligenceInputs: cardProfile.signals.map(
+      (signal) => `${signal.name}: ${signal.score}`,
+    ),
+    negotiationMargin,
+    recommendedOffer,
+    strategyWeights: Object.entries(input.strategyProfile.signalWeights).map(
+      ([signal, weight]) => `${signal}: ${weight}`,
+    ),
+  };
+
+  if (!ladderValidation.validatedLadder) {
+    const validationStatus =
+      ladderValidation.status === "READY" ? "INVALID" : ladderValidation.status;
+
+    return createUnavailableEvaluation({
+      askingPrice: input.purchasePrice,
+      marketEstimate,
+      reason:
+        ladderValidation.errors[0] ??
+        "Offer ladder unavailable. Evaluation unavailable.",
+      selectedPrinting: input.card,
+      selectedVariant: input.selectedVariant,
+      status: validationStatus,
+      trace: {
+        offerLadderTrace,
+        profitTrace,
+        validation: {
+          errors: ladderValidation.errors,
+          status: ladderValidation.status,
+          warnings: ladderValidation.warnings,
+        },
+      },
+    });
+  }
+
   const passesConstraints = passesStrategyConstraints(input.strategyProfile, {
     game: input.card.game,
     marketplaceId: marketEstimate.providerId,
@@ -162,17 +396,8 @@ export function evaluatePurchase(
   });
   const action = resolveDecision({
     askingPrice: input.purchasePrice,
-    negotiationLadder,
+    negotiationLadder: ladderValidation.validatedLadder,
   });
-  const negotiationMargin =
-    negotiationLadder.maximumBuyPrice - input.purchasePrice;
-  const recommendedOffer =
-    action === "BUY"
-      ? negotiationLadder.targetOffer
-      : Math.min(
-          negotiationLadder.targetOffer,
-          negotiationLadder.maximumBuyPrice,
-        );
   const estimatedMargin =
     Math.round((marketEstimate.price - input.purchasePrice) * 100) / 100;
   const strategyReason = passesConstraints
@@ -188,6 +413,31 @@ export function evaluatePurchase(
     recommendedOffer,
     roi,
   });
+  const strategyIssues: string[] = [];
+
+  if (
+    profit.netProfit < 0 &&
+    marketEstimate.price > input.purchasePrice
+  ) {
+    strategyIssues.push(
+      "Negative expected profit despite market estimate exceeding asking price; costs exceed spread.",
+    );
+  }
+
+  if (!passesConstraints) {
+    strategyIssues.push("Strategy constraints failed.");
+  }
+  const decisionTrace = {
+    businessInvariantChecks: [
+      `Opening <= Target: ${negotiationLadder.openingOffer <= negotiationLadder.targetOffer}`,
+      `Target <= Maximum: ${negotiationLadder.targetOffer <= negotiationLadder.maximumBuyPrice}`,
+      `Recommended <= Maximum: ${recommendedOffer <= negotiationLadder.maximumBuyPrice}`,
+      "Decision Resolver executed with validated offer ladder.",
+    ],
+    decisionZone: action,
+    reason: decisionDrivers[0]?.message ?? "Decision resolved from offer ladder.",
+    sellerAskingPrice: input.purchasePrice,
+  };
 
   return {
     askingPrice: input.purchasePrice,
@@ -217,6 +467,24 @@ export function evaluatePurchase(
     roi,
     selectedPrinting: input.card,
     selectedVariant: input.selectedVariant,
+    status: "READY",
     strategyReason,
+    trace: {
+      decisionTrace,
+      offerLadderTrace,
+      pipeline,
+      profitTrace,
+      strategyTrace: {
+        issues: strategyIssues,
+        passedConstraints: passesConstraints,
+        score: intelligenceScore,
+      },
+      validation: {
+        errors: ladderValidation.errors,
+        status: "READY",
+        warnings: ladderValidation.warnings,
+      },
+    },
+    validation: ladderValidation,
   };
 }

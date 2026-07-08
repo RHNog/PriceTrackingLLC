@@ -1,5 +1,9 @@
 import DecisionBadge from "@/features/vendor/components/DecisionBadge";
-import type { PurchaseEvaluation } from "@/lib/engines/evaluation/evaluatePurchase";
+import type {
+  EvaluationTrace,
+  PurchaseEvaluation,
+  ReadyPurchaseEvaluation,
+} from "@/lib/engines/evaluation/evaluatePurchase";
 import type { ReactNode } from "react";
 
 type EvaluationSummaryProps = {
@@ -32,6 +36,30 @@ export default function EvaluationSummary({
   askingPrice,
   evaluation,
 }: EvaluationSummaryProps) {
+  if (evaluation.status !== "READY") {
+    return (
+      <section className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+        <p className="text-sm font-medium text-zinc-200">
+          Unable to evaluate purchase.
+        </p>
+        <p className="mt-2 text-sm text-zinc-400">Reason: {evaluation.reason}</p>
+        <EvaluationTraceView trace={evaluation.trace} />
+      </section>
+    );
+  }
+
+  return (
+    <ReadyEvaluationSummary askingPrice={askingPrice} evaluation={evaluation} />
+  );
+}
+
+function ReadyEvaluationSummary({
+  askingPrice,
+  evaluation,
+}: {
+  askingPrice: number;
+  evaluation: ReadyPurchaseEvaluation;
+}) {
   const { decision, ranking } = evaluation;
   const ladder = evaluation.negotiationLadder;
 
@@ -108,6 +136,8 @@ export default function EvaluationSummary({
           ))}
         </ul>
       </div>
+
+      <EvaluationTraceView trace={evaluation.trace} />
     </section>
   );
 }
@@ -115,7 +145,10 @@ export default function EvaluationSummary({
 function NegotiationLadderView({
   askingPrice,
   evaluation,
-}: EvaluationSummaryProps) {
+}: {
+  askingPrice: number;
+  evaluation: ReadyPurchaseEvaluation;
+}) {
   const ladder = evaluation.negotiationLadder;
   const steps: { label: string; tone: Tone; value: number }[] = [
     {
@@ -212,6 +245,70 @@ function Metric({
     <div className="rounded-md bg-zinc-950/60 p-3">
       <p className="text-xs text-zinc-500">{label}</p>
       <p className={`mt-1 font-semibold ${toneClass}`}>{value}</p>
+    </div>
+  );
+}
+
+function EvaluationTraceView({ trace }: { trace: EvaluationTrace }) {
+  if (process.env.NODE_ENV !== "development") {
+    return null;
+  }
+
+  return (
+    <div className="mt-4 border-t border-zinc-800 pt-4">
+      <p className="text-sm font-medium text-zinc-200">Evaluation Trace</p>
+      <div className="mt-3 grid gap-3 text-xs text-zinc-400">
+        <TraceGroup title="Market And Profit">
+          <TraceLine label="Market Estimate" value={trace.profitTrace.rawMarketEstimate} />
+          <TraceLine label="Profit Before Costs" value={trace.profitTrace.profitBeforeCosts} />
+          <TraceLine label="Costs" value={trace.profitTrace.estimatedFees !== null && trace.profitTrace.estimatedShipping !== null ? trace.profitTrace.estimatedFees + trace.profitTrace.estimatedShipping : null} />
+          <TraceLine label="Profit After Costs" value={trace.profitTrace.profitAfterCosts} />
+        </TraceGroup>
+        <TraceGroup title="Strategy And Ladder">
+          <TraceLine label="Strategy Score" value={trace.strategyTrace.score} />
+          <TraceLine label="Opening Offer" value={trace.offerLadderTrace.calculatedOpeningOffer} />
+          <TraceLine label="Target Offer" value={trace.offerLadderTrace.calculatedTargetOffer} />
+          <TraceLine label="Maximum Buy Price" value={trace.offerLadderTrace.calculatedMaximumBuyPrice} />
+          <TraceLine label="Recommended Offer" value={trace.offerLadderTrace.recommendedOffer} />
+        </TraceGroup>
+        <TraceGroup title="Decision">
+          <TraceLine label="Decision Zone" value={trace.decisionTrace.decisionZone} />
+          <TraceLine label="Decision" value={trace.decisionTrace.reason} />
+          <TraceLine label="Validation Status" value={trace.validation.status} />
+        </TraceGroup>
+      </div>
+    </div>
+  );
+}
+
+function TraceGroup({
+  children,
+  title,
+}: {
+  children: ReactNode;
+  title: string;
+}) {
+  return (
+    <div className="rounded-md bg-zinc-950/60 p-3">
+      <p className="font-medium uppercase text-zinc-500">{title}</p>
+      <div className="mt-2 space-y-1">{children}</div>
+    </div>
+  );
+}
+
+function TraceLine({
+  label,
+  value,
+}: {
+  label: string;
+  value: number | string | null;
+}) {
+  return (
+    <div className="flex justify-between gap-3">
+      <span>{label}</span>
+      <span className="text-right text-zinc-200">
+        {value === null ? "Unavailable" : value}
+      </span>
     </div>
   );
 }

@@ -7,6 +7,7 @@ import type { SearchResult } from "@/types/searchResult";
 
 type CardSearchPaletteProps = {
   focusKey?: number;
+  highlightedCardId: string;
   interpretationSummary?: string[];
   query: string;
   results: SearchResult<CardIdentity>[];
@@ -17,6 +18,7 @@ type CardSearchPaletteProps = {
 
 export default function CardSearchPalette({
   focusKey = 0,
+  highlightedCardId,
   interpretationSummary = [],
   query,
   results,
@@ -58,6 +60,7 @@ export default function CardSearchPalette({
       ) : null}
 
       <SearchResults
+        highlightedCardId={highlightedCardId}
         results={results}
         selectedCardId={selectedCardId}
         onSelectCard={onSelectCard}

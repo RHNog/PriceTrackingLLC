@@ -1,10 +1,10 @@
-import type { NegotiationLadder } from "@/lib/engines/negotiation/NegotiationLadder";
+import type { ValidatedOfferLadder } from "@/lib/engines/negotiation/OfferLadderValidator";
 import { resolveNegotiationZone } from "@/lib/engines/negotiation/NegotiationZone";
 import type { DecisionAction } from "@/lib/engines/decision/DecisionEngine";
 
 type DecisionResolverInput = {
   askingPrice: number;
-  negotiationLadder: NegotiationLadder;
+  negotiationLadder: ValidatedOfferLadder;
 };
 
 export function resolveDecision(input: DecisionResolverInput): DecisionAction {

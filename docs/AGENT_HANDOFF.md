@@ -8,9 +8,9 @@ It helps trading-card buyers discover opportunities, evaluate in-person purchase
 
 ## Current Development Phase
 
-Current sprint: Sprint 18, Card Intelligence Platform.
+Current sprint: Sprint 20.1, Vendor Workflow Stabilization.
 
-The app now evaluates a selected card through Card Profile, condition-adjusted market context, strategy-weighted signals, Negotiation Ladder, and deterministic Decision Resolver output.
+The app now evaluates a selected card through deterministic Vendor Workflow states, Card Profile, Asset Intelligence models, condition-adjusted market context, strategy-weighted signals, Negotiation Ladder, and deterministic Decision Resolver output.
 
 ## What Has Been Built?
 
@@ -31,6 +31,9 @@ The app now evaluates a selected card through Card Profile, condition-adjusted m
 - Decision-first Vendor Workspace layout
 - Decision Drivers Engine
 - Card Intelligence Engine
+- Asset Intelligence Framework
+- Intelligence Model registry
+- Indicator registry
 - Signal Registry
 - Condition Resolution
 - Market Context foundation
@@ -40,6 +43,9 @@ The app now evaluates a selected card through Card Profile, condition-adjusted m
 - Dense Vendor Workspace printing rows
 - Printing filter chips
 - Automatic debounced purchase evaluation
+- Vendor Workflow State Machine
+- Single Printing Rule
+- Vendor Workflow diagnostics
 - ESC reset and keyboard printing navigation
 - Project Atlas
 
@@ -56,10 +62,21 @@ The app now evaluates a selected card through Card Profile, condition-adjusted m
 - Variant policy vs UI selection separation
 - Decision driver engine vs presentation copy separation
 - Card Intelligence vs recommendation separation
+- Asset Intelligence model contract
+- Indicator contract and status metadata
 - Negotiation Ladder vs Decision Resolver separation
+- Offer Ladder Validator vs Decision Resolver separation
 - Condition must not affect identity resolution
 - Automatic evaluation should remain engine-driven; UI components may debounce input but must not calculate business values.
 - Printing filters should use buyer-facing vocabulary and avoid exposing internal engine terminology.
+- Vendor Workflow command processing should stay centralized in `lib/workflow/commands/WorkflowCommandProcessor.ts`.
+- Vendor Workspace should dispatch workflow commands, not workflow events or manual state transitions.
+- Workflow Command Processor owns Asset Context and context generation.
+- Asset Context validation lives in `lib/workflow/AssetContextValidator.ts`.
+- Workflow context owns selected and highlighted Vendor Workspace state.
+- Context invalidation must stay centralized in `lib/workflow/commands/ContextInvalidationEngine.ts`.
+- Successful identity selection must reach `ReadyForEvaluation` or `Error`.
+- Candidate, highlighted, and selected identity states must remain separate.
 
 ## Important Architectural Rules
 
@@ -72,8 +89,21 @@ The app now evaluates a selected card through Card Profile, condition-adjusted m
 - Scryfall prices are daily estimates and must not be treated as live inventory.
 - Do not invent lowest listing, recent sale, or buylist values.
 - Card Intelligence must not negotiate.
+- Future intelligence must be registered as an Asset Intelligence model, not built as an isolated scoring engine.
+- Strategies must not read provider data directly.
 - Negotiation Ladder owns opening offer, target offer, maximum buy price, and walk-away price.
+- Offer Ladder Validator must approve the ladder before Decision Resolver executes.
 - Decision Resolver must return BUY at or below target, NEGOTIATE between target and maximum buy price, and PASS above maximum buy price.
+- Missing evaluation data must return unavailable or invalid results, never fallback zero.
+- Evaluation Trace should be preserved for future replay, backtesting, and simulation work.
+- Rejected workflow commands must leave selected identity, printing, variant, and decision context unchanged.
+- Production Vendor Workspace must not display workflow or Asset Context diagnostics.
+- Atlas Inspector is development-only and toggled with Cmd/Ctrl+Shift+D.
+- Condition changes must dispatch `ChangeCondition` and trigger a generation-aware market snapshot request.
+- Market Provider data always has precedence over future condition inference.
+- Evaluation history is append-only and lives under `lib/history/`.
+- Only completed `READY` evaluations should create `EvaluationSnapshot` records.
+- Snapshot validation must reject incomplete Asset Context, Offer Ladder, or Decision data.
 - Production UI should not expose provider internals or placeholder engine language.
 - Tailwind CSS only.
 - No external libraries unless explicitly requested.
@@ -124,4 +154,4 @@ No sprint is complete until documentation is updated.
 
 ## Suggested Next Step
 
-Market Provider v2 should add true live listings or recent sales from a marketplace-specific provider while preserving normalized `MarketSnapshot` output. Future Market Context work should add regional valuation, currency normalization, shipping, tax, import cost, and demand assumptions without changing the Card Intelligence → Negotiation Ladder → Decision Resolver contract.
+Market Provider v2 should add true live listings or recent sales from a marketplace-specific provider while preserving normalized `MarketSnapshot` output. Future intelligence work should register models in the Asset Intelligence Framework without changing the Asset Intelligence → Strategy → Negotiation Ladder → Offer Ladder Validation → Decision Resolver contract. Future Condition Intelligence may estimate missing provider condition values only when provider data is unavailable, and provider data must always win. Vendor Workflow follow-up should persist Atlas Inspector snapshots, add richer ARIA active-descendant keyboard focus, and generalize Asset Context plus Workflow Command processing for future workspaces. Evaluation History is now the input for future backtesting, simulation, strategy replay, evaluation replay, Market Context replay, signal validation, personal buying history, and portfolio tracking.

@@ -5,18 +5,21 @@ type CardProfilePanelProps = {
 };
 
 const visibleSignals = [
-  "InvestmentPotential",
-  "CollectorAppeal",
-  "Liquidity",
-  "ReprintRisk",
-  "MarketConfidence",
+  "investment-potential",
+  "collector-appeal",
+  "liquidity",
+  "reprint-risk",
+  "market-confidence",
 ];
 
 export default function CardProfilePanel({
   cardProfile,
 }: CardProfilePanelProps) {
-  const signals = cardProfile.signals.filter((signal) =>
-    visibleSignals.includes(signal.name),
+  const indicators = cardProfile.intelligenceModels
+    .flatMap((model) => model.indicators)
+    .filter((indicator) => visibleSignals.includes(indicator.id));
+  const uniqueIndicators = Array.from(
+    new Map(indicators.map((indicator) => [indicator.id, indicator])).values(),
   );
 
   return (
@@ -26,16 +29,16 @@ export default function CardProfilePanel({
       </summary>
 
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
-        {signals.map((signal) => (
-          <div key={signal.name} className="rounded-md bg-zinc-950/60 p-3">
+        {uniqueIndicators.map((indicator) => (
+          <div key={indicator.id} className="rounded-md bg-zinc-950/60 p-3">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-xs text-zinc-500">{signal.label}</p>
+              <p className="text-xs text-zinc-500">{indicator.name}</p>
               <p className="text-sm font-semibold text-cyan-300">
-                {signal.score}
+                {indicator.score}
               </p>
             </div>
             <p className="mt-2 text-xs text-zinc-400">
-              {signal.explanation}
+              {indicator.explanation}
             </p>
           </div>
         ))}

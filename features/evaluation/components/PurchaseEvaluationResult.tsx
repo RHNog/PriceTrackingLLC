@@ -12,6 +12,17 @@ function formatCurrency(value: number) {
 export default function PurchaseEvaluationResult({
   evaluation,
 }: PurchaseEvaluationResultProps) {
+  if (evaluation.status !== "READY") {
+    return (
+      <section className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 shadow-lg shadow-black/10">
+        <p className="text-sm font-medium text-zinc-200">
+          Evaluation unavailable.
+        </p>
+        <p className="mt-2 text-sm text-zinc-400">Reason: {evaluation.reason}</p>
+      </section>
+    );
+  }
+
   const { decision, ranking } = evaluation;
 
   return (
