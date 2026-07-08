@@ -6,6 +6,7 @@ import type { CardIdentity } from "@/types/cardIdentity";
 import type { SearchResult } from "@/types/searchResult";
 
 type CardSearchPaletteProps = {
+  focusKey?: number;
   interpretationSummary?: string[];
   query: string;
   results: SearchResult<CardIdentity>[];
@@ -15,6 +16,7 @@ type CardSearchPaletteProps = {
 };
 
 export default function CardSearchPalette({
+  focusKey = 0,
   interpretationSummary = [],
   query,
   results,
@@ -27,6 +29,12 @@ export default function CardSearchPalette({
   useEffect(() => {
     searchInputRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    if (focusKey > 0) {
+      searchInputRef.current?.focus();
+    }
+  }, [focusKey]);
 
   return (
     <section className="space-y-3">

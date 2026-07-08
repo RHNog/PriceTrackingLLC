@@ -1,13 +1,19 @@
 "use client";
 
 import CardImage from "@/components/ui/CardImage";
+import CardProfilePanel from "@/features/vendor/components/CardProfilePanel";
 import EvaluationSummary from "@/features/vendor/components/EvaluationSummary";
-import {
-  evaluatePurchase,
-  type PurchaseEvaluation,
-} from "@/lib/engines/evaluation/evaluatePurchase";
+import { createCardProfile } from "@/lib/engines/cardIntelligence/CardIntelligenceEngine";
+import { evaluatePurchase } from "@/lib/engines/evaluation/evaluatePurchase";
+import { createConditionMarketSnapshot } from "@/lib/engines/market/createConditionMarketSnapshot";
 import type { Card } from "@/types/card";
-import type { FormEvent } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  conditionProfiles,
+  findConditionProfile,
+  type CardConditionCode,
+} from "@/types/conditionProfile";
+import { defaultMarketContext } from "@/types/MarketContext";
 import type { MarketPrice } from "@/types/marketPrice";
 import type { MarketSnapshot } from "@/types/marketSnapshot";
 import type { PrintingVariant } from "@/types/printingVariant";
@@ -23,9 +29,7 @@ type PurchasePanelProps = {
   marketSnapshot?: MarketSnapshot;
   selectedStrategy?: Strategy;
   selectedStrategyProfile?: StrategyProfile;
-  evaluation: PurchaseEvaluation | null;
   onAskingPriceChange: (price: string) => void;
-  onEvaluationChange: (evaluation: PurchaseEvaluation) => void;
   onVariantChange: (variantId: string) => void;
   selectedVariant: PrintingVariant | null;
 };
@@ -63,12 +67,12 @@ export default function PurchasePanel({
   marketSnapshot,
   selectedStrategy,
   selectedStrategyProfile,
-  evaluation,
   onAskingPriceChange,
-  onEvaluationChange,
   onVariantChange,
   selectedVariant,
 }: PurchasePanelProps) {
+  const [debouncedAskingPrice, setDebouncedAskingPrice] = useState(askingPrice);
+  const [condition, setCondition] = useState<CardConditionCode>("NM");
   const canEvaluate = Boolean(
     marketPrice &&
     selectedStrategyProfile &&
@@ -76,57 +80,93 @@ export default function PurchasePanel({
     selectedVariant,
   );
   const requiresFinishSelection = availableVariants.length > 1 && !selectedVariant;
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedAskingPrice(askingPrice);
+    }, 300);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [askingPrice]);
+
+  const conditionMarketSnapshot = useMemo(() => {
+    if (!marketPrice) {
+      return null;
+    }
+
+    return createConditionMarketSnapshot(marketPrice, condition);
+  }, [condition, marketPrice]);
+  const conditionMarketPrice = conditionMarketSnapshot?.selectedPrice;
+  const cardProfilePreview = useMemo(() => {
+    if (!conditionMarketSnapshot || !selectedVariant) {
+      return null;
+    }
+
+    return createCardProfile({
+      condition: findConditionProfile(condition),
+      marketContext: defaultMarketContext,
+      marketContextSnapshot: conditionMarketSnapshot,
+      printing: card,
+      variant: selectedVariant,
+    });
+  }, [card, condition, conditionMarketSnapshot, selectedVariant]);
+
+  const liveEvaluation = useMemo(() => {
+    if (!canEvaluate || !marketPrice || !selectedStrategyProfile || !selectedVariant) {
+      return null;
+    }
+
+    return evaluatePurchase({
+      card,
+      condition,
+      marketContext: defaultMarketContext,
+      marketPrice,
+      purchasePrice: Number(debouncedAskingPrice),
+      selectedVariant,
+      strategyProfile: selectedStrategyProfile,
+    });
+  }, [
+    canEvaluate,
+    card,
+    condition,
+    debouncedAskingPrice,
+    marketPrice,
+    selectedStrategyProfile,
+    selectedVariant,
+  ]);
+  const evaluationToShow = liveEvaluation;
   const marketStats = [
     {
       label: "Current Market Estimate",
-      value: marketPrice?.price,
+      value: conditionMarketPrice?.price,
     },
   ];
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (!marketPrice || !selectedStrategyProfile || !selectedVariant) {
-      return;
-    }
-
-    onEvaluationChange(
-      evaluatePurchase({
-        card,
-        marketPrice,
-        purchasePrice: Number(askingPrice),
-        strategyProfile: selectedStrategyProfile,
-      }),
-    );
-  }
-
   return (
-    <section className="space-y-4">
-      <form
-        onSubmit={handleSubmit}
-        className="rounded-lg border border-zinc-800 bg-zinc-900 p-5 shadow-lg shadow-black/10"
-      >
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div className="flex flex-col gap-4 sm:flex-row">
+    <section className="space-y-4 lg:sticky lg:top-6">
+      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 shadow-lg shadow-black/10">
+        <div className="flex flex-col gap-4">
+          <div className="flex gap-3">
             <CardImage
               card={card}
               detail={`${card.set} ${card.finish}`}
-              size="selected"
+              size="printing"
             />
-            <div>
+            <div className="min-w-0">
               <p className="text-xs text-zinc-500">Selected Card</p>
-              <h3 className="mt-1 text-xl font-semibold text-white">{card.name}</h3>
+              <h3 className="mt-1 truncate text-lg font-semibold text-white">
+                {card.name}
+              </h3>
               <p className="mt-1 text-sm text-zinc-400">
-                {card.game} / {card.set} /{" "}
-                {selectedVariant?.finish ?? card.finish}
+                {card.set} #{card.number}
               </p>
-              <p className="mt-2 text-sm text-zinc-500">
-                #{card.number} / {card.language ?? "English"} /{" "}
-                {card.treatment || "Standard"} / {card.releaseYear ?? "Unknown"}
+              <p className="mt-1 text-xs text-zinc-500">
+                {selectedVariant?.finish ?? card.finish} /{" "}
+                {card.releaseYear ?? "Unknown"}
               </p>
             </div>
           </div>
-          <div className="rounded-md bg-zinc-950/60 px-3 py-2 text-left md:text-right">
+          <div className="rounded-md bg-zinc-950/60 px-3 py-2">
             <p className="text-xs text-zinc-500">Current Buying Strategy</p>
             <p className="mt-1 text-sm font-medium text-cyan-300">
               {selectedStrategy?.name ?? "No strategy"}
@@ -144,27 +184,25 @@ export default function PurchasePanel({
           ))}
           <MarketTextStat
             label="Lowest Listing"
-            value="Coming in Market Provider v2"
+            value="Live marketplace listings coming soon"
           />
           <MarketTextStat
             label="Recent Sale Price"
-            value="Coming in Market Provider v2"
+            value="Recent sales coming soon"
           />
         </div>
 
         <div className="mt-3 text-xs text-zinc-500">
           {isMarketLoading ? (
-            <p>Loading Scryfall market estimate...</p>
+            <p>Loading market estimate...</p>
           ) : marketSnapshot?.errorMessage ? (
             <p>{marketSnapshot.errorMessage}</p>
           ) : !selectedVariant ? (
             <p>Select a finish variant to load a market estimate.</p>
           ) : marketPrice ? (
             <p>
-              {marketSnapshot?.sourceLabel}: {marketPrice.currency}{" "}
-              {marketPrice.priceType.replace("_", " ")} for{" "}
-              {marketPrice.finish}. Scryfall prices are daily market estimates
-              and may not reflect live marketplace availability.
+              Daily market estimate for {marketPrice.finish}. Live availability
+              may differ.
             </p>
           ) : (
             <p>
@@ -174,39 +212,69 @@ export default function PurchasePanel({
         </div>
 
         {availableVariants.length > 0 ? (
-          <div className="mt-5 border-t border-zinc-800 pt-5">
-            <p className="text-sm font-medium text-zinc-300">
-              {requiresFinishSelection ? "Finish required" : "Selected Finish"}
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {availableVariants.map((variant) => {
-                const isSelected = variant.id === selectedVariant?.id;
+          <div className="mt-5 grid gap-4 border-t border-zinc-800 pt-5 sm:grid-cols-2">
+            <div>
+              <p className="text-sm font-medium text-zinc-300">
+                {requiresFinishSelection ? "Finish required" : "Selected Finish"}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {availableVariants.map((variant) => {
+                  const isSelected = variant.id === selectedVariant?.id;
 
-                return (
-                  <button
-                    key={variant.id}
-                    type="button"
-                    onClick={() => onVariantChange(variant.id)}
-                    className={`rounded-md border px-3 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
-                      isSelected
-                        ? "border-cyan-400 bg-cyan-400 text-zinc-950"
-                        : "border-zinc-700 bg-zinc-950 text-zinc-200 hover:border-zinc-500"
-                    }`}
-                  >
-                    {variant.finish}
-                  </button>
-                );
-              })}
+                  return (
+                    <button
+                      key={variant.id}
+                      type="button"
+                      onClick={() => onVariantChange(variant.id)}
+                      className={`rounded-md border px-3 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
+                        isSelected
+                          ? "border-cyan-400 bg-cyan-400 text-zinc-950"
+                          : "border-zinc-700 bg-zinc-950 text-zinc-200 hover:border-zinc-500"
+                      }`}
+                    >
+                      {variant.finish}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-2 text-xs text-zinc-500">
+                {requiresFinishSelection
+                  ? "Choose Foil or Nonfoil before evaluation."
+                  : availableVariants.length > 1
+                    ? `✓ Default finish selected: ${selectedVariant?.finish}`
+                    : `✓ Finish: ${selectedVariant?.finish}`}
+              </p>
             </div>
-            <p className="mt-2 text-xs text-zinc-500">
-              {requiresFinishSelection
-                ? "Choose Foil or Nonfoil before evaluation."
-                : `✓ Finish: ${selectedVariant?.finish}`}
-            </p>
+            <div>
+              <p className="text-sm font-medium text-zinc-300">Condition</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {conditionProfiles.map((profile) => {
+                  const isSelected = profile.code === condition;
+
+                  return (
+                    <button
+                      key={profile.code}
+                      type="button"
+                      onClick={() => setCondition(profile.code)}
+                      className={`rounded-md border px-3 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
+                        isSelected
+                          ? "border-cyan-400 bg-cyan-400 text-zinc-950"
+                          : "border-zinc-700 bg-zinc-950 text-zinc-200 hover:border-zinc-500"
+                      }`}
+                    >
+                      {profile.code}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-2 text-xs text-zinc-500">
+                {findConditionProfile(condition).label}
+              </p>
+            </div>
           </div>
         ) : null}
 
-        <div className="mt-5 flex flex-col gap-3 border-t border-zinc-800 pt-5 sm:flex-row">
+        <div className="mt-5 border-t border-zinc-800 pt-5">
           <label className="flex-1 space-y-2">
             <span className="block text-sm font-medium text-zinc-300">
               Current Asking Price
@@ -220,17 +288,26 @@ export default function PurchasePanel({
               className="w-full rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/30"
             />
           </label>
-          <button
-            type="submit"
-            disabled={!canEvaluate}
-            className="self-end rounded-md bg-cyan-400 px-4 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-zinc-900 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
-          >
-            Evaluate Purchase
-          </button>
+          <p className="mt-2 text-xs text-zinc-500">
+            Decision updates automatically.
+          </p>
         </div>
-      </form>
+      </div>
 
-      {evaluation ? <EvaluationSummary askingPrice={Number(askingPrice)} evaluation={evaluation} /> : null}
+      {evaluationToShow ? (
+        <EvaluationSummary
+          askingPrice={Number(askingPrice)}
+          evaluation={evaluationToShow}
+        />
+      ) : (
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 text-sm text-zinc-400">
+          Enter an asking price to see the buy decision.
+        </div>
+      )}
+
+      {cardProfilePreview ? (
+        <CardProfilePanel cardProfile={cardProfilePreview} />
+      ) : null}
     </section>
   );
 }

@@ -9,6 +9,7 @@ import {
 import type { Card } from "@/types/card";
 import type { Listing } from "@/types/listing";
 import type { MarketPrice } from "@/types/marketPrice";
+import type { PrintingVariant } from "@/types/printingVariant";
 import type { Strategy } from "@/types/strategy";
 import type { StrategyProfile } from "@/types/strategyProfile";
 
@@ -44,6 +45,17 @@ function toManualMarketPrice(listing: Listing): MarketPrice {
     priceType: "manual",
     updatedAt: listing.updatedAt,
     confidence: 50,
+  };
+}
+
+function toManualVariant(card: Card): PrintingVariant {
+  return {
+    id: `${card.id}:manual`,
+    printingId: card.id,
+    finish: card.finish,
+    imageUrls: card.imageUrls,
+    isAvailable: true,
+    source: "Manual",
   };
 }
 
@@ -88,6 +100,7 @@ export default function PurchaseEvaluationForm({
         card: selectedCard,
         marketPrice: toManualMarketPrice(currentMarketListing),
         purchasePrice: Number(purchasePrice),
+        selectedVariant: toManualVariant(selectedCard),
         strategyProfile: selectedProfile,
       }),
     );

@@ -389,6 +389,14 @@ export default function ProviderDiagnostics({
           value={printingResolution?.explanation.join(" ") ?? "None"}
         />
         <Diagnostic
+          label="Variant Policy Used"
+          value={printingResolution?.selectedVariantReasonCode ?? "None"}
+        />
+        <Diagnostic
+          label="Variant Policy Reason"
+          value={printingResolution?.selectedVariantReason ?? "None"}
+        />
+        <Diagnostic
           label="Evaluation Blocked by Finish"
           value={
             printingResolution?.shouldAutoCommitPrinting &&

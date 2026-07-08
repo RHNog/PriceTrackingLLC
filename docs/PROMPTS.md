@@ -141,3 +141,53 @@ Core instruction: images are part of purchase evaluation and must come from norm
 Major files affected: `types/card.ts`, `ScryfallAdapter.ts`, `features/vendor/`, `docs/`.
 
 Result: Vendor Workspace card images and project documentation system.
+
+## Sprint 14
+
+Purpose: introduce the first live Market Provider.
+
+Core instruction: use Scryfall prices as daily market estimates, not live listings.
+
+Major files affected: `lib/providers/market/`, `types/marketPrice.ts`, `features/vendor/`.
+
+Result: Vendor Workspace can use normalized market estimates.
+
+## Sprint 15
+
+Purpose: add default variant resolution and complete purchase evaluation.
+
+Core instruction: default multi-finish printings through a reusable policy and return BUY / NEGOTIATE / PASS.
+
+Major files affected: `lib/engines/variantResolution/`, `lib/engines/evaluation/`, `features/vendor/`.
+
+Result: Vendor Workspace completes the first end-to-end buying workflow.
+
+## Sprint 16
+
+Purpose: optimize Vendor Workspace for real buying sessions.
+
+Core instruction: make the decision visible immediately, reduce scrolling, remove repeated explanations, and synchronize Atlas.
+
+Major files affected: `features/vendor/`, `lib/engines/decision/`, `docs/`.
+
+Result: Decision-first workspace with sticky decision panel and Decision Drivers.
+
+## Sprint 17
+
+Purpose: optimize Vendor Workspace VX for professional in-person buying speed.
+
+Core instruction: reduce scrolling and eye movement, make BUY / NEGOTIATE / PASS focal, compress printing rows, replace the manual Evaluate action with automatic debounced evaluation, add chip-based printing refinement, and preserve normal keyboard input behavior.
+
+Major files affected: `features/vendor/`, `components/ui/CardImage.tsx`, `docs/`.
+
+Result: denser command-palette-style Vendor Workspace with automatic decisions, compact printing rows, finish segmented controls, ESC reset, and keyboard printing navigation.
+
+## Sprint 18
+
+Purpose: introduce the Card Intelligence Platform.
+
+Core instruction: stop evaluating price alone; evaluate Card, Printing, Variant, Condition, Market Context, and Strategy through reusable intelligence signals, then convert strategy into negotiation through a Negotiation Ladder before the Decision Resolver compares asking price.
+
+Major files affected: `lib/engines/cardIntelligence/`, `lib/engines/negotiation/`, `lib/engines/decision/`, `lib/engines/evaluation/`, `types/`, `features/vendor/`, `tests/`, `docs/`.
+
+Result: Card Profile, Signal Registry, signal versioning, condition-adjusted market snapshots, Market Context foundation, Negotiation Ladder Engine, deterministic Decision Resolver invariants, Vendor Workspace condition selection, and Card Profile signal panel.

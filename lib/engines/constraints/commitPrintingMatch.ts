@@ -33,10 +33,15 @@ export function commitPrintingMatch(
   const confidenceGap = secondCandidate
     ? topCandidate.confidence - secondCandidate.confidence
     : topCandidate.confidence;
+  const selectionPriorityGap = secondCandidate
+    ? (topCandidate.selectionPriority ?? 0) -
+      (secondCandidate.selectionPriority ?? 0)
+    : topCandidate.selectionPriority ?? 0;
 
   if (
     topCandidate.confidence >= constraintConfig.printingAutoCommitThreshold &&
-    confidenceGap >= constraintConfig.minimumConfidenceGap
+    (confidenceGap >= constraintConfig.minimumConfidenceGap ||
+      (confidenceGap === 0 && selectionPriorityGap > 0))
   ) {
     return topCandidate;
   }

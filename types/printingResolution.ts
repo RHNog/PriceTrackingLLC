@@ -12,6 +12,7 @@ export interface PrintingMatchCandidate {
   matchedConstraints: ConstraintMatch[];
   printing: Card;
   relaxedConstraints: PrintingConstraint[];
+  selectionPriority?: number;
   unmatchedConstraints: ConstraintMatch[];
 }
 
@@ -24,6 +25,8 @@ export interface PrintingResolution {
   selectedPrinting?: Card;
   selectedPrintingConfidence: number;
   selectedVariant?: PrintingVariant | null;
+  selectedVariantReason?: string;
+  selectedVariantReasonCode?: string;
   selectedVariantConfidence: number;
   shouldAutoCommit: boolean;
   shouldAutoCommitPrinting: boolean;

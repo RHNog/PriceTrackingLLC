@@ -101,3 +101,31 @@ Introduced explicit printing finish variants. Multi-finish printings now keep fi
 First Live Market Provider.
 
 Added Scryfall Market Provider v1, normalized market price snapshots, and Vendor Workspace support for daily Scryfall market estimates. Lowest listing and recent sale remain unavailable until Market Provider v2 adds true marketplace inventory or sales data.
+
+## Sprint 15
+
+Variant Resolution Policy and Purchase Evaluation Engine.
+
+Added a reusable Variant Resolution Policy that respects explicit finish requests, auto-selects single-finish printings, defaults multi-finish printings to Nonfoil, and falls back to the least-special finish. Vendor Workspace now completes the buying workflow with market estimate, asking price, estimated profit, ROI, recommended offer, confidence, and BUY / NEGOTIATE / PASS recommendations.
+
+## Sprint 16
+
+Decision-First Vendor Workspace.
+
+Optimized Vendor Workspace for faster buying sessions by placing printing candidates beside a sticky decision panel, reorganizing metrics, removing repeated explanation text, and introducing Decision Drivers for concise business reasoning. Atlas now records backlog, technical debt, dependency graph, and reusable interaction patterns.
+
+## Sprint 17
+
+Vendor Workspace VX Optimization.
+
+Compressed the in-person buying workflow for professional trading sessions. Printing rows are denser, thumbnails are smaller, common printing refinements are chip-based, purchase evaluation updates automatically with a short debounce, and the decision panel now surfaces BUY / NEGOTIATE / PASS plus offer, profit, and ROI as the first thing to read.
+
+Keyboard behavior now supports ESC reset, natural tab order, Enter selection outside text inputs, and arrow-key printing navigation without interrupting typing.
+
+## Sprint 18
+
+Card Intelligence Platform.
+
+Introduced Card Profile, Signal Registry, signal versioning, condition-adjusted market snapshots, Market Context, Negotiation Ladder, and a deterministic Decision Resolver. Purchase Evaluation now flows through card intelligence signals and a negotiation ladder before BUY / NEGOTIATE / PASS is selected.
+
+Vendor Workspace gained a Condition selector and collapsible Card Profile panel. Automated tests now verify condition-sensitive market estimates, negotiation ladders, decisions, strategy signal weighting, finish-sensitive ladders, independent signals, and exact BUY / NEGOTIATE / PASS ladder invariants.

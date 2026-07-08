@@ -62,6 +62,13 @@ export const seedStrategyProfiles: StrategyProfile[] = [
       liquidity: 0.1,
       risk: 0.05,
     },
+    signalWeights: {
+      Demand: 0.2,
+      FlipPotential: 0.2,
+      Liquidity: 0.25,
+      MarketConfidence: 0.2,
+      Scarcity: 0.15,
+    },
     constraints: {
       minimumProfit: 80,
       minimumROI: 5,
@@ -79,6 +86,13 @@ export const seedStrategyProfiles: StrategyProfile[] = [
       confidence: 0.15,
       liquidity: 0.1,
       risk: 0.05,
+    },
+    signalWeights: {
+      Demand: 0.2,
+      FlipPotential: 0.3,
+      Liquidity: 0.25,
+      MarketConfidence: 0.15,
+      Volatility: 0.1,
     },
     constraints: {
       minimumProfit: 25,
@@ -98,6 +112,13 @@ export const seedStrategyProfiles: StrategyProfile[] = [
       liquidity: 0.3,
       risk: 0.05,
     },
+    signalWeights: {
+      Demand: 0.25,
+      FlipPotential: 0.25,
+      Liquidity: 0.3,
+      MarketConfidence: 0.15,
+      Playability: 0.05,
+    },
     constraints: {
       minimumProfit: 20,
       minimumROI: 5,
@@ -116,6 +137,14 @@ export const seedStrategyProfiles: StrategyProfile[] = [
       liquidity: 0.05,
       risk: 0.1,
     },
+    signalWeights: {
+      CollectorAppeal: 0.2,
+      HistoricalStability: 0.1,
+      InvestmentPotential: 0.3,
+      MarketConfidence: 0.15,
+      ReprintRisk: 0.1,
+      Scarcity: 0.15,
+    },
     constraints: {
       minimumProfit: 75,
       minimumROI: 8,
@@ -133,6 +162,15 @@ export const seedStrategyProfiles: StrategyProfile[] = [
       confidence: 0.15,
       liquidity: 0.15,
       risk: 0.05,
+    },
+    signalWeights: {
+      CollectorAppeal: 0.15,
+      Demand: 0.1,
+      FlipPotential: 0.15,
+      InvestmentPotential: 0.15,
+      Liquidity: 0.15,
+      MarketConfidence: 0.2,
+      Scarcity: 0.1,
     },
     constraints: {
       minimumProfit: 0,

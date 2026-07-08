@@ -1,5 +1,6 @@
 import { commitPrintingMatch } from "@/lib/engines/constraints/commitPrintingMatch";
 import { rankPrintingMatches } from "@/lib/engines/constraints/rankPrintingMatches";
+import { resolvePrintingVariant } from "@/lib/engines/variantResolution/VariantResolutionPolicy";
 import type { Card } from "@/types/card";
 import type { CardIdentity } from "@/types/cardIdentity";
 import type { Constraint } from "@/types/constraint";
@@ -96,19 +97,6 @@ function getFinishVariants(printing: Card): PrintingVariant[] {
   return [];
 }
 
-function findVariantForFinish(
-  variants: PrintingVariant[],
-  finishConstraint: PrintingConstraint | undefined,
-) {
-  if (!finishConstraint) {
-    return undefined;
-  }
-
-  return variants.find(
-    (variant) => normalize(variant.finish) === normalize(finishConstraint.value),
-  );
-}
-
 export function satisfyPrintingConstraints(
   identity: CardIdentity,
   printings: Card[],
@@ -126,37 +114,22 @@ export function satisfyPrintingConstraints(
     printingConstraints,
   );
   const bestCandidate = selectedCandidate ?? printingCandidates[0];
-  const finishConstraint = printingConstraints.find(
-    (constraint) => constraint.type === "finish",
-  );
   const availableVariants = selectedCandidate
     ? getFinishVariants(selectedCandidate.printing)
     : [];
-  const selectedVariant = finishConstraint
-    ? findVariantForFinish(availableVariants, finishConstraint) ?? null
-    : availableVariants.length === 1
-      ? availableVariants[0]
-      : null;
+  const variantResolution = selectedCandidate
+    ? resolvePrintingVariant({
+        availableVariants,
+        constraints: printingConstraints,
+        printing: selectedCandidate.printing,
+      })
+    : undefined;
+  const selectedVariant = variantResolution?.selectedVariant ?? null;
   const shouldAutoCommitVariant = Boolean(
-    selectedVariant &&
-      (finishConstraint || availableVariants.length === 1),
+    selectedVariant && !variantResolution?.requiresUserSelection,
   );
   const variantExplanation = selectedCandidate
-    ? finishConstraint
-      ? selectedVariant
-        ? [`Selected finish variant ${selectedVariant.finish}.`]
-        : [
-            `Finish ${finishConstraint.value} is not available for the selected printing.`,
-            "Variant was left unresolved to avoid choosing a different finish.",
-          ]
-      : availableVariants.length > 1
-        ? [
-            "Finish required: this printing has multiple available finishes.",
-            "Choose a finish before purchase evaluation.",
-          ]
-        : selectedVariant
-          ? [`Only ${selectedVariant.finish} is available, so the finish was selected.`]
-          : ["No finish variant data is available for this printing."]
+    ? [variantResolution?.selectionReason ?? "No variant resolution was available."]
     : [];
   const fallbackExplanation =
     bestCandidate && bestCandidate.confidence > 0
@@ -186,7 +159,9 @@ export function satisfyPrintingConstraints(
     selectedPrinting: selectedCandidate?.printing,
     selectedPrintingConfidence: selectedCandidate?.confidence ?? 0,
     selectedVariant,
-    selectedVariantConfidence: selectedVariant ? selectedCandidate?.confidence ?? 0 : 0,
+    selectedVariantConfidence: variantResolution?.confidence ?? 0,
+    selectedVariantReason: variantResolution?.selectionReason,
+    selectedVariantReasonCode: variantResolution?.selectionReasonCode,
     shouldAutoCommit: Boolean(selectedCandidate),
     shouldAutoCommitPrinting: Boolean(selectedCandidate),
     shouldAutoCommitVariant,

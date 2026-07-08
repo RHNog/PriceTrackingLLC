@@ -4,6 +4,27 @@ import { scorePrintingAgainstConstraints } from "@/lib/engines/constraints/score
 import type { Card } from "@/types/card";
 import type { PrintingConstraint } from "@/types/printingConstraint";
 
+function normalize(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "");
+}
+
+function getSelectionPriority(printing: Card) {
+  const finishes =
+    printing.availableFinishes ??
+    printing.finishVariants?.map((variant) => variant.finish) ??
+    [];
+
+  if (finishes.some((finish) => normalize(finish) === "nonfoil")) {
+    return 3;
+  }
+
+  if (finishes.some((finish) => normalize(finish) === "foil")) {
+    return 2;
+  }
+
+  return finishes.length > 0 ? 1 : 0;
+}
+
 export function rankPrintingMatches(
   printings: Card[],
   constraints: PrintingConstraint[],
@@ -22,8 +43,13 @@ export function rankPrintingMatches(
         availableFinishes,
         explanation: explainPrintingMatch(candidate),
         finishVariants,
+        selectionPriority: getSelectionPriority(printing),
       };
     })
-    .sort((first, second) => second.confidence - first.confidence)
+    .sort(
+      (first, second) =>
+        second.confidence - first.confidence ||
+        (second.selectionPriority ?? 0) - (first.selectionPriority ?? 0),
+    )
     .slice(0, constraintConfig.maximumPrintingCandidates);
 }

@@ -4,8 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import CardSearchPalette from "@/features/vendor/components/CardSearchPalette";
 import PrintingResults from "@/features/vendor/components/PrintingResults";
 import PurchasePanel from "@/features/vendor/components/PurchasePanel";
-import type { PurchaseEvaluation } from "@/lib/engines/evaluation/evaluatePurchase";
+import { toPrintingConstraints } from "@/lib/engines/constraints/satisfyPrintingConstraints";
 import { searchPrintings } from "@/lib/engines/search/searchPrintings";
+import { resolvePrintingVariant } from "@/lib/engines/variantResolution/VariantResolutionPolicy";
 import type { Card } from "@/types/card";
 import type { CardIdentity } from "@/types/cardIdentity";
 import type { MarketSnapshot } from "@/types/marketSnapshot";
@@ -30,14 +31,57 @@ function getVariants(card?: Card) {
   return card?.finishVariants ?? [];
 }
 
-function getOnlyVariant(card?: Card) {
+function getPolicyVariant(card?: Card, intent?: ResolvedIntent) {
   const variants = getVariants(card);
 
-  return variants.length === 1 ? variants[0] : undefined;
+  if (!card) {
+    return undefined;
+  }
+
+  return resolvePrintingVariant({
+    availableVariants: variants,
+    constraints: toPrintingConstraints(intent?.resolvedConstraints ?? []),
+    printing: card,
+  }).selectedVariant ?? undefined;
 }
 
 function findVariant(variants: PrintingVariant[], variantId: string) {
   return variants.find((variant) => variant.id === variantId);
+}
+
+const printingFilterChips = [
+  "Foil",
+  "Nonfoil",
+  "Judge",
+  "Retro",
+  "Borderless",
+  "Textless",
+  "Serialized",
+  "Showcase",
+  "Secret Lair",
+  "Special Guests",
+  "Masterpiece",
+];
+
+function getPrintingFilterText(candidate: {
+  availableFinishes: string[];
+  printing: Card;
+}) {
+  const printing = candidate.printing;
+
+  return [
+    printing.set,
+    printing.setCode,
+    printing.number,
+    printing.language,
+    printing.treatment,
+    printing.productFamily,
+    ...(printing.promoTypes ?? []),
+    ...(printing.frameEffects ?? []),
+    ...candidate.availableFinishes,
+  ]
+    .join(" ")
+    .toLowerCase();
 }
 
 function createInitialResults(cards: Card[]): SearchResult<CardIdentity>[] {
@@ -66,9 +110,10 @@ export default function VendorWorkspace({
   const [selectedPrintingId, setSelectedPrintingId] = useState("");
   const [selectedVariantId, setSelectedVariantId] = useState("");
   const [printingQuery, setPrintingQuery] = useState("");
+  const [activePrintingFilters, setActivePrintingFilters] = useState<string[]>([]);
+  const [searchFocusKey, setSearchFocusKey] = useState(0);
   const [askingPrice, setAskingPrice] = useState("");
   const [strategyId, setStrategyId] = useState(defaultStrategyId);
-  const [evaluation, setEvaluation] = useState<PurchaseEvaluation | null>(null);
   const [providerResults, setProviderResults] = useState<
     SearchResult<CardIdentity>[]
   >([]);
@@ -133,22 +178,34 @@ export default function VendorWorkspace({
     : [];
   const constraintPrintingCandidates =
     resolvedIntent?.printingResolution?.printingCandidates ?? [];
+  const filteredPrintingCandidates = constraintPrintingCandidates.filter(
+    (candidate) => {
+      const filterText = getPrintingFilterText(candidate);
+      const matchesChips = activePrintingFilters.every((filter) =>
+        filterText.includes(filter.toLowerCase()),
+      );
+      const matchesText =
+        !printingQuery.trim() ||
+        filterText.includes(printingQuery.trim().toLowerCase());
+
+      return matchesChips && matchesText;
+    },
+  );
   const selectedConstraintPrinting =
-    constraintPrintingCandidates.find(
+    filteredPrintingCandidates.find(
       (candidate) => candidate.printing.id === selectedPrintingId,
     )?.printing ??
     (resolvedIntent?.printingResolution?.shouldAutoCommit
       ? resolvedIntent?.printingResolution?.selectedPrinting
       : undefined) ??
     (resolvedIntent?.printingResolution?.shouldAutoCommit
-      ? constraintPrintingCandidates[0]?.printing
+      ? filteredPrintingCandidates[0]?.printing
       : undefined);
-  const selectedCard = printingQuery.trim()
-    ? printingResults[0]?.item
-    : selectedConstraintPrinting ??
-      (resolvedIntent?.printingResolution?.shouldAutoCommit
-        ? printingResults[0]?.item
-        : undefined);
+  const selectedCard =
+    selectedConstraintPrinting ??
+    (resolvedIntent?.printingResolution?.shouldAutoCommit
+      ? printingResults[0]?.item
+      : undefined);
   const availableVariants = getVariants(selectedCard);
   const resolvedSelectedVariant =
     resolvedIntent?.printingResolution?.selectedVariant;
@@ -157,7 +214,7 @@ export default function VendorWorkspace({
     (resolvedSelectedVariant?.printingId === selectedCard?.id
       ? resolvedSelectedVariant
       : undefined) ??
-    getOnlyVariant(selectedCard);
+    getPolicyVariant(selectedCard, resolvedIntent);
   const selectedStrategy = findById(strategies, strategyId) ?? strategies[0];
   const selectedProfile = selectedStrategy
     ? findById(strategyProfiles, selectedStrategy.profileId)
@@ -224,11 +281,11 @@ export default function VendorWorkspace({
 
     setSelectedCardId(identity.id);
     setSelectedPrintingId(firstPrinting.id);
-    setSelectedVariantId(getOnlyVariant(firstPrinting)?.id ?? "");
+    setSelectedVariantId(getPolicyVariant(firstPrinting, resolvedIntent)?.id ?? "");
     setPrintingQuery("");
+    setActivePrintingFilters([]);
     setAskingPrice("");
     setMarketSnapshot(undefined);
-    setEvaluation(null);
   }
 
   function handleSelectPrinting(printingId: string) {
@@ -239,19 +296,99 @@ export default function VendorWorkspace({
       printingResults.find((result) => result.item.id === printingId)?.item;
 
     setSelectedPrintingId(printingId);
-    setSelectedVariantId(getOnlyVariant(printing)?.id ?? "");
+    setSelectedVariantId(getPolicyVariant(printing, resolvedIntent)?.id ?? "");
     setMarketSnapshot(undefined);
-    setEvaluation(null);
   }
 
   function handleStrategyChange(nextStrategyId: string) {
     setStrategyId(nextStrategyId);
-    setEvaluation(null);
   }
+
+  function resetWorkflow() {
+    setQuery("");
+    setSelectedCardId(cards[0]?.name.toLowerCase() ?? "");
+    setSelectedPrintingId("");
+    setSelectedVariantId("");
+    setPrintingQuery("");
+    setActivePrintingFilters([]);
+    setAskingPrice("");
+    setProviderResults([]);
+    setResolvedIntent(undefined);
+    setMarketSnapshot(undefined);
+    setSearchFocusKey((value) => value + 1);
+  }
+
+  function togglePrintingFilter(filter: string) {
+    setActivePrintingFilters((current) =>
+      current.includes(filter)
+        ? current.filter((item) => item !== filter)
+        : [...current, filter],
+    );
+  }
+
+  function movePrintingSelection(direction: 1 | -1) {
+    if (filteredPrintingCandidates.length === 0) {
+      return;
+    }
+
+    const currentIndex = Math.max(
+      0,
+      filteredPrintingCandidates.findIndex(
+        (candidate) => candidate.printing.id === selectedPrintingId,
+      ),
+    );
+    const nextIndex =
+      (currentIndex + direction + filteredPrintingCandidates.length) %
+      filteredPrintingCandidates.length;
+
+    handleSelectPrinting(filteredPrintingCandidates[nextIndex].printing.id);
+  }
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        resetWorkflow();
+        return;
+      }
+
+      const target = event.target as HTMLElement | null;
+      const isTypingTarget =
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.tagName === "SELECT";
+
+      if (isTypingTarget) {
+        return;
+      }
+
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        movePrintingSelection(1);
+        return;
+      }
+
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        movePrintingSelection(-1);
+        return;
+      }
+
+      if (event.key === "Enter" && selectedPrintingId) {
+        event.preventDefault();
+        handleSelectPrinting(selectedPrintingId);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  });
 
   return (
     <div className="space-y-6">
       <CardSearchPalette
+        focusKey={searchFocusKey}
         interpretationSummary={
           query.trim() ? resolvedIntent?.resolutionExplanation : undefined
         }
@@ -280,49 +417,68 @@ export default function VendorWorkspace({
       </label>
 
       {selectedIdentity ? (
-        <div className="space-y-4">
-          <label className="block max-w-xs space-y-2">
-            <span className="block text-sm font-medium text-zinc-300">
-              Filter printings...
-            </span>
-            <input
-              type="search"
-              value={printingQuery}
-              onChange={(event) => setPrintingQuery(event.target.value)}
-              placeholder="Filter printings..."
-              className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/30"
-            />
-          </label>
-          {printingQuery.trim() ? null : (
+        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_390px]">
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-2" aria-label="Printing filters">
+              {printingFilterChips.map((filter) => {
+                const isActive = activePrintingFilters.includes(filter);
+
+                return (
+                  <button
+                    key={filter}
+                    type="button"
+                    aria-pressed={isActive}
+                    onClick={() => togglePrintingFilter(filter)}
+                    className={`rounded-full border px-3 py-1 text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
+                      isActive
+                        ? "border-cyan-400 bg-cyan-400 text-zinc-950"
+                        : "border-zinc-700 bg-zinc-900 text-zinc-300 hover:border-zinc-500"
+                    }`}
+                  >
+                    {filter}
+                  </button>
+                );
+              })}
+            </div>
+            <label className="block max-w-xs space-y-2">
+              <span className="block text-xs font-medium text-zinc-400">
+                Refine printings
+              </span>
+              <input
+                type="search"
+                value={printingQuery}
+                onChange={(event) => setPrintingQuery(event.target.value)}
+                placeholder="Set, number, style..."
+                className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/30"
+              />
+            </label>
             <PrintingResults
-              candidates={constraintPrintingCandidates}
+              candidates={filteredPrintingCandidates}
+              highlightedPrintingId={selectedPrintingId}
               selectedPrintingId={selectedCard?.id ?? ""}
               onSelectPrinting={handleSelectPrinting}
             />
-          )}
-        </div>
-      ) : null}
+          </div>
 
-      {selectedCard ? (
-        <PurchasePanel
-          askingPrice={askingPrice}
-          card={selectedCard}
-          availableVariants={availableVariants}
-          isMarketLoading={isMarketLoading}
-          marketPrice={marketPrice}
-          marketSnapshot={activeMarketSnapshot}
-          selectedStrategy={selectedStrategy}
-          selectedStrategyProfile={selectedProfile}
-          evaluation={evaluation}
-          onAskingPriceChange={setAskingPrice}
-          onEvaluationChange={setEvaluation}
-          onVariantChange={(variantId) => {
-            setSelectedVariantId(variantId);
-            setMarketSnapshot(undefined);
-            setEvaluation(null);
-          }}
-          selectedVariant={selectedVariant ?? null}
-        />
+          {selectedCard ? (
+            <PurchasePanel
+              askingPrice={askingPrice}
+              card={selectedCard}
+              availableVariants={availableVariants}
+              isMarketLoading={isMarketLoading}
+              marketPrice={marketPrice}
+              marketSnapshot={activeMarketSnapshot}
+              selectedStrategy={selectedStrategy}
+              selectedStrategyProfile={selectedProfile}
+              onAskingPriceChange={setAskingPrice}
+              onVariantChange={(variantId) => {
+                setSelectedVariantId(variantId);
+                setMarketSnapshot(undefined);
+              }}
+              selectedVariant={selectedVariant ?? null}
+            />
+          ) : null}
+        </div>
       ) : null}
     </div>
   );

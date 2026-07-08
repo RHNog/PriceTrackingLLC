@@ -22,29 +22,53 @@
 - Progressive printing refinement
 - Scryfall Market Provider v1
 - Vendor Workspace daily market estimates
+- Variant Resolution Policy
+- BUY / NEGOTIATE / PASS purchase evaluation
+- Decision-first Vendor Workspace
+- Vendor Workspace VX optimization
+- Card Intelligence Platform
+- Condition Resolution
+- Market Context foundation
+- Negotiation Ladder Engine
+- Decision Resolver
+- Project Atlas
 
 ## Current Sprint
 
-Sprint 14: First Live Market Provider
+Sprint 18: Card Intelligence Platform
 
 Goals:
 
-- Use Scryfall daily market estimates in Vendor Workspace.
-- Keep live listings and recent sales out of scope until Market Provider v2.
-- Preserve provider-independent evaluation engines.
+- Produce reusable Card Intelligence signals without making recommendations.
+- Make condition part of the canonical purchase evaluation pipeline.
+- Route negotiation through the Negotiation Ladder before Decision Resolver output.
+- Preserve provider-independent engines and normalized domain objects.
+- Document Market Context, Signal Registry, and decision invariants.
 
 ## Near-Term Roadmap
 
-Sprint 15: Live Marketplace Listings
+Sprint 19: Live Hot Opportunities
 
-Sprint 16: Live Hot Opportunities
+Sprint 20: Live Marketplace Listings
+
+Sprint 21: Printing Descriptor Engine
 
 ## Future Roadmap
 
 - Market Provider integrations
 - Pricing normalization
 - Currency engine
+- Market Context Engine
+- Liquidity Engine
+- Historical Analytics Engine
+- Regional valuation
+- Currency normalization
+- Import cost modeling
+- Regional demand and format popularity
 - BR to USA arbitrage
+- ARIA active-descendant keyboard refinement for printing rows
+- Persisted Vendor Workspace preferences
+- Full browser visual regression checks once Playwright browsers are installed
 - Portfolio intelligence
 - Inventory management
 - Strategy builder

@@ -153,7 +153,7 @@ function createMultiFinishPrinting(overrides: Partial<Card> = {}) {
   } as Card;
 }
 
-test("keeps finish unresolved when a matching printing has multiple finishes", () => {
+test("defaults to nonfoil when a matching printing has multiple finishes", () => {
   const parsedQuery = parseQuery("urza's saga secret lair");
   const identity = {
     id: "urzas-saga",
@@ -169,8 +169,9 @@ test("keeps finish unresolved when a matching printing has multiple finishes", (
 
   assert.equal(resolution.selectedPrinting?.id, "secret-lair-countdown");
   assert.equal(resolution.shouldAutoCommitPrinting, true);
-  assert.equal(resolution.selectedVariant, null);
-  assert.equal(resolution.shouldAutoCommitVariant, false);
+  assert.equal(resolution.selectedVariant?.finish, "Nonfoil");
+  assert.equal(resolution.selectedVariantReasonCode, "default_nonfoil");
+  assert.equal(resolution.shouldAutoCommitVariant, true);
   assert.deepEqual(
     resolution.availableVariants.map((variant) => variant.finish),
     ["Nonfoil", "Foil"],
@@ -249,7 +250,7 @@ test("auto-selects a single available finish for unambiguous promo printings", (
   assert.equal(resolution.shouldAutoCommitVariant, true);
 });
 
-test("keeps judge promo finish unresolved until foil is requested", () => {
+test("defaults judge promo to nonfoil until foil is requested when both finishes exist", () => {
   const identity = {
     id: "lightning-bolt",
     name: "Lightning Bolt",
@@ -277,8 +278,8 @@ test("keeps judge promo finish unresolved until foil is requested", () => {
   );
 
   assert.equal(unresolved.selectedPrinting?.id, "bolt-judge");
-  assert.equal(unresolved.selectedVariant, null);
-  assert.equal(unresolved.shouldAutoCommitVariant, false);
+  assert.equal(unresolved.selectedVariant?.finish, "Nonfoil");
+  assert.equal(unresolved.shouldAutoCommitVariant, true);
   assert.equal(foil.selectedVariant?.finish, "Foil");
   assert.equal(foil.shouldAutoCommitVariant, true);
 });

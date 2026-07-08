@@ -9,7 +9,7 @@ type CardImageProps = {
 
 const sizeClasses = {
   identity: "h-16 w-11 text-[10px]",
-  printing: "h-24 w-16 text-[10px]",
+  printing: "h-20 w-14 text-[10px]",
   selected: "h-72 w-48 text-sm",
 };
 const imageSizes = {
@@ -18,8 +18,8 @@ const imageSizes = {
     width: 64,
   },
   printing: {
-    height: 144,
-    width: 96,
+    height: 120,
+    width: 84,
   },
   selected: {
     height: 432,
