@@ -2,6 +2,16 @@
 
 This file summarizes major prompts and architectural instructions. It intentionally avoids copying every prompt in full.
 
+## Sprint 28
+
+Purpose: introduce the Asset Assessment Engine.
+
+Core instruction: Intelligence Models provide evidence; Asset Assessment interprets evidence; Business Profile, Strategy, Negotiation, and Decision remain separate downstream layers.
+
+Major files affected: `lib/assessment/`, Card Profile, Asset Intelligence Framework registry, strategy scoring, business profile explanation, Intelligence Console tile content, tests, and Atlas documentation.
+
+Result: deterministic assessment with overall assessment, confidence, evidence coverage, primary drivers, supporting drivers, risk factors, opportunity factors, and business summary.
+
 ## Sprint 26
 
 Purpose: mature Playability Intelligence from Level 2 to Level 3.

@@ -61,6 +61,10 @@ function getBusinessConclusion(
   model: IntelligenceModel,
   score: number,
 ) {
+  if (model.id === "asset-assessment") {
+    return [cardProfile.assetAssessment.businessSummary];
+  }
+
   if (model.id === "certification-intelligence") {
     if (model.evidenceReport.status === "INSUFFICIENT") {
       return [
@@ -129,6 +133,10 @@ function getConfidenceReason(
   cardProfile: CardProfile,
   model: IntelligenceModel,
 ) {
+  if (model.id === "asset-assessment") {
+    return cardProfile.assetAssessment.confidence.reason;
+  }
+
   if (getConfidenceLabel(model.confidence) === "High") {
     return "";
   }
@@ -177,6 +185,16 @@ function getSupportingEvidence(
   )
     .slice(0, 4)
     .join(", ");
+
+  if (model.id === "asset-assessment") {
+    return [
+      `Evidence Coverage: ${cardProfile.assetAssessment.evidenceCoverage}%`,
+      `Primary Drivers: ${joinValues(cardProfile.assetAssessment.primaryDrivers)}`,
+      `Supporting Drivers: ${joinValues(cardProfile.assetAssessment.supportingDrivers)}`,
+      `Risk Factors: ${joinValues(cardProfile.assetAssessment.riskFactors)}`,
+      `Opportunity Factors: ${joinValues(cardProfile.assetAssessment.opportunityFactors)}`,
+    ];
+  }
 
   if (model.id === "certification-intelligence") {
     const certification = cardProfile.certificationProfile;
@@ -254,7 +272,9 @@ export default function IntelligenceDetail({
   );
   const businessConclusion = getBusinessConclusion(cardProfile, model, score);
   const keySignals =
-    model.id === "playability-intelligence"
+    model.id === "asset-assessment"
+      ? cardProfile.assetAssessment.primaryDrivers
+      : model.id === "playability-intelligence"
       ? cardProfile.playabilityProfile.keySignals
       : getKeySignals(model);
   const confidenceReason = getConfidenceReason(cardProfile, model);

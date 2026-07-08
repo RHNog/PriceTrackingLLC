@@ -1,5 +1,6 @@
 import {
   calculateBusinessCosts,
+  createBusinessProfileAssessmentContext,
   createOfferPolicy,
   type BusinessProfile,
 } from "@/lib/business/BusinessProfileEngine";
@@ -70,6 +71,7 @@ export type EvaluationTrace = {
     sellerAskingPrice: number;
   };
   offerLadderTrace: {
+    assetAssessment?: string;
     calculatedMaximumBuyPrice: number | null;
     calculatedOpeningOffer: number | null;
     calculatedTargetOffer: number | null;
@@ -372,6 +374,11 @@ export function evaluatePurchase(
   const intelligenceScore = calculateSignalStrategyScore(
     input.strategyProfile,
     cardProfile.signals,
+    cardProfile.assetAssessment,
+  );
+  const businessAssessmentContext = createBusinessProfileAssessmentContext(
+    businessProfile,
+    cardProfile.assetAssessment,
   );
   const ranking = calculateOpportunityRanking({
     profit: profit.netProfit,
@@ -422,6 +429,7 @@ export function evaluatePurchase(
     profitBeforeCosts: profit.trace.profitBeforeCosts,
     rawMarketEstimate: input.marketPrice.price,
     strategyAdjustments: [
+      `Asset Assessment ${cardProfile.assetAssessment.overallAssessment}`,
       `Minimum profit ${input.strategyProfile.constraints.minimumProfit}`,
       `Minimum ROI ${input.strategyProfile.constraints.minimumROI}`,
       `Business minimum profit ${businessProfile.minimumProfit}`,
@@ -431,6 +439,7 @@ export function evaluatePurchase(
     variantAdjustment: `${input.selectedVariant.finish} via ${input.selectedVariant.source}`,
   };
   const offerLadderTrace = {
+    assetAssessment: businessAssessmentContext.businessSummary,
     calculatedMaximumBuyPrice: negotiationLadder.maximumBuyPrice,
     calculatedOpeningOffer: negotiationLadder.openingOffer,
     calculatedTargetOffer: negotiationLadder.targetOffer,

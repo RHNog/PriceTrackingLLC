@@ -2,6 +2,18 @@
 
 This file records logical product milestones. Sprint numbers may not perfectly match commit history.
 
+## Sprint 28
+
+Introduced the Asset Assessment Engine as the canonical synthesis layer for asset understanding.
+
+- Added `lib/assessment/` with assessment, evidence, reasoning, confidence, summary, registry, and engine contracts.
+- Registered Asset Assessment as a first-class Asset Intelligence model.
+- Generated overall assessment, overall confidence, evidence coverage, primary drivers, supporting drivers, risk factors, opportunity factors, and business summary.
+- Differentiated weak assets from unknown assets by reducing confidence for unknown evidence without reducing quality.
+- Routed Strategy scoring through Asset Assessment evidence while preserving existing signal-weight compatibility.
+- Added Business Profile assessment context before negotiation.
+- Added Intelligence Console support for the Asset Assessment tile without redesigning existing tiles.
+
 ## Asset Knowledge Graph Sprint
 
 Introduced the Asset Knowledge Graph as a reusable semantic layer for Intelligence models.

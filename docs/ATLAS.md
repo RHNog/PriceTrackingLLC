@@ -2,6 +2,37 @@
 
 Atlas is the permanent project knowledge base for PriceTrackingLLC.
 
+## Sprint 28 Synchronization
+
+Asset Assessment architecture:
+
+- Asset Assessment Engine
+- Asset Assessment
+- Assessment Evidence
+- Assessment Reasoning
+- Assessment Confidence
+- Assessment Summary
+- Assessment Registry
+
+Registered assessment outputs:
+
+- Overall Assessment
+- Overall Confidence
+- Evidence Coverage
+- Primary Drivers
+- Supporting Drivers
+- Risk Factors
+- Opportunity Factors
+- Business Summary
+
+Dependency graph:
+
+Intelligence Models -> Evidence Sufficiency -> Asset Knowledge Graph -> Asset Assessment Engine -> Business Profile -> Strategy -> Negotiation Ladder -> Decision Resolver.
+
+Rule:
+
+Intelligence models provide evidence. Assessment interprets evidence. Business Profiles and Strategies consume Assessment. Negotiation consumes Strategy output. Decision evaluates the validated offer.
+
 ## Asset Knowledge Graph Synchronization
 
 Registered architecture:

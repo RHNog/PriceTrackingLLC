@@ -5,6 +5,7 @@ import type {
 import type { PaymentProfile } from "@/lib/business/PaymentProfile";
 import type { ShippingProfile } from "@/lib/business/ShippingProfile";
 import type { TaxProfile } from "@/lib/business/TaxProfile";
+import type { AssetAssessment } from "@/lib/assessment/AssetAssessment";
 
 export type NegotiationAggressiveness =
   | "Conservative"
@@ -77,9 +78,16 @@ export function calculateBusinessCosts(
 export function explainBusinessProfile(
   businessProfile: BusinessProfile,
   costs: BusinessCostBreakdown,
+  assetAssessment?: AssetAssessment,
 ) {
   return [
     `Business Profile: ${businessProfile.name}`,
+    ...(assetAssessment
+      ? [
+          `Asset Assessment: ${assetAssessment.overallAssessment}`,
+          `Assessment summary: ${assetAssessment.businessSummary}`,
+        ]
+      : []),
     `Marketplace: ${businessProfile.defaultMarketplace}`,
     `Marketplace fees: ${costs.marketplaceFees}`,
     `Payment fees: ${costs.paymentFees}`,
@@ -88,6 +96,20 @@ export function explainBusinessProfile(
     `Minimum profit: ${businessProfile.minimumProfit}`,
     `Minimum ROI: ${businessProfile.minimumROI}%`,
   ];
+}
+
+export function createBusinessProfileAssessmentContext(
+  businessProfile: BusinessProfile,
+  assetAssessment: AssetAssessment,
+) {
+  return {
+    assessmentConfidence: assetAssessment.confidence.label,
+    businessProfileId: businessProfile.id,
+    businessProfileName: businessProfile.name,
+    businessSummary: assetAssessment.businessSummary,
+    primaryDrivers: assetAssessment.primaryDrivers,
+    riskFactors: assetAssessment.riskFactors,
+  };
 }
 
 export function createOfferPolicy(

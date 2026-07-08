@@ -2,6 +2,8 @@
 
 ## Major Product And Architecture Decisions
 
+0.7. Asset Assessment is the canonical interpretation layer for asset evidence. Intelligence models provide evidence; Assessment interprets it; Business Profiles and Strategies consume Assessment.
+
 0.6. Asset Knowledge Graph is the reusable semantic layer for Intelligence models. Relationship Registry owns configured semantic relationships; models consume the graph but do not mutate strategy, negotiation, or UI behavior.
 
 0.5. Playability card roles are provider-independent. Provider adapters normalize external evidence into roles and demand dimensions; they do not perform strategy or negotiation.

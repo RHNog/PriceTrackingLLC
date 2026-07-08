@@ -9,6 +9,12 @@ The format is inspired by "Keep a Changelog".
 ## [Unreleased]
 
 ### Added
+- Sprint 28 Asset Assessment Engine.
+- `lib/assessment/` with Asset Assessment engine, registry, evidence, reasoning, confidence, summary, and assessment contracts.
+- Asset Assessment registered as a first-class Asset Intelligence model and Intelligence Console tile.
+- Assessment drivers, risk factors, opportunity factors, evidence coverage, and business summary generation.
+- Strategy scoring can consume Asset Assessment evidence instead of inspecting individual Intelligence models directly.
+- Business Profile explanations now consume the Asset Assessment summary before negotiation.
 - Asset Knowledge Graph semantic layer under `lib/knowledge/`.
 - Relationship Registry and Relationship Resolver for asset roles, mechanics, themes, archetypes, strategies, color identity, tribes, keywords, families, Universes Beyond, Reserved List, premium printings, and format relationships.
 - Playability Intelligence now consumes Asset Knowledge Graph relationships for role-aware reasoning without UI changes.

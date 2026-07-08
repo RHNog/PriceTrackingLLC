@@ -4,6 +4,9 @@
 
 - Add official-provider Certification population ingestion once permitted sources are selected.
 - Add provider-backed relationship enrichment for the Asset Knowledge Graph.
+- Add Assessment driver calibration from Evaluation History outcomes.
+- Add Atlas Assessment diagnostics for drivers, risk factors, and evidence coverage.
+- Add configurable Assessment source weights.
 - Add relationship confidence calibration after approved provider integrations exist.
 - Add graph export diagnostics to Atlas Inspector.
 - Add EDHREC Playability Provider once an approved integration path exists.

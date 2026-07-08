@@ -1,15 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { ReadyPurchaseEvaluation } from "@/lib/engines/evaluation/evaluatePurchase";
+import { createCardProfile } from "@/lib/engines/cardIntelligence/CardIntelligenceEngine";
+import { createConditionMarketSnapshot } from "@/lib/engines/market/createConditionMarketSnapshot";
 import { EvaluationHistoryEngine } from "@/lib/history/EvaluationHistoryEngine";
 import { HistoryRepository } from "@/lib/history/HistoryRepository";
 import { getDefaultBusinessProfile } from "@/lib/business/BusinessProfileRegistry";
-import { createCertificationProfile } from "@/lib/intelligence/certification/CertificationEngine";
-import { createPlayabilityProfile } from "@/lib/intelligence/playability/PlayabilityEngine";
 import { createReadinessReport } from "@/lib/validation/ReadinessReport";
 import type { AssetContext } from "@/types/AssetContext";
 import type { Card } from "@/types/card";
-import type { CardConditionCode } from "@/types/conditionProfile";
+import { findConditionProfile, type CardConditionCode } from "@/types/conditionProfile";
 import type { Decision } from "@/types/decision";
 import { defaultMarketContext } from "@/types/MarketContext";
 import type { MarketPrice } from "@/types/marketPrice";
@@ -124,6 +124,17 @@ function createEvaluation(input: {
 }): ReadyPurchaseEvaluation {
   const marketEstimate = createMarketPrice(input.printing.id, input.variant.id);
   const businessProfile = getDefaultBusinessProfile();
+  const conditionMarketSnapshot = createConditionMarketSnapshot(
+    marketEstimate,
+    "NM",
+  );
+  const cardProfile = createCardProfile({
+    condition: findConditionProfile("NM"),
+    marketContext: defaultMarketContext,
+    marketContextSnapshot: conditionMarketSnapshot,
+    printing: input.printing,
+    variant: input.variant,
+  });
   const decision =
     input.decision ??
     {
@@ -141,55 +152,9 @@ function createEvaluation(input: {
   return {
     askingPrice: 300,
     businessProfile,
-    cardProfile: {
-      condition: {
-        code: "NM",
-        confidenceAdjustment: 0,
-        label: "Near Mint",
-        marketMultiplier: 1,
-        offerMultiplier: 1,
-      },
-      generatedAt: "2026-01-01T00:00:00.000Z",
-      identity: {
-        id: "chrome-mox",
-        name: "Chrome Mox",
-        game: "Magic",
-      },
-      intelligenceModels: [],
-      marketContext: defaultMarketContext,
-      marketContextSnapshot: {
-        selectedCondition: "NM",
-        selectedPrice: marketEstimate,
-        pricesByCondition: {
-          NM: marketEstimate,
-          LP: marketEstimate,
-          MP: marketEstimate,
-          HP: marketEstimate,
-          DMG: marketEstimate,
-        },
-      },
-      overallConfidence: 90,
-      certificationProfile: createCertificationProfile(
-        input.printing,
-        input.variant,
-      ),
-      playabilityProfile: createPlayabilityProfile(input.printing),
-      printing: input.printing,
-      signals: [],
-      variant: input.variant,
-    },
+    cardProfile,
     confidence: 92,
-    conditionMarketSnapshot: {
-      selectedCondition: "NM",
-      selectedPrice: marketEstimate,
-      pricesByCondition: {
-        NM: marketEstimate,
-        LP: marketEstimate,
-        MP: marketEstimate,
-        HP: marketEstimate,
-        DMG: marketEstimate,
-      },
-    },
+    conditionMarketSnapshot,
     decision,
     decisionDrivers: [],
     estimatedMargin: 100,

@@ -8,9 +8,13 @@ It helps trading-card buyers discover opportunities, evaluate in-person purchase
 
 ## Current Development Phase
 
-Current sprint: Sprint 26, Playability Intelligence Level 3.
+Current sprint: Sprint 28, Asset Assessment Engine.
 
 The app now evaluates a selected card through deterministic Vendor Workflow states, Card Profile, Asset Intelligence models, condition-adjusted market context, strategy-weighted signals, Negotiation Ladder, and deterministic Decision Resolver output.
+
+Sprint 28 adds Asset Assessment as the canonical interpretation layer. Intelligence models provide evidence, Assessment interprets evidence, Business Profiles apply business context, Strategies apply business objectives, Negotiation consumes strategy-shaped output, and Decision evaluates the validated offer.
+
+`CardProfile.assetAssessment` is now the shared assessment output. It includes overall assessment, overall confidence, evidence coverage, primary drivers, supporting drivers, risk factors, opportunity factors, and business summary.
 
 Playability Intelligence now measures why a card has play demand. It is registered in the Asset Intelligence Framework, backed first by Scryfall legalities, exposed on `CardProfile.playabilityProfile`, and consumed by strategies through configurable `Playability` signal weights.
 
@@ -33,6 +37,8 @@ Sprint 25 matures Playability Intelligence from legality reporting to player dem
 Sprint 25.1 adds Evidence Sufficiency. Intelligence models must declare required, optional, and future evidence before producing grades. If required evidence is insufficient, production shows Unknown with low confidence and a reason. Missing evidence is not negative evidence.
 
 Sprint 26 adds Playability Level 3 semantics: provider adapter, demand dimensions, format analysis, and card role model. Playability remains demand-only and must not evaluate collectability, negotiation, or BUY/PASS decisions.
+
+Asset Assessment must not decide BUY/PASS. It synthesizes evidence into asset understanding only.
 
 ## What Has Been Built?
 
@@ -67,6 +73,8 @@ Sprint 26 adds Playability Level 3 semantics: provider adapter, demand dimension
 - Playability Intelligence Level 2
 - Evidence Sufficiency Framework
 - Playability Intelligence Level 3
+- Asset Knowledge Graph
+- Asset Assessment Engine
 - Certification Provider Registry
 - Placeholder Certification Provider
 - Offer Policy

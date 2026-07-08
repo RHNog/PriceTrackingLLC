@@ -44,6 +44,11 @@
 - Playability Intelligence Level 3
 - Asset Knowledge Graph
 - Relationship Registry
+- Asset Assessment Engine
+- Assessment Registry
+- Assessment Drivers
+- Risk Factors
+- Evidence Coverage
 - Certification Provider Registry
 - Placeholder PSA, BGS, and CGC certification provider coverage
 - Marketplace Profile templates
@@ -62,15 +67,15 @@
 
 ## Current Sprint
 
-Asset Knowledge Graph
+Sprint 28: Asset Assessment Engine
 
 Goals:
 
-- Introduce a reusable semantic graph consumed by Intelligence models.
-- Model roles, mechanics, themes, archetypes, strategies, color identity, tribes, keywords, families, Universes Beyond, Reserved List, premium printings, and formats.
-- Connect Playability to graph relationships without redesigning Playability or the Intelligence Console.
-- Connect Certification to collector-relevance relationships without adding certification provider integrations.
-- Preserve the existing Business Conclusion presentation.
+- Introduce a deterministic assessment layer that synthesizes all Intelligence model evidence.
+- Generate primary drivers, supporting drivers, risk factors, opportunity factors, evidence coverage, confidence, and business summary.
+- Keep Intelligence models as evidence providers only.
+- Make Business Profiles and Strategies consume Asset Assessment rather than individual models.
+- Preserve the Intelligence Console layout and Business Profile design.
 
 ## Near-Term Roadmap
 
@@ -102,6 +107,8 @@ Sprint 27: Printing Descriptor Engine
 - Melee / MTGO / Top8 competitive metagame providers
 - Provider-backed Knowledge Graph relationship enrichment
 - Relationship confidence calibration from approved providers
+- Assessment provider/source weighting controls
+- Assessment driver calibration from historical outcomes
 - Tournament API Playability Provider
 - Deck Penetration indicator implementation
 - Meta Stability and Trend provider implementation

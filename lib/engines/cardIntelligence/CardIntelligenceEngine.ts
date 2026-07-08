@@ -1,5 +1,6 @@
 import { generateSignals } from "@/lib/engines/cardIntelligence/SignalEngine";
 import type { CardProfile } from "@/lib/engines/cardIntelligence/models/CardProfile";
+import { createAssetAssessment } from "@/lib/assessment/AssetAssessmentEngine";
 import { createAssetIntelligenceModels } from "@/lib/intelligence/framework/AssetIntelligenceFramework";
 import { createCertificationProfile } from "@/lib/intelligence/certification/CertificationEngine";
 import { createPlayabilityProfile } from "@/lib/intelligence/playability/PlayabilityEngine";
@@ -56,9 +57,21 @@ export function createCardProfile(input: CardIntelligenceInput): CardProfile {
     overallConfidence: calculateOverallConfidence(signals),
     generatedAt: new Date().toISOString(),
   };
+  const preliminaryModels = createAssetIntelligenceModels(baseProfile);
+  const assetAssessment = createAssetAssessment({
+    ...input,
+    certificationProfile,
+    intelligenceModels: preliminaryModels,
+    playabilityProfile,
+    signals,
+  });
+  const assessedProfile = {
+    ...baseProfile,
+    assetAssessment,
+  };
 
   return {
-    ...baseProfile,
-    intelligenceModels: createAssetIntelligenceModels(baseProfile),
+    ...assessedProfile,
+    intelligenceModels: createAssetIntelligenceModels(assessedProfile),
   };
 }

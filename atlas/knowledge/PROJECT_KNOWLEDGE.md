@@ -40,6 +40,8 @@ Decision Resolver should remain deterministic after receiving a validated Offer 
 - Card roles are provider-independent Playability signals.
 - Asset Knowledge Graph owns reusable semantic relationships between assets.
 - Relationship Registry owns configured roles, mechanics, themes, archetypes, strategies, color identity, tribes, keywords, families, Universes Beyond, Reserved List, premium printings, and format relationships.
+- Asset Assessment interprets Intelligence evidence into one canonical asset understanding.
+- Business Profiles and Strategies consume Asset Assessment instead of inspecting individual Intelligence models directly.
 - Evidence Sufficiency determines whether Intelligence models may issue grades.
 - Unknown means missing evidence, not poor quality.
 - Vendor Workspace owns Intelligence layers 1-3: Decision, Explanation, and Evidence.
@@ -67,6 +69,47 @@ Integration rules:
 - Certification consumes graph premium-printing, Reserved List, and collector-role relationships.
 - Collector Intelligence may consume graph-enriched Certification and future graph facts through normalized Intelligence outputs.
 - The graph does not decide BUY, PASS, strategy, negotiation, or offer values.
+
+## Asset Assessment Knowledge
+
+The Asset Assessment Engine lives under `lib/assessment/`.
+
+Core contracts:
+
+- `AssetAssessmentEngine`
+- `AssetAssessment`
+- `AssessmentEvidence`
+- `AssessmentReasoning`
+- `AssessmentConfidence`
+- `AssessmentSummary`
+- `AssessmentRegistry`
+
+Layer rule:
+
+Intelligence Models provide evidence.
+
+Asset Assessment interprets evidence.
+
+Business Profile applies business context.
+
+Strategy applies business objectives.
+
+Negotiation consumes strategy-shaped output.
+
+Decision evaluates the validated offer.
+
+Assessment outputs:
+
+- Overall Assessment
+- Overall Confidence
+- Evidence Coverage
+- Primary Drivers
+- Supporting Drivers
+- Risk Factors
+- Opportunity Factors
+- Business Summary
+
+Unknown evidence reduces confidence only. Unknown evidence does not reduce the quality score, because unknown asset and weak asset must remain separate states.
 
 ## Permanent Rules
 

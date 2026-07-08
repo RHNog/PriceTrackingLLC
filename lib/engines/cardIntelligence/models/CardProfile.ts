@@ -1,4 +1,5 @@
 import type { Signal } from "@/lib/engines/cardIntelligence/models/Signal";
+import type { AssetAssessment } from "@/lib/assessment/AssetAssessment";
 import type { CertificationProfile } from "@/lib/intelligence/certification/CertificationProfile";
 import type { IntelligenceModel } from "@/lib/intelligence/framework/IntelligenceModel";
 import type { PlayabilityProfile } from "@/lib/intelligence/playability/PlayabilityProfile";
@@ -19,6 +20,7 @@ export interface CardProfile {
   condition: ConditionProfile;
   marketContext: MarketContext;
   marketContextSnapshot: ConditionMarketSnapshot;
+  assetAssessment: AssetAssessment;
   signals: Signal[];
   intelligenceModels: IntelligenceModel[];
   certificationProfile: CertificationProfile;

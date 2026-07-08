@@ -52,7 +52,11 @@ export function createNegotiationLadder(
     walkAwayPrice: maximumBuyPrice,
     explanation: [
       ...(businessProfile && businessCosts
-        ? explainBusinessProfile(businessProfile, businessCosts)
+        ? explainBusinessProfile(
+            businessProfile,
+            businessCosts,
+            input.cardProfile.assetAssessment,
+          )
         : []),
       ...(offerPolicy
         ? [

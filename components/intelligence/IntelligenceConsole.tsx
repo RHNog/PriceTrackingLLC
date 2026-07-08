@@ -27,6 +27,10 @@ function averageIndicatorScore(model: IntelligenceModel) {
 }
 
 function getPresentationScore(cardProfile: CardProfile, model: IntelligenceModel) {
+  if (model.id === "asset-assessment") {
+    return cardProfile.assetAssessment.overallScore;
+  }
+
   if (model.id === "certification-intelligence") {
     return cardProfile.certificationProfile.overallGrade;
   }
@@ -78,6 +82,11 @@ export default function IntelligenceConsole({
                 isExpanded={isExpanded}
                 model={model}
                 score={score}
+                summary={
+                  model.id === "asset-assessment"
+                    ? cardProfile.assetAssessment.businessSummary
+                    : undefined
+                }
                 onToggle={() =>
                   setExpandedModelId((current) =>
                     current === model.id ? null : model.id,

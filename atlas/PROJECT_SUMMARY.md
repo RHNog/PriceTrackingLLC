@@ -32,6 +32,10 @@ The Asset Knowledge Graph sprint introduces reusable semantic relationships.
 
 `lib/knowledge/` now models graph nodes, graph edges, queries, relationship registry, relationship resolver, and graph registry. Playability consumes graph roles and semantic relationships for richer reasoning. Certification consumes premium-printing, Reserved List, and collector-role relationships when estimating certification relevance. The graph does not redesign UI, strategy, or negotiation behavior.
 
+Sprint 28 introduces the Asset Assessment Engine.
+
+`lib/assessment/` now synthesizes Knowledge Graph, Playability, Certification, Collector, Investment, Market, Liquidity, Business Context, and Evidence Sufficiency into one deterministic Asset Assessment. Assessment produces overall assessment, confidence, evidence coverage, primary drivers, supporting drivers, risk factors, opportunity factors, and business summary. Business Profiles and Strategies consume this assessment instead of inspecting individual Intelligence models directly.
+
 ## Current Architecture
 
 PriceTrackingLLC is a Next.js, TypeScript, and Tailwind CSS application for professional trading-card buying decisions.
@@ -44,6 +48,7 @@ The runtime architecture separates:
 - Business Profile and Offer Policy assumptions.
 - System Readiness and Pipeline Integrity.
 - Card and Asset Intelligence.
+- Asset Assessment.
 - Strategy scoring.
 - Negotiation Ladder generation.
 - Offer Ladder validation.
@@ -54,11 +59,11 @@ Atlas is not part of this runtime architecture. It is an internal companion syst
 
 ## Current Sprint
 
-Asset Knowledge Graph
+Sprint 28: Asset Assessment Engine
 
 ## Current Milestone
 
-Reusable semantic relationship layer for Intelligence models.
+Canonical evidence interpretation layer for asset understanding.
 
 ## Open Issues
 
@@ -67,6 +72,7 @@ Reusable semantic relationship layer for Intelligence models.
 - Repository scanning is available as a standalone TypeScript utility but not connected to a script.
 - Existing test execution needs a formal alias-aware test runner.
 - Knowledge Graph relationship coverage is configured for known examples and should be provider-enriched later.
+- Assessment driver weights are deterministic and should be calibrated with future outcome history.
 
 ## Technical Debt
 
@@ -76,7 +82,8 @@ Reusable semantic relationship layer for Intelligence models.
 - Browser visual regression coverage is not active.
 - Atlas has no drift detection yet.
 - Relationship confidence calibration remains future work.
+- Assessment source weighting remains configuration-ready future work.
 
 ## Next Recommended Sprint
 
-Add provider-backed Knowledge Graph relationship enrichment and Atlas graph diagnostics.
+Calibrate Assessment drivers with Evaluation History and add Atlas Assessment diagnostics.

@@ -14,6 +14,7 @@ Top-level structure:
 - `knowledge/`: dictionary-driven TCG knowledge.
 - `config/`: configurable engine thresholds and weights.
 - `lib/knowledge/`: reusable Asset Knowledge Graph, relationship registry, resolver, graph registry, nodes, edges, and queries.
+- `lib/assessment/`: Asset Assessment Engine, assessment registry, evidence, reasoning, confidence, summary, and assessment contracts.
 - `lib/engines/`: provider-independent business and interpretation engines.
 - `lib/providers/`: external or mocked data provider implementations.
 - `lib/intelligence/certification/`: provider-ready Certification Intelligence model.
@@ -51,6 +52,38 @@ The graph models relationships between an asset and:
 Relationship Registry owns configured semantic knowledge. Relationship Resolver combines configured knowledge with card metadata into an `AssetKnowledgeGraph`. Knowledge Graph Registry is the stable integration point consumed by Intelligence models.
 
 Playability consumes graph roles, archetypes, themes, strategies, and format context for richer player-demand reasoning. Certification consumes premium-printing, Reserved List, and collector-role relationships for certification relevance. The graph does not decide BUY/PASS, strategy behavior, or negotiation terms.
+
+## Asset Assessment Engine
+
+Asset Assessment is the canonical synthesis layer between Intelligence models and downstream business logic.
+
+Core files:
+
+- `lib/assessment/AssetAssessmentEngine.ts`
+- `lib/assessment/AssetAssessment.ts`
+- `lib/assessment/AssessmentEvidence.ts`
+- `lib/assessment/AssessmentReasoning.ts`
+- `lib/assessment/AssessmentConfidence.ts`
+- `lib/assessment/AssessmentSummary.ts`
+- `lib/assessment/AssessmentRegistry.ts`
+
+Flow:
+
+Intelligence Models provide evidence.
+
+Asset Assessment interprets evidence.
+
+Business Profile applies business context.
+
+Strategy applies business objectives.
+
+Negotiation consumes strategy-shaped output.
+
+Decision evaluates the validated offer.
+
+Asset Assessment consumes Knowledge Graph, Playability, Certification, Collector, Investment, Market, Liquidity, Business Context, and Evidence Sufficiency. It outputs overall assessment, confidence, evidence coverage, primary drivers, supporting drivers, risk factors, opportunity factors, and a concise business summary.
+
+Unknown evidence reduces confidence but does not reduce asset quality. This preserves the distinction between a weak asset and an unknown asset.
 
 ## App Shell
 

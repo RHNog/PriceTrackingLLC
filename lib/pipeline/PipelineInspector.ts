@@ -81,6 +81,7 @@ export function inspectEvaluationPipeline(
       name: "Asset",
       receivedInputs: {
         cardProfileId: input.cardProfile?.identity.id,
+        assetAssessment: input.cardProfile?.assetAssessment.overallAssessment,
         variantId: input.selectedVariant?.id,
       },
     }),
@@ -128,6 +129,7 @@ export function inspectEvaluationPipeline(
       name: "Business",
       receivedInputs: { businessProfileId: businessProfile?.id },
       calculatedOutputs: {
+        assetAssessment: input.cardProfile?.assetAssessment.businessSummary,
         businessProfileName: businessProfile?.name,
         marketplace: businessProfile?.defaultMarketplace,
       },
@@ -205,6 +207,7 @@ export function inspectEvaluationPipeline(
       ].filter(Boolean),
       name: "Strategy",
       receivedInputs: {
+        assetAssessment: input.cardProfile?.assetAssessment.overallAssessment,
         strategyProfileId: input.strategyProfile?.id,
         offerPolicy,
         marketPrice,

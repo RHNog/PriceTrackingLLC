@@ -4,6 +4,8 @@
 
 ### Added
 
+- Sprint 28 Asset Assessment Engine documentation.
+- Assessment philosophy, reasoning, evidence interpretation, primary drivers, risk factors, business summary, architecture graph, dependency graph, and Atlas synchronization documentation.
 - Sprint 26 Playability Intelligence Level 3 documentation.
 - Demand Model, Card Role Model, Playability Provider Adapter, and updated Intelligence Registry documentation.
 - Sprint 25.1 Evidence Sufficiency Framework documentation.
@@ -65,6 +67,8 @@
 
 ### Changed
 
+- Current sprint updated to Sprint 28.
+- Documentation now treats Asset Assessment as the canonical evidence interpretation layer consumed by Business Profiles and Strategies.
 - Current sprint updated to Sprint 26.
 - Playability documentation now describes explainable player demand intelligence and role-driven demand sources.
 - Current sprint updated to Sprint 25.1.

@@ -7,6 +7,7 @@ import type { IntelligenceModel } from "@/lib/intelligence/framework/Intelligenc
 type IntelligenceTileProps = {
   isExpanded: boolean;
   model: IntelligenceModel;
+  summary?: string;
   score: number;
   onToggle: () => void;
 };
@@ -20,6 +21,7 @@ export default function IntelligenceTile({
   model,
   onToggle,
   score,
+  summary,
 }: IntelligenceTileProps) {
   return (
     <button
@@ -28,8 +30,15 @@ export default function IntelligenceTile({
       onClick={onToggle}
       className="grid w-full grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-3 rounded-md border border-zinc-800 bg-zinc-950/70 px-3 py-2 text-left transition hover:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-cyan-400"
     >
-      <span className="truncate text-sm font-medium text-zinc-200">
-        {getDisplayName(model.name)}
+      <span className="min-w-0">
+        <span className="block truncate text-sm font-medium text-zinc-200">
+          {getDisplayName(model.name)}
+        </span>
+        {summary ? (
+          <span className="mt-0.5 block truncate text-xs text-zinc-500">
+            {summary}
+          </span>
+        ) : null}
       </span>
       {model.evidenceReport.status === "INSUFFICIENT" ? (
         <span className="inline-flex h-7 min-w-16 items-center justify-center rounded-md border border-zinc-600 bg-zinc-800 px-2 text-sm font-semibold text-zinc-200">

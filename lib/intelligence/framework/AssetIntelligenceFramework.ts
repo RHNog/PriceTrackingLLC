@@ -1,4 +1,5 @@
 import type { CardProfile } from "@/lib/engines/cardIntelligence/models/CardProfile";
+import type { AssetAssessment } from "@/lib/assessment/AssetAssessment";
 import { evaluateEvidenceSufficiency } from "@/lib/intelligence/framework/EvidenceSufficiencyEngine";
 import type { EvidenceRequirement } from "@/lib/intelligence/framework/EvidenceRequirement";
 import { createIndicator } from "@/lib/intelligence/framework/IndicatorFactory";
@@ -25,6 +26,74 @@ type IntelligenceModelDefinition = {
 };
 
 export const intelligenceModelRegistry: IntelligenceModelDefinition[] = [
+  {
+    id: "asset-assessment",
+    name: "Asset Assessment",
+    version: "1.0.0",
+    status: "ESTIMATED",
+    indicatorIds: [
+      "asset-assessment-overall",
+      "asset-assessment-confidence",
+      "asset-assessment-coverage",
+    ],
+    inputs: [
+      "Knowledge Graph",
+      "Playability",
+      "Certification",
+      "Collector",
+      "Investment",
+      "Market",
+      "Liquidity",
+      "Business Context",
+      "Evidence Sufficiency",
+    ],
+    outputs: [
+      "overall assessment",
+      "overall confidence",
+      "evidence coverage",
+      "primary drivers",
+      "risk factors",
+      "business summary",
+    ],
+    supportingSources: [
+      "Asset Knowledge Graph",
+      "Asset Intelligence Framework",
+      "Evidence Sufficiency",
+      "Card Profile",
+    ],
+    explanation:
+      "Synthesizes registered Intelligence model evidence into a canonical asset assessment before business, strategy, negotiation, and decision layers interpret it.",
+    dependencyGraph: [
+      "Intelligence Models",
+      "Evidence Sufficiency",
+      "Asset Knowledge Graph",
+      "Asset Assessment Engine",
+      "Assessment Registry",
+      "Assessment Drivers",
+      "Risk Factors",
+      "Evidence Coverage",
+      "Business Profile",
+      "Strategy",
+      "Negotiation Ladder",
+      "Decision Resolver",
+    ],
+    evidenceRequirements: [
+      {
+        id: "asset-assessment",
+        label: "Asset Assessment",
+        type: "REQUIRED",
+        indicatorIds: ["asset-assessment-overall"],
+        minimumConfidence: 30,
+      },
+      {
+        id: "evidence-coverage",
+        label: "Evidence Coverage",
+        type: "REQUIRED",
+        indicatorIds: ["asset-assessment-coverage"],
+        minimumConfidence: 30,
+      },
+    ],
+  },
   {
     id: "market-intelligence",
     name: "Market Intelligence",
@@ -526,6 +595,61 @@ function averageConfidence(indicators: Indicator[]) {
   return Math.round(total / indicators.length);
 }
 
+function createAssetAssessmentIndicators(
+  assetAssessment?: AssetAssessment,
+): Indicator[] {
+  if (!assetAssessment) {
+    return [];
+  }
+
+  const timestamp = assetAssessment.generatedAt;
+
+  return [
+    {
+      id: "asset-assessment-overall",
+      name: "Overall Assessment",
+      score: assetAssessment.overallScore,
+      confidence: assetAssessment.confidence.score,
+      version: assetAssessment.version,
+      status: "ESTIMATED",
+      dataSources: ["Asset Assessment Engine"],
+      contributingFactors: assetAssessment.primaryDrivers,
+      lastUpdated: timestamp,
+      explanation: assetAssessment.businessSummary,
+      futureDependencies: [],
+    },
+    {
+      id: "asset-assessment-confidence",
+      name: "Overall Confidence",
+      score: assetAssessment.confidence.score,
+      confidence: assetAssessment.confidence.score,
+      version: assetAssessment.version,
+      status: "ESTIMATED",
+      dataSources: ["Evidence Sufficiency"],
+      contributingFactors: [assetAssessment.confidence.reason],
+      lastUpdated: timestamp,
+      explanation: assetAssessment.confidence.reason,
+      futureDependencies: [],
+    },
+    {
+      id: "asset-assessment-coverage",
+      name: "Evidence Coverage",
+      score: assetAssessment.evidenceCoverage,
+      confidence: assetAssessment.confidence.score,
+      version: assetAssessment.version,
+      status: "ESTIMATED",
+      dataSources: ["Assessment Registry"],
+      contributingFactors: [
+        ...assetAssessment.primaryDrivers,
+        ...assetAssessment.riskFactors,
+      ],
+      lastUpdated: timestamp,
+      explanation: `${assetAssessment.evidenceCoverage}% of assessment evidence is available.`,
+      futureDependencies: [],
+    },
+  ];
+}
+
 function getModelHealth(
   status: IndicatorStatus,
   indicators: Indicator[],
@@ -554,18 +678,27 @@ export function getRegisteredIntelligenceModels() {
 }
 
 export function createAssetIntelligenceModels(
-  cardProfile: Omit<CardProfile, "intelligenceModels">,
+  cardProfile: Omit<CardProfile, "intelligenceModels" | "assetAssessment"> & {
+    assetAssessment?: AssetAssessment;
+  },
 ): IntelligenceModel[] {
-  const indicators = indicatorRegistry.map((metadata) =>
-    createIndicator({
-      metadata,
-      certificationProfile: cardProfile.certificationProfile,
-      playabilityProfile: cardProfile.playabilityProfile,
-      signals: cardProfile.signals,
-    }),
-  );
+  const indicators = [
+    ...createAssetAssessmentIndicators(cardProfile.assetAssessment),
+    ...indicatorRegistry.map((metadata) =>
+      createIndicator({
+        metadata,
+        certificationProfile: cardProfile.certificationProfile,
+        playabilityProfile: cardProfile.playabilityProfile,
+        signals: cardProfile.signals,
+      }),
+    ),
+  ];
 
-  return intelligenceModelRegistry.map((definition) => {
+  return intelligenceModelRegistry.flatMap((definition) => {
+    if (definition.id === "asset-assessment" && !cardProfile.assetAssessment) {
+      return [];
+    }
+
     const modelIndicators = indicators.filter((indicator) =>
       definition.indicatorIds.includes(indicator.id),
     );
@@ -578,7 +711,7 @@ export function createAssetIntelligenceModels(
       averageConfidence(modelIndicators) + evidenceReport.confidenceAdjustment,
     );
 
-    return {
+    return [{
       id: definition.id,
       name: definition.name,
       version: definition.version,
@@ -593,6 +726,6 @@ export function createAssetIntelligenceModels(
       explanation: definition.explanation,
       dependencyGraph: definition.dependencyGraph,
       evidenceReport,
-    };
+    }];
   });
 }

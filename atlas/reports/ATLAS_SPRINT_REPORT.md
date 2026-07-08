@@ -2,46 +2,49 @@
 
 ## Sprint
 
-Asset Knowledge Graph Sprint
+Sprint 28 - Asset Assessment Engine
 
 ## Summary
 
-Introduced the Asset Knowledge Graph as a reusable semantic layer consumed by Intelligence models.
+Introduced the Asset Assessment Engine as the canonical synthesis layer for Intelligence model evidence.
 
 ## Goal
 
-Model relationships between assets so Playability, Certification, and future Intelligence models can share semantic reasoning.
+Generate one deterministic Asset Assessment that downstream Business Profile and Strategy layers can consume.
 
 ## Files Added
 
-- `lib/knowledge/AssetKnowledgeGraph.ts`
-- `lib/knowledge/KnowledgeEdge.ts`
-- `lib/knowledge/KnowledgeGraphRegistry.ts`
-- `lib/knowledge/KnowledgeNode.ts`
-- `lib/knowledge/KnowledgeQuery.ts`
-- `lib/knowledge/RelationshipRegistry.ts`
-- `lib/knowledge/RelationshipResolver.ts`
+- `lib/assessment/AssessmentConfidence.ts`
+- `lib/assessment/AssessmentEvidence.ts`
+- `lib/assessment/AssessmentReasoning.ts`
+- `lib/assessment/AssessmentRegistry.ts`
+- `lib/assessment/AssessmentSummary.ts`
+- `lib/assessment/AssetAssessment.ts`
+- `lib/assessment/AssetAssessmentEngine.ts`
+- `tests/asset-assessment.test.ts`
 
 ## Files Modified
 
-- `config/playability.ts`
-- `lib/intelligence/certification/CertificationEngine.ts`
-- `lib/intelligence/certification/CertificationProfile.ts`
+- `components/intelligence/IntelligenceConsole.tsx`
+- `components/intelligence/IntelligenceDetail.tsx`
+- `components/intelligence/IntelligenceTile.tsx`
+- `lib/business/BusinessProfileEngine.ts`
+- `lib/engines/cardIntelligence/CardIntelligenceEngine.ts`
+- `lib/engines/cardIntelligence/models/CardProfile.ts`
+- `lib/engines/evaluation/evaluatePurchase.ts`
+- `lib/engines/negotiation/NegotiationLadderEngine.ts`
+- `lib/engines/strategy/calculateSignalStrategyScore.ts`
 - `lib/intelligence/framework/AssetIntelligenceFramework.ts`
-- `lib/intelligence/playability/PlayabilityEngine.ts`
-- `lib/intelligence/playability/PlayabilityProfile.ts`
-- `lib/intelligence/playability/PlayabilityRole.ts`
-- `tests/asset-knowledge-graph.test.ts`
-- `tests/certification-intelligence.test.ts`
-- `tests/playability-intelligence.test.ts`
+- `lib/pipeline/PipelineInspector.ts`
+- `tests/evaluation-history.test.ts`
 - Sprint documentation and Atlas files.
 
 ## Architecture Changes
 
-- Added a reusable graph, node, edge, query, registry, relationship registry, and resolver architecture.
-- Playability consumes graph roles, archetypes, themes, strategies, and format context.
-- Certification consumes premium-printing, Reserved List, and collector-role relationships.
-- Asset Intelligence Framework metadata now records graph dependencies.
+- Added a deterministic assessment layer over registered Intelligence evidence.
+- Asset Assessment produces overall assessment, confidence, evidence coverage, drivers, risks, opportunities, and business summary.
+- Business Profile explanations and Strategy scoring now consume Asset Assessment.
+- Intelligence Console renders Asset Assessment through the existing tile/detail pattern.
 
 ## Documentation Updated
 
@@ -57,8 +60,8 @@ Model relationships between assets so Playability, Certification, and future Int
 
 ## Technical Debt
 
-- Relationship coverage is configured for requested examples and should later be provider-enriched.
-- Relationship confidence is configured until approved provider integrations exist.
+- Assessment driver weights are deterministic and should later be calibrated against outcomes.
+- Future Intelligence models can extend Assessment through registered framework evidence.
 
 ## Known Issues
 
@@ -66,9 +69,8 @@ Model relationships between assets so Playability, Certification, and future Int
 
 ## Tests Added
 
-- Asset Knowledge Graph tests verify Mox Opal, Sol Ring, Collected Company, Counterspell, and Black Lotus relationships.
-- Playability tests verify graph consumption.
-- Certification tests verify graph collector relationship consumption.
+- Asset Assessment tests verify Mox Opal, Chrome Mox, Sol Ring, Black Lotus, Collected Company, and Counterspell.
+- Tests verify primary drivers, risk factors, business summary, confidence, Business Profile assessment context, and Strategy assessment scoring.
 
 ## Build Status
 
@@ -78,4 +80,4 @@ Model relationships between assets so Playability, Certification, and future Int
 
 ## Suggested Next Sprint
 
-Add provider-backed relationship enrichment and Atlas graph diagnostics.
+Calibrate Assessment drivers and add Atlas Assessment diagnostics.
