@@ -2,6 +2,16 @@
 
 This file summarizes major prompts and architectural instructions. It intentionally avoids copying every prompt in full.
 
+## Sprint 33
+
+Purpose: introduce Provider Replay & Fixture Infrastructure.
+
+Core instruction: production acquires provider observations, development replays provider observations, and the application should behave identically in both modes.
+
+Major files affected: `lib/providers/replay/`, `lib/providers/justtcg/JustTCGProvider.ts`, JustTCG developer diagnostics, provider replay fixtures, provider replay tests, and Atlas documentation.
+
+Result: development can run JustTCG provider flows from certified fixtures in `REPLAY` or `AUTO` mode without network calls or quota usage, while production remains live and downstream repository/business layers stay unaware.
+
 ## Sprint 32
 
 Purpose: introduce the Market Ontology.

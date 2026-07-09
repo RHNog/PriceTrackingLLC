@@ -1,0 +1,87 @@
+{
+  "metadata": {
+    "asset": "urzas-saga",
+    "game": "magic",
+    "provider": "justtcg",
+    "providerVersion": "justtcg-js@0.2.1",
+    "recordedAt": "2026-07-09T00:00:00.000Z",
+    "recordedFrom": "MANUAL_FIXTURE",
+    "schemaVersion": 1,
+    "sdkVersion": "justtcg-js@0.2.1"
+  },
+  "raw": {
+    "data": [
+      {
+        "id": "urzas-saga",
+        "uuid": "fixture-urzas-saga-card",
+        "name": "Urza's Saga",
+        "game": "Magic: The Gathering",
+        "set": "modern-horizons-2",
+        "set_name": "Modern Horizons 2",
+        "number": "259",
+        "rarity": "Rare",
+        "tcgplayerId": "239493",
+        "scryfallId": "fixture-urzas-saga-scryfall",
+        "mtgjsonId": "fixture-urzas-saga-mtgjson",
+        "details": "Replay fixture observation.",
+        "variants": [
+          {
+            "id": "urzas-saga-near-mint-normal",
+            "uuid": "fixture-urzas-saga-variant",
+            "condition": "Near Mint",
+            "printing": "Normal",
+            "language": "English",
+            "tcgplayerSkuId": "fixture-urzas-saga-sku",
+            "price": 42.2,
+            "lastUpdated": 1783555200,
+            "priceChange24hr": 0.3,
+            "priceChange7d": 1.7,
+            "avgPrice": 41.8,
+            "priceHistory": [
+              { "t": 1783468800, "p": 41.5 },
+              { "t": 1783555200, "p": 42.2 }
+            ],
+            "minPrice7d": 40.1,
+            "maxPrice7d": 43.5,
+            "avgPrice30d": 40.9,
+            "minPrice30d": 38.8,
+            "maxPrice30d": 44.2,
+            "avgPrice90d": 39.75,
+            "minPrice90d": 35.5,
+            "maxPrice90d": 45
+          }
+        ]
+      }
+    ],
+    "pagination": { "hasMore": false, "limit": 1, "offset": 0, "total": 1 },
+    "usage": {
+      "apiDailyLimit": 100,
+      "apiDailyRequestsRemaining": 99,
+      "apiDailyRequestsUsed": 1,
+      "apiPlan": "fixture",
+      "apiRateLimit": 60,
+      "apiRequestLimit": 1000,
+      "apiRequestsRemaining": 999,
+      "apiRequestsUsed": 1
+    }
+  },
+  "normalized": {
+    "cards": [
+      {
+        "cardId": "urzas-saga",
+        "name": "Urza's Saga",
+        "variants": [
+          {
+            "condition": "Near Mint",
+            "currentPriceUsd": 42.2,
+            "printing": "Normal",
+            "variantId": "urzas-saga-near-mint-normal"
+          }
+        ]
+      }
+    ],
+    "providerId": "justtcg",
+    "providerName": "JustTCG",
+    "synchronizedAt": "2026-07-09T00:00:00.000Z"
+  }
+}

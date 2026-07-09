@@ -1,6 +1,15 @@
 # Roadmap
 
-## Current Sprint: Sprint 32
+## Current Sprint: Sprint 33
+
+Provider Replay lets development replay certified provider observations without using live APIs.
+
+- Connected: replay fixture infrastructure, fixture validation, replay sessions, replay diagnostics, JustTCG fixture replay, and optional fixture recording.
+- Verified: seeded replay fixtures for Mox Opal, Chrome Mox, Lightning Bolt, Black Lotus, Collected Company, and Urza's Saga compile through the provider path.
+- Deferred: production replay mode, repository-specific fixture awareness, business engine changes, and provider administration UI.
+- Compatibility: production remains live; repository and business engines receive the same provider-shaped observations regardless of live or replay source.
+
+## Recently Completed: Sprint 32
 
 Market Ontology now defines what each market evidence domain means and which providers can answer each domain.
 

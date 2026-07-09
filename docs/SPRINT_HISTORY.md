@@ -2,6 +2,18 @@
 
 This file records logical product milestones. Sprint numbers may not perfectly match commit history.
 
+## Sprint 33
+
+Introduced Provider Replay & Fixture Infrastructure.
+
+- Added `lib/providers/replay/` with replay provider, recorder, loader, registry, metadata, diagnostics, mode, and session modules.
+- Added `LIVE`, `REPLAY`, and `AUTO` provider modes controlled by `.env.local`.
+- Added fixture validation for provider, schema version, SDK version, timestamp, payload presence, and optional checksum.
+- Integrated JustTCG replay inside the provider implementation so repository and business engines remain unaware of live versus replay source.
+- Added seeded JustTCG fixtures under `fixtures/providers/justtcg/magic/`.
+- Extended `/dev/justtcg` diagnostics with replay mode, fixture status, fixture age, recorded source, SDK version, skipped live request, and quota saved.
+- Preserved Market Ontology, Repository, Asset Assessment, Business Profiles, Strategy, Negotiation, Decision, and Intelligence Console behavior.
+
 ## Sprint 32
 
 Introduced the Market Ontology.

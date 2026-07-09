@@ -4,6 +4,9 @@
 
 ### Added
 
+- Sprint 33 Provider Replay & Fixture Infrastructure documentation.
+- Replay lifecycle, fixture format, development workflow, and provider certification workflow documentation.
+- Documentation that production acquires observations while development may replay observations through provider implementations.
 - Sprint 32.2 coverage-driven market refresh documentation.
 - Evidence Coverage Map documentation for asset, printing, finish, condition, coverage status, and domain freshness.
 - Developer diagnostics documentation for coverage, freshness, missing evidence, providers queried, providers skipped, and merge result.

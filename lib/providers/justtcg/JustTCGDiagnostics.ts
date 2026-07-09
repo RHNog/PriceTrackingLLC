@@ -1,6 +1,7 @@
 import type { ProviderDiagnostics } from "@/lib/providers/sdk/ProviderDiagnostics";
 import type { ProviderResultStatus } from "@/lib/providers/sdk/ProviderResult";
 import type { JustTCGNormalizedResponse } from "@/lib/providers/justtcg/JustTCGNormalizer";
+import type { ReplayDiagnostics } from "@/lib/providers/replay/ReplayDiagnostics";
 
 export type JustTCGAuthenticationStatus =
   | "CONFIGURED"
@@ -19,8 +20,19 @@ export type JustTCGInspectionResult = {
   connectionStatus: JustTCGConnectionStatus;
   diagnostics: ProviderDiagnostics;
   normalized: JustTCGNormalizedResponse | null;
+  providerRequestError: unknown;
+  providerRequestTrace: JustTCGRequestTraceEntry[];
   providerResultStatus: ProviderResultStatus;
   rawSdkResponse: unknown;
+  replayDiagnostics: ReplayDiagnostics | null;
+};
+
+export type JustTCGRequestTraceEntry = {
+  details?: unknown;
+  durationSincePreviousMs: number;
+  durationSinceStartMs: number;
+  stage: string;
+  timestamp: string;
 };
 
 export function getJustTCGAuthenticationStatus(): JustTCGAuthenticationStatus {

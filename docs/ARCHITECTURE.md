@@ -1,5 +1,99 @@
 # Architecture
 
+## Sprint 33: Provider Replay & Fixture Infrastructure
+
+Provider Replay separates provider acquisition from development playback.
+
+```text
+Production
+  -> Provider
+  -> Official SDK / API
+  -> Raw observation
+  -> Normalizer
+  -> Repository
+
+Development replay
+  -> Provider
+  -> Replay fixture
+  -> Raw observation
+  -> Normalizer
+  -> Repository
+```
+
+The repository and business engines do not know whether observations came from a live provider or replay fixture.
+
+Core files:
+
+- `lib/providers/replay/ReplayProvider.ts`
+- `lib/providers/replay/ReplayRecorder.ts`
+- `lib/providers/replay/ReplayLoader.ts`
+- `lib/providers/replay/ReplayRegistry.ts`
+- `lib/providers/replay/ReplayMetadata.ts`
+- `lib/providers/replay/ReplayDiagnostics.ts`
+- `lib/providers/replay/ReplayMode.ts`
+- `lib/providers/replay/ReplaySession.ts`
+
+### Replay Modes
+
+`PROVIDER_MODE` controls local provider behavior:
+
+- `LIVE`: call the provider SDK/API.
+- `REPLAY`: load a fixture and skip network/API quota. Missing fixtures fail fast.
+- `AUTO`: load a fixture if present; otherwise call the live provider.
+
+`NODE_ENV=production` forces `LIVE`.
+
+### Fixture Format
+
+Fixtures live under:
+
+```text
+fixtures/providers/{provider}/{game}/{asset}.json
+```
+
+Example:
+
+```text
+fixtures/providers/justtcg/magic/mox-opal.json
+```
+
+Each fixture stores:
+
+- `metadata.provider`
+- `metadata.schemaVersion`
+- `metadata.recordedAt`
+- `metadata.providerVersion`
+- `metadata.sdkVersion`
+- optional `metadata.checksum`
+- `raw` provider response
+- `normalized` provider observation snapshot
+
+The loader validates provider, game, asset, schema version, SDK version, timestamp, payload presence, and optional checksum before replay.
+
+### Replay Lifecycle
+
+1. Provider receives a normal request.
+2. `ReplayProvider.prepare()` resolves `LIVE`, `REPLAY`, or `AUTO`.
+3. In `REPLAY`, the fixture raw response is returned before SDK instantiation.
+4. In `AUTO`, the fixture is used if present; otherwise live provider execution proceeds.
+5. The existing provider normalizer converts raw observations into the same normalized response used by live mode.
+6. Diagnostics record fixture loaded, fixture age, recorded source, SDK version, skipped live request, and quota saved.
+
+### Recording Workflow
+
+When `PROVIDER_RECORD_FIXTURES=true`, live provider responses can be recorded after normalization. The recorder writes raw response, normalized response, metadata, and checksum-ready fixture data to the provider fixture tree.
+
+### Provider Certification Workflow
+
+Certified providers should:
+
+1. Run live acquisition for a known asset.
+2. Normalize the response through the provider adapter.
+3. Record the fixture.
+4. Validate the fixture with `ReplayLoader`.
+5. Re-run the provider in `REPLAY`.
+6. Confirm no SDK/network call occurs and normalized observations match the certified provider path.
+
 ## Sprint 32: Market Ontology
 
 The Market Ontology is the canonical vocabulary for market evidence. It defines what each evidence domain means before providers are asked for data.

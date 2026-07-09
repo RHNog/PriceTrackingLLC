@@ -1,5 +1,20 @@
 # Decisions
 
+## Sprint 33: Development Replays Certified Provider Observations
+
+Decision: introduce Provider Replay as a provider implementation detail under `lib/providers/replay/`.
+
+Rationale:
+
+- Development should not depend on live provider availability, network health, or API quota.
+- Certified provider observations should be reusable as fixtures.
+- The repository and business engines should behave the same whether observations came from a live provider or a replay fixture.
+- Recording and replay should live at the provider boundary, not in Market Ontology, Repository, Assessment, Strategy, Negotiation, Decision, or Intelligence Console code.
+
+Constraint: production forces live provider behavior. Replay modes are development capabilities only.
+
+Rule: production acquires observations; development may replay observations. Provider replay must never become a business-domain concern.
+
 ## Sprint 32: Market Ontology Owns Market Semantics
 
 Decision: introduce `lib/market/ontology/` as the canonical vocabulary for market evidence domains and provider capabilities.

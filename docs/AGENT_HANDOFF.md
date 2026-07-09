@@ -1,5 +1,30 @@
 # Agent Handoff
 
+## Sprint 33 Handoff
+
+Provider Replay lives in `lib/providers/replay/`.
+
+- Provider: `ReplayProvider.ts`
+- Recorder: `ReplayRecorder.ts`
+- Loader and validation: `ReplayLoader.ts`
+- Fixture paths: `ReplayRegistry.ts`
+- Metadata: `ReplayMetadata.ts`
+- Diagnostics: `ReplayDiagnostics.ts`
+- Mode: `ReplayMode.ts`
+- Session: `ReplaySession.ts`
+
+Local mode is controlled by `PROVIDER_MODE` in `.env.local`:
+
+- `LIVE`: call the live provider.
+- `REPLAY`: require a fixture and skip live provider calls.
+- `AUTO`: use a fixture if present, otherwise call the live provider.
+
+Optional recording uses `PROVIDER_RECORD_FIXTURES=true`. Recording writes raw provider response, normalized response, timestamp, provider version, SDK version, and metadata under `fixtures/providers/{provider}/{game}/{asset}.json`.
+
+Replay is a provider implementation detail. Do not teach the repository, Asset Assessment, Business Profiles, Strategy, Negotiation, Decision, or Intelligence Console whether data came from a fixture or a live provider.
+
+Production must continue using live providers. `resolveReplayMode()` forces `LIVE` when `NODE_ENV` is `production`.
+
 ## Sprint 32 Handoff
 
 Market semantics now live in `lib/market/ontology/`.

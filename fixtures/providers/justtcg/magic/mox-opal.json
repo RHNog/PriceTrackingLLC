@@ -1,0 +1,87 @@
+{
+  "metadata": {
+    "asset": "mox-opal",
+    "game": "magic",
+    "provider": "justtcg",
+    "providerVersion": "justtcg-js@0.2.1",
+    "recordedAt": "2026-07-09T00:00:00.000Z",
+    "recordedFrom": "MANUAL_FIXTURE",
+    "schemaVersion": 1,
+    "sdkVersion": "justtcg-js@0.2.1"
+  },
+  "raw": {
+    "data": [
+      {
+        "id": "mox-opal",
+        "uuid": "fixture-mox-opal-card",
+        "name": "Mox Opal",
+        "game": "Magic: The Gathering",
+        "set": "scars-of-mirrodin",
+        "set_name": "Scars of Mirrodin",
+        "number": "179",
+        "rarity": "Mythic",
+        "tcgplayerId": "37073",
+        "scryfallId": "fixture-mox-opal-scryfall",
+        "mtgjsonId": "fixture-mox-opal-mtgjson",
+        "details": "Replay fixture observation.",
+        "variants": [
+          {
+            "id": "mox-opal-near-mint-normal",
+            "uuid": "fixture-mox-opal-variant",
+            "condition": "Near Mint",
+            "printing": "Normal",
+            "language": "English",
+            "tcgplayerSkuId": "fixture-mox-opal-sku",
+            "price": 89.12,
+            "lastUpdated": 1783555200,
+            "priceChange24hr": 0.4,
+            "priceChange7d": 1.1,
+            "avgPrice": 88.5,
+            "priceHistory": [
+              { "t": 1783468800, "p": 88.01 },
+              { "t": 1783555200, "p": 89.12 }
+            ],
+            "minPrice7d": 86.5,
+            "maxPrice7d": 91,
+            "avgPrice30d": 87.25,
+            "minPrice30d": 82,
+            "maxPrice30d": 93,
+            "avgPrice90d": 84.75,
+            "minPrice90d": 78,
+            "maxPrice90d": 94
+          }
+        ]
+      }
+    ],
+    "pagination": { "hasMore": false, "limit": 1, "offset": 0, "total": 1 },
+    "usage": {
+      "apiDailyLimit": 100,
+      "apiDailyRequestsRemaining": 99,
+      "apiDailyRequestsUsed": 1,
+      "apiPlan": "fixture",
+      "apiRateLimit": 60,
+      "apiRequestLimit": 1000,
+      "apiRequestsRemaining": 999,
+      "apiRequestsUsed": 1
+    }
+  },
+  "normalized": {
+    "cards": [
+      {
+        "cardId": "mox-opal",
+        "name": "Mox Opal",
+        "variants": [
+          {
+            "condition": "Near Mint",
+            "currentPriceUsd": 89.12,
+            "printing": "Normal",
+            "variantId": "mox-opal-near-mint-normal"
+          }
+        ]
+      }
+    ],
+    "providerId": "justtcg",
+    "providerName": "JustTCG",
+    "synchronizedAt": "2026-07-09T00:00:00.000Z"
+  }
+}

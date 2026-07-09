@@ -84,12 +84,64 @@ export default async function JustTCGDeveloperPage({
           </dl>
         </section>
 
+        <section className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+          <h3 className="text-sm font-semibold text-zinc-200">
+            Replay Status
+          </h3>
+          <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <StatusValue
+              label="Replay Mode"
+              value={inspection.replayDiagnostics?.mode ?? "LIVE"}
+            />
+            <StatusValue
+              label="Fixture Loaded"
+              value={inspection.replayDiagnostics?.fixtureLoaded ? "YES" : "NO"}
+            />
+            <StatusValue
+              label="Fixture Age"
+              value={inspection.replayDiagnostics?.fixtureAge ?? "N/A"}
+            />
+            <StatusValue
+              label="Recorded From"
+              value={inspection.replayDiagnostics?.recordedFrom ?? "N/A"}
+            />
+            <StatusValue
+              label="Provider"
+              value={inspection.replayDiagnostics?.provider ?? "justtcg"}
+            />
+            <StatusValue
+              label="SDK Version"
+              value={inspection.replayDiagnostics?.sdkVersion ?? "N/A"}
+            />
+            <StatusValue
+              label="Live Skipped"
+              value={inspection.replayDiagnostics?.liveRequestSkipped ? "YES" : "NO"}
+            />
+            <StatusValue
+              label="Quota Saved"
+              value={inspection.replayDiagnostics?.quotaSaved ? "YES" : "NO"}
+            />
+          </dl>
+        </section>
+
         <div className="grid gap-6 xl:grid-cols-2">
           <JsonPanel title="Raw SDK Response" value={inspection.rawSdkResponse} />
           <JsonPanel title="Normalized Response" value={inspection.normalized} />
         </div>
 
         <JsonPanel title="Provider Diagnostics" value={inspection.diagnostics} />
+        <JsonPanel
+          title="Replay Diagnostics"
+          value={inspection.replayDiagnostics}
+        />
+        <JsonPanel
+          title="Provider Request Trace"
+          value={inspection.providerRequestTrace}
+        />
+        <JsonPanel
+          title="Provider Request Error"
+          value={inspection.providerRequestError}
+        />
       </div>
     </AppShell>
   );
