@@ -27,6 +27,7 @@ export type ScryfallCardResponse = {
   finishes?: string[];
   frame?: string;
   frame_effects?: string[];
+  games?: string[];
   layout?: string;
   component?: string;
   legalities?: Record<string, string>;
@@ -270,13 +271,17 @@ export function adaptScryfallCard(card: ScryfallCardResponse): Card | null {
       name: card.name,
     }),
     language: getLanguageName(normalized.language),
+    layout: card.layout,
     legalities: card.legalities,
     productFamily: card.set_name,
     promoTypes: card.promo_types ?? [],
     releaseYear: card.released_at?.slice(0, 4),
     selectedFinish:
       availableFinishes.length === 1 ? availableFinishes[0] : undefined,
+    sourceGames: card.games,
     treatment: getTreatment(card),
+    typeLine: card.type_line,
+    component: card.component,
     finishVariants,
   };
 }

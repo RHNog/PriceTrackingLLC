@@ -33,11 +33,15 @@ export interface Card {
   imageUrls?: CardImageUrls;
   identityRelationship?: IdentityRelationship;
   language?: string;
+  layout?: string;
   legalities?: Record<string, string>;
   productFamily?: string;
   promoTypes?: string[];
   releaseYear?: string;
   selectedFinish?: string;
+  sourceGames?: string[];
   treatment?: string;
+  typeLine?: string;
+  component?: string;
   finishVariants?: PrintingVariant[];
 }

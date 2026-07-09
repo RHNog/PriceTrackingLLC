@@ -5,8 +5,7 @@ import {
   seedStrategies,
   seedStrategyProfiles,
 } from "@/data/seedStrategies";
-import VendorWorkspace, {
-} from "@/features/vendor/components/VendorWorkspace";
+import VendorWorkspace from "@/features/vendor/components/VendorWorkspace";
 import { ScryfallProvider } from "@/lib/providers/identity/ScryfallProvider";
 
 async function getIdentityCards() {

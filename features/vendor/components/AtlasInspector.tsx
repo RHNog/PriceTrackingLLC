@@ -2,6 +2,7 @@
 
 import type { AssetContextValidationResult } from "@/lib/workflow/AssetContextValidator";
 import type { CardProfile } from "@/lib/engines/cardIntelligence/models/CardProfile";
+import type { IdentityEligibilityResult } from "@/lib/engines/eligibility/AssetEligibilityEngine";
 import type { PipelineReport } from "@/lib/pipeline/PipelineReport";
 import { getProviderSdkSnapshot } from "@/lib/providers/sdk/ProviderRegistry";
 import type { ReadinessReport } from "@/lib/validation/ReadinessReport";
@@ -13,6 +14,7 @@ import type { VendorWorkflowSnapshot } from "@/types/VendorWorkflowState";
 type AtlasInspectorProps = {
   assetValidation: AssetContextValidationResult;
   cardProfile?: CardProfile;
+  eligibilityDiagnostics: IdentityEligibilityResult[];
   isMarketLoading: boolean;
   marketSnapshot?: MarketSnapshot;
   pipelineReport: PipelineReport;
@@ -74,6 +76,7 @@ function ReadinessList({ label, items }: { label: string; items: string[] }) {
 export default function AtlasInspector({
   assetValidation,
   cardProfile,
+  eligibilityDiagnostics,
   isMarketLoading,
   marketSnapshot,
   pipelineReport,
@@ -255,6 +258,45 @@ export default function AtlasInspector({
           label="Resolution"
           value="Captured upstream by the identity search API."
         />
+      </InspectorSection>
+
+      <InspectorSection title="Asset Eligibility">
+        {eligibilityDiagnostics.length > 0 ? (
+          <div className="grid gap-2">
+            {eligibilityDiagnostics.flatMap((diagnostic) =>
+              diagnostic.printings.map((printing) => (
+                <div
+                  key={`${diagnostic.identity.id}:${printing.assetId}`}
+                  className={`rounded-md border px-3 py-2 ${
+                    printing.eligible
+                      ? "border-emerald-800/60 bg-emerald-950/10"
+                      : "border-amber-800/60 bg-amber-950/10"
+                  }`}
+                >
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <KeyValue
+                      label="Resolved Asset"
+                      value={`${printing.assetName} / ${printing.assetId}`}
+                    />
+                    <KeyValue
+                      label="Eligibility Decision"
+                      value={printing.eligible ? "YES" : "NO"}
+                    />
+                    <KeyValue label="Matched Rule" value={printing.matchedRuleId} />
+                    <KeyValue label="Reason" value={printing.reason.description} />
+                    <KeyValue label="Workflow" value={printing.workflow} />
+                    <KeyValue
+                      label="Confidence"
+                      value={`${printing.confidence}%`}
+                    />
+                  </div>
+                </div>
+              )),
+            )}
+          </div>
+        ) : (
+          <KeyValue label="Eligibility" value="Waiting for resolved assets" />
+        )}
       </InspectorSection>
 
       <InspectorSection title="Intent Resolution">

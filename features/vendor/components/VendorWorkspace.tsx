@@ -10,6 +10,10 @@ import {
   defaultBusinessProfiles,
 } from "@/lib/business/BusinessDefaults";
 import { createCardProfile } from "@/lib/engines/cardIntelligence/CardIntelligenceEngine";
+import {
+  filterIdentityResultsForVendorWorkflow,
+  type IdentityEligibilityResult,
+} from "@/lib/engines/eligibility/AssetEligibilityEngine";
 import { createConditionMarketSnapshot } from "@/lib/engines/market/createConditionMarketSnapshot";
 import { inspectEvaluationPipeline } from "@/lib/pipeline/PipelineInspector";
 import { createSystemReadinessReport } from "@/lib/validation/SystemReadinessEngine";
@@ -131,6 +135,58 @@ function createInitialResults(cards: Card[]): SearchResult<CardIdentity>[] {
   }));
 }
 
+function constrainIntentToEligibleResults(
+  intent: ResolvedIntent | undefined,
+  results: SearchResult<CardIdentity>[],
+): ResolvedIntent | undefined {
+  if (!intent) {
+    return undefined;
+  }
+
+  const eligibleIdentities = new Map(
+    results.map((result) => [result.item.id, result.item]),
+  );
+  const eligiblePrintingIds = new Set(
+    results.flatMap((result) => result.item.printings.map((printing) => printing.id)),
+  );
+  const selectedIdentity = intent.selectedIdentity
+    ? eligibleIdentities.get(intent.selectedIdentity.id)
+    : undefined;
+  const selectedPrinting = intent.selectedPrinting &&
+    eligiblePrintingIds.has(intent.selectedPrinting.id)
+      ? intent.selectedPrinting
+      : undefined;
+
+  return {
+    ...intent,
+    identityCandidates: intent.identityCandidates.filter((candidate) =>
+      eligibleIdentities.has(candidate.identity.id),
+    ),
+    printingResolution: intent.printingResolution
+      ? {
+          ...intent.printingResolution,
+          printingCandidates: intent.printingResolution.printingCandidates.filter(
+            (candidate) => eligiblePrintingIds.has(candidate.printing.id),
+          ),
+          selectedPrinting,
+          selectedVariant: selectedPrinting ? intent.printingResolution.selectedVariant : null,
+          shouldAutoCommit:
+            Boolean(selectedPrinting) &&
+            intent.printingResolution.shouldAutoCommit,
+          shouldAutoCommitPrinting:
+            Boolean(selectedPrinting) &&
+            intent.printingResolution.shouldAutoCommitPrinting,
+          shouldAutoCommitVariant:
+            Boolean(selectedPrinting) &&
+            intent.printingResolution.shouldAutoCommitVariant,
+        }
+      : undefined,
+    selectedIdentity,
+    selectedPrinting,
+    selectedVariant: selectedPrinting ? intent.selectedVariant : null,
+  };
+}
+
 export default function VendorWorkspace({
   cards,
   defaultStrategyId,
@@ -144,6 +200,8 @@ export default function VendorWorkspace({
   const [providerResults, setProviderResults] = useState<
     SearchResult<CardIdentity>[]
   >([]);
+  const [providerEligibilityDiagnostics, setProviderEligibilityDiagnostics] =
+    useState<IdentityEligibilityResult[]>([]);
   const [resolvedIntent, setResolvedIntent] = useState<ResolvedIntent>();
   const [marketSnapshot, setMarketSnapshot] = useState<MarketSnapshot>();
   const [selectedBusinessProfileId, setSelectedBusinessProfileId] = useState(
@@ -159,7 +217,16 @@ export default function VendorWorkspace({
     },
   });
   const initialResults = useMemo(() => createInitialResults(cards), [cards]);
-  const searchResults = query.trim() ? providerResults : initialResults;
+  const initialEligibility = useMemo(
+    () => filterIdentityResultsForVendorWorkflow(initialResults),
+    [initialResults],
+  );
+  const searchResults = query.trim()
+    ? providerResults
+    : initialEligibility.results;
+  const eligibilityDiagnostics = query.trim()
+    ? providerEligibilityDiagnostics
+    : initialEligibility.diagnostics;
   const workflowContext = workflow.context;
   const askingPrice = workflowContext.askingPrice;
   const highlightedCardId = workflowContext.highlightedIdentityId;
@@ -194,15 +261,21 @@ export default function VendorWorkspace({
         results?: SearchResult<CardIdentity>[];
       };
       const results = payload.results ?? [];
+      const eligibility = filterIdentityResultsForVendorWorkflow(results);
+      const eligibleIntent = constrainIntentToEligibleResults(
+        payload.intent,
+        eligibility.results,
+      );
 
-      setResolvedIntent(payload.intent);
-      setProviderResults(results);
+      setResolvedIntent(eligibleIntent);
+      setProviderResults(eligibility.results);
+      setProviderEligibilityDiagnostics(eligibility.diagnostics);
       dispatchCommand(
         createWorkflowCommand(
           "LoadSearchResults",
           {
-            resolvedIntent: payload.intent,
-            results: results.map((result) => result.item),
+            resolvedIntent: eligibleIntent,
+            results: eligibility.results.map((result) => result.item),
           },
           "SearchEngine",
         ),
@@ -214,6 +287,7 @@ export default function VendorWorkspace({
         console.error(error);
         setResolvedIntent(undefined);
         setProviderResults([]);
+        setProviderEligibilityDiagnostics([]);
         dispatchCommand(
           createWorkflowCommand(
             "ReportWorkflowError",
@@ -501,6 +575,7 @@ export default function VendorWorkspace({
     setPrintingQuery("");
     setActivePrintingFilters([]);
     setProviderResults([]);
+    setProviderEligibilityDiagnostics([]);
     setResolvedIntent(undefined);
     setMarketSnapshot(undefined);
     dispatchCommand(createWorkflowCommand("ResetWorkspace", {}));
@@ -651,6 +726,7 @@ export default function VendorWorkspace({
           pipelineReport={pipelineReport}
           resolvedIntent={resolvedIntent}
           selectedCondition={selectedCondition}
+          eligibilityDiagnostics={eligibilityDiagnostics}
           systemReadinessReport={systemReadinessReport}
           workflow={workflow}
         />
