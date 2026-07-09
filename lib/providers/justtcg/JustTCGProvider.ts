@@ -17,6 +17,7 @@ import type { ProviderResult } from "@/lib/providers/sdk/ProviderResult";
 import { createReplayDiagnostics } from "@/lib/providers/replay/ReplayDiagnostics";
 import { ReplayProvider, type ReplayDecision } from "@/lib/providers/replay/ReplayProvider";
 import { ReplayRecorder } from "@/lib/providers/replay/ReplayRecorder";
+import type { ReplayIdentityInput } from "@/lib/providers/replay/ReplayRegistry";
 import type { MarketSnapshot } from "@/types/marketSnapshot";
 import type { MarketPrice } from "@/types/marketPrice";
 
@@ -73,9 +74,10 @@ export class JustTCGProvider {
       priceHistoryDuration: normalizedContext.priceHistoryDuration,
       include_statistics: ["7d", "30d", "90d", "allTime"],
     };
+    const replayIdentity = createJustTCGReplayIdentity(normalizedContext);
     const replayDecision = this.replayProvider.prepare({
-      asset: normalizedContext.cardName,
       game: normalizedContext.game,
+      identity: replayIdentity,
       provider: this.id,
     });
     this.lastReplayDecision = replayDecision;
@@ -101,7 +103,7 @@ export class JustTCGProvider {
 
     if (replayDecision.mode === "REPLAY") {
       const error = new Error(
-        `Replay fixture not found: ${replayDecision.location.path}`,
+        `${replayDecision.session.matchReason ?? "Replay observation missing."} ${replayDecision.location.path}`,
       );
       const classified = classifyJustTCGProviderError(error, trace.entries);
       this.lastProviderRequestError = classified;
@@ -205,15 +207,17 @@ export class JustTCGProvider {
     }
 
     const normalizedContext = normalizeJustTCGContext(context);
-    const location = this.replayRecorder.record({
-      asset: normalizedContext.cardName,
-      game: normalizedContext.game,
-      normalized,
-      provider: this.id,
-      providerVersion: this.adapter.metadata.version,
-      raw,
-      sdkVersion: this.adapter.metadata.version,
-    });
+    const locations = createJustTCGReplayRecords(raw, normalized, normalizedContext)
+      .map((record) => this.replayRecorder.record({
+        game: normalizedContext.game,
+        identity: record.identity,
+        normalized: record.normalized,
+        provider: this.id,
+        providerVersion: this.adapter.metadata.version,
+        raw: record.raw,
+        sdkVersion: this.adapter.metadata.version,
+      }));
+    const location = locations[0] ?? replayDecision.location;
 
     replayDecision.session.fixtureLoaded = true;
     replayDecision.session.fixturePath = location.path;
@@ -256,14 +260,27 @@ export class JustTCGProvider {
 
   async getMarketSnapshot(input: {
     cardName: string;
+    collectorNumber?: string;
     condition?: string;
+    finish?: string;
     game?: string;
+    language?: string;
+    printing?: string;
     printingId: string;
     variantId: string;
   }): Promise<MarketSnapshot> {
     const result = await this.executeKnownCard({
       cardName: input.cardName,
+      collectorNumber: input.collectorNumber,
+      condition: input.condition,
+      finish: input.finish ?? finishFromVariantId(input.variantId),
       game: normalizeGameName(input.game),
+      language: input.language,
+      printing: input.printing ?? input.printingId,
+      printingId: input.printingId,
+      providerProductIdentifier: input.printingId,
+      providerVariantIdentifier: input.variantId,
+      variantId: input.variantId,
     });
     const normalized = result.data;
     const card = normalized?.cards.find(
@@ -273,6 +290,9 @@ export class JustTCGProvider {
     const prices = card
       ? createVariantValuationPrices({
           card,
+          requestedCondition: input.condition,
+          requestedFinish: input.finish ?? finishFromVariantId(input.variantId),
+          requestedLanguage: input.language,
           printingId: input.printingId,
         })
       : [];
@@ -697,6 +717,91 @@ function createIdentityEvidence(
   };
 }
 
+function createJustTCGReplayIdentity(
+  context: Required<JustTCGKnownCardContext>,
+): ReplayIdentityInput {
+  const variantId = context.providerVariantIdentifier !== "unknown"
+    ? context.providerVariantIdentifier
+    : context.variantId;
+  const productId = context.providerProductIdentifier !== "unknown"
+    ? context.providerProductIdentifier
+    : context.printingId;
+
+  return {
+    assetIdentity: context.cardName,
+    collectorNumber: context.collectorNumber,
+    condition: context.condition,
+    finish: context.finish,
+    language: context.language,
+    printing: context.printing !== "unknown" ? context.printing : productId,
+    providerProductIdentifier: productId,
+    providerVariantIdentifier: variantId,
+  };
+}
+
+function createJustTCGReplayRecords(
+  raw: JustTCGRawCardResponse,
+  normalized: JustTCGNormalizedResponse,
+  context: Required<JustTCGKnownCardContext>,
+) {
+  return normalized.cards.flatMap((card, cardIndex) => {
+    const rawCard = raw.data[cardIndex];
+
+    if (!rawCard) {
+      return [];
+    }
+
+    return card.variants.map((variant, variantIndex) => {
+      const rawVariant = rawCard.variants[variantIndex];
+      const scopedRaw = {
+        ...raw,
+        data: [
+          {
+            ...rawCard,
+            variants: rawVariant ? [rawVariant] : [],
+          },
+        ],
+      };
+      const scopedNormalized = {
+        ...normalized,
+        cards: [
+          {
+            ...card,
+            variants: [variant],
+          },
+        ],
+      };
+      const productIdentifier = context.providerProductIdentifier !== "unknown"
+        ? context.providerProductIdentifier
+        : context.printingId !== "unknown"
+          ? context.printingId
+          : card.identifiers.scryfallId ?? card.cardUuid;
+      const variantIdentifier = context.providerVariantIdentifier !== "unknown"
+        ? context.providerVariantIdentifier
+        : context.variantId !== "unknown"
+          ? context.variantId
+          : `${productIdentifier}:${variant.printing.toLowerCase() === "foil" ? "foil" : "nonfoil"}`;
+
+      return {
+        identity: {
+          assetIdentity: card.name,
+          collectorNumber: card.number ?? context.collectorNumber,
+          condition: variant.condition,
+          finish: variant.printing,
+          language: variant.language ?? context.language,
+          printing: context.printing !== "unknown"
+            ? context.printing
+            : card.setName ?? card.setId ?? productIdentifier,
+          providerProductIdentifier: productIdentifier,
+          providerVariantIdentifier: variantIdentifier,
+        },
+        normalized: scopedNormalized,
+        raw: scopedRaw,
+      };
+    });
+  });
+}
+
 function normalizeGameName(game?: string) {
   if (!game || game.toLowerCase() === "magic") {
     return "Magic: The Gathering";
@@ -705,11 +810,37 @@ function normalizeGameName(game?: string) {
   return game;
 }
 
+function finishFromVariantId(variantId: string | undefined) {
+  if (!variantId) {
+    return "Normal";
+  }
+
+  const suffix = variantId.split(":").at(-1)?.toLowerCase();
+
+  if (suffix === "foil") {
+    return "Foil";
+  }
+
+  if (suffix === "nonfoil" || suffix === "normal") {
+    return "Normal";
+  }
+
+  return "Normal";
+}
+
 function createVariantValuationPrices(input: {
   card: JustTCGNormalizedResponse["cards"][number];
+  requestedCondition?: string;
+  requestedFinish?: string;
+  requestedLanguage?: string;
   printingId: string;
 }): MarketPrice[] {
   return input.card.variants
+    .filter((variant) =>
+      identityValueMatches(variant.condition, input.requestedCondition) &&
+      identityValueMatches(variant.printing, input.requestedFinish) &&
+      identityValueMatches(variant.language, input.requestedLanguage)
+    )
     .filter((variant) => variant.currentPriceUsd !== null)
     .map((variant) => ({
       id: `justtcg:${input.printingId}:${variant.variantId}:variant-valuation`,
@@ -727,4 +858,25 @@ function createVariantValuationPrices(input: {
       condition: variant.condition,
       conditionSpecific: true,
     }));
+}
+
+function identityValueMatches(actual: string | null, expected: string | undefined) {
+  if (!expected) {
+    return true;
+  }
+
+  return normalizeComparableIdentityValue(actual ?? "") ===
+    normalizeComparableIdentityValue(expected);
+}
+
+function normalizeComparableIdentityValue(value: string) {
+  const normalized = value.trim().toLowerCase();
+  const aliases: Record<string, string> = {
+    "lightly played": "lp",
+    "near mint": "nm",
+    "non-foil": "normal",
+    "nonfoil": "normal",
+  };
+
+  return aliases[normalized] ?? normalized;
 }

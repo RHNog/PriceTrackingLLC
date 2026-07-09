@@ -15,6 +15,8 @@ Constraint: production forces live provider behavior. Replay modes are developme
 
 Rule: production acquires observations; development may replay observations. Provider replay must never become a business-domain concern.
 
+Identity rule: replay fixtures are keyed by full market identity: asset identity, printing, collector number, finish, condition, language, provider product identifier, and provider variant identifier. The replay registry must perform exact lookup only. If an exact observation is absent, `REPLAY` mode reports the missing identity component instead of selecting a nearby card or falling back to live provider execution.
+
 ## Sprint 32: Market Ontology Owns Market Semantics
 
 Decision: introduce `lib/market/ontology/` as the canonical vocabulary for market evidence domains and provider capabilities.

@@ -5,6 +5,7 @@
 ### Added
 
 - Sprint 33 Provider Replay & Fixture Infrastructure documentation.
+- Sprint 33.1 fixture identity model documentation for exact replay lookup by asset, printing, collector number, finish, condition, language, provider product identifier, and provider variant identifier.
 - Replay lifecycle, fixture format, development workflow, and provider certification workflow documentation.
 - Documentation that production acquires observations while development may replay observations through provider implementations.
 - Sprint 32.2 coverage-driven market refresh documentation.
@@ -98,6 +99,7 @@
 ### Changed
 
 - Market refresh now requires both freshness and evidence-domain coverage before skipping provider requests.
+- Provider Replay fixtures now document market-identity paths instead of card-level fixture paths.
 - Fresh but incomplete snapshots now fetch only missing refreshable evidence domains.
 - Current Market Estimate now preserves JustTCG Variant Valuation through a temporary projection bridge until the Market Intelligence Engine exists.
 - Lowest Listing and Recent Sales remain restricted to Listing Intelligence and Transaction Intelligence respectively.

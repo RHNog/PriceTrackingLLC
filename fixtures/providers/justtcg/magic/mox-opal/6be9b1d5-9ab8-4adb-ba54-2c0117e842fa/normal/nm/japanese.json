@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "asset": "mox-opal",
+    "game": "magic",
+    "identity": {
+      "assetIdentity": "Mox Opal",
+      "assetKey": "mox-opal",
+      "collectorNumber": "179",
+      "condition": "Near Mint",
+      "conditionKey": "nm",
+      "finish": "Normal",
+      "finishKey": "normal",
+      "language": "Japanese",
+      "languageKey": "japanese",
+      "printing": "6be9b1d5-9ab8-4adb-ba54-2c0117e842fa",
+      "printingKey": "6be9b1d5-9ab8-4adb-ba54-2c0117e842fa",
+      "providerProductIdentifier": "6be9b1d5-9ab8-4adb-ba54-2c0117e842fa",
+      "providerVariantIdentifier": "6be9b1d5-9ab8-4adb-ba54-2c0117e842fa:nonfoil"
+    },
+    "provider": "justtcg",
+    "providerVersion": "justtcg-js@0.2.1",
+    "recordedAt": "2026-07-09T00:00:00.000Z",
+    "recordedFrom": "MANUAL_FIXTURE",
+    "schemaVersion": 1,
+    "sdkVersion": "justtcg-js@0.2.1"
+  },
+  "raw": {
+    "data": [
+      {
+        "id": "mox-opal",
+        "uuid": "fixture-mox-opal-card",
+        "name": "Mox Opal",
+        "game": "Magic: The Gathering",
+        "set": "scars-of-mirrodin",
+        "set_name": "Scars of Mirrodin",
+        "number": "179",
+        "rarity": "Mythic",
+        "tcgplayerId": "37073",
+        "scryfallId": "6be9b1d5-9ab8-4adb-ba54-2c0117e842fa",
+        "mtgjsonId": "fixture-mox-opal-mtgjson",
+        "details": "Replay fixture observation.",
+        "variants": [
+          {
+            "id": "mox-opal-near-mint-normal-japanese",
+            "uuid": "fixture-mox-opal-normal-nm-japanese",
+            "condition": "Near Mint",
+            "printing": "Normal",
+            "language": "Japanese",
+            "tcgplayerSkuId": "fixture-mox-opal-normal-nm-japanese-sku",
+            "price": 112.25,
+            "lastUpdated": 1783555200,
+            "priceChange24hr": 0.3,
+            "priceChange7d": 0.9,
+            "avgPrice": 111,
+            "priceHistory": [
+              { "t": 1783468800, "p": 110.8 },
+              { "t": 1783555200, "p": 112.25 }
+            ],
+            "minPrice7d": 108,
+            "maxPrice7d": 114,
+            "avgPrice30d": 109,
+            "minPrice30d": 104,
+            "maxPrice30d": 116,
+            "avgPrice90d": 106,
+            "minPrice90d": 98,
+            "maxPrice90d": 118
+          }
+        ]
+      }
+    ],
+    "pagination": { "hasMore": false, "limit": 1, "offset": 0, "total": 1 },
+    "usage": {
+      "apiDailyLimit": 100,
+      "apiDailyRequestsRemaining": 99,
+      "apiDailyRequestsUsed": 1,
+      "apiPlan": "fixture",
+      "apiRateLimit": 60,
+      "apiRequestLimit": 1000,
+      "apiRequestsRemaining": 999,
+      "apiRequestsUsed": 1
+    }
+  },
+  "normalized": {
+    "cards": [
+      {
+        "cardId": "mox-opal",
+        "name": "Mox Opal",
+        "variants": [
+          {
+            "condition": "Near Mint",
+            "currentPriceUsd": 112.25,
+            "language": "Japanese",
+            "printing": "Normal",
+            "variantId": "mox-opal-near-mint-normal-japanese"
+          }
+        ]
+      }
+    ],
+    "providerId": "justtcg",
+    "providerName": "JustTCG",
+    "synchronizedAt": "2026-07-09T00:00:00.000Z"
+  }
+}

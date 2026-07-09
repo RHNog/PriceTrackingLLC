@@ -19,7 +19,9 @@ Local mode is controlled by `PROVIDER_MODE` in `.env.local`:
 - `REPLAY`: require a fixture and skip live provider calls.
 - `AUTO`: use a fixture if present, otherwise call the live provider.
 
-Optional recording uses `PROVIDER_RECORD_FIXTURES=true`. Recording writes raw provider response, normalized response, timestamp, provider version, SDK version, and metadata under `fixtures/providers/{provider}/{game}/{asset}.json`.
+Optional recording uses `PROVIDER_RECORD_FIXTURES=true`. Recording writes each provider variant as its own identity fixture with raw provider response, normalized response, timestamp, provider version, SDK version, and metadata under `fixtures/providers/{provider}/{game}/{asset}/{printing}/{finish}/{condition}/{language}.json`.
+
+Replay fixture identity is explicit. A fixture is valid only for one asset identity, printing, collector number, finish, condition, language, provider product identifier, and provider variant identifier. `ReplayRegistry` builds exact paths from those components and does not scan for close matches. In `REPLAY`, a missing fixture must return replay observation missing with the failed component, such as Printing, Finish, Condition, or Language.
 
 Replay is a provider implementation detail. Do not teach the repository, Asset Assessment, Business Profiles, Strategy, Negotiation, Decision, or Intelligence Console whether data came from a fixture or a live provider.
 

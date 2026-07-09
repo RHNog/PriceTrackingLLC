@@ -5,12 +5,17 @@ export type ReplayDiagnostics = {
   fixtureAgeMs: number | null;
   fixtureLoaded: boolean;
   fixturePath: string | null;
+  identityExactMatch: boolean;
+  identityMatchReason: string | null;
   liveRequestSkipped: boolean;
+  missingIdentityComponents: string[];
   mode: ReplaySession["mode"];
   provider: string;
   quotaSaved: boolean;
   recordedAt: string | null;
   recordedFrom: string | null;
+  replayIdentity: ReplaySession["replayIdentity"];
+  requestedIdentity: ReplaySession["requestedIdentity"];
   sdkVersion: string | null;
   status: ReplaySession["status"];
 };
@@ -27,12 +32,17 @@ export function createReplayDiagnostics(
     fixtureAgeMs: session.fixtureAgeMs,
     fixtureLoaded: session.fixtureLoaded,
     fixturePath: session.fixturePath,
+    identityExactMatch: session.exactMatch,
+    identityMatchReason: session.matchReason,
     liveRequestSkipped: session.liveRequestSkipped,
+    missingIdentityComponents: session.missingComponents,
     mode: session.mode,
     provider: session.provider,
     quotaSaved: session.quotaSaved,
     recordedAt: session.recordedAt,
     recordedFrom: session.recordedFrom,
+    replayIdentity: session.replayIdentity,
+    requestedIdentity: session.requestedIdentity,
     sdkVersion: session.sdkVersion,
     status: session.status,
   };

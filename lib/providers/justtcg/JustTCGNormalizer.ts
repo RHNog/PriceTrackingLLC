@@ -11,10 +11,19 @@ export type JustTCGRawCardResponse = JustTCGApiResponse<Card[]>;
 
 export type JustTCGKnownCardContext = {
   cardName?: string;
+  collectorNumber?: string;
+  condition?: string;
+  finish?: string;
   game?: string;
   includePriceHistory?: boolean;
+  language?: string;
   limit?: number;
   priceHistoryDuration?: "7d" | "30d" | "90d" | "180d" | "1y";
+  printing?: string;
+  printingId?: string;
+  providerProductIdentifier?: string;
+  providerVariantIdentifier?: string;
+  variantId?: string;
 };
 
 export type JustTCGFieldMapping = {
@@ -151,10 +160,19 @@ export type JustTCGNormalizedResponse = {
 
 export const JUSTTCG_DEFAULT_CONTEXT: Required<JustTCGKnownCardContext> = {
   cardName: "Mox Opal",
+  collectorNumber: "unknown",
+  condition: "Near Mint",
+  finish: "Normal",
   game: "Magic: The Gathering",
   includePriceHistory: true,
+  language: "English",
   limit: 1,
   priceHistoryDuration: "30d",
+  printing: "unknown",
+  printingId: "unknown",
+  providerProductIdentifier: "unknown",
+  providerVariantIdentifier: "unknown",
+  variantId: "unknown",
 };
 
 export const JUSTTCG_FIELD_MAPPINGS: JustTCGFieldMapping[] = [

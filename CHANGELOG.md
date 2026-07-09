@@ -12,9 +12,11 @@ The format is inspired by "Keep a Changelog".
 - Sprint 33 Provider Replay & Fixture Infrastructure under `lib/providers/replay/`.
 - Replay modes `LIVE`, `REPLAY`, and `AUTO` controlled by `PROVIDER_MODE` in local development.
 - Provider fixture loading, validation, optional checksum verification, recording, replay sessions, and replay diagnostics.
+- Market-identity replay fixtures keyed by asset, printing, collector number, finish, condition, language, provider product identifier, and provider variant identifier.
 - JustTCG replay integration so development can replay certified fixtures without network calls or API quota usage while production remains live.
 - Seed JustTCG fixtures under `fixtures/providers/justtcg/magic/` for Mox Opal, Chrome Mox, Lightning Bolt, Black Lotus, Collected Company, Urza's Saga, and Sol Ring.
 - Developer-only replay diagnostics on `/dev/justtcg` for replay mode, fixture loaded, fixture age, recorded source, provider, SDK version, live request skipped, and quota saved.
+- Replay diagnostics for requested identity, replay identity, exact match, and missing identity component.
 - Evidence Coverage Map for market refresh scheduling by asset, printing, finish, condition, domain coverage, and domain freshness.
 - Scheduler diagnostics for coverage, freshness, missing evidence, providers queried, providers skipped, and merge result.
 - Transitional Evidence Projection Layer for projecting JustTCG Variant Valuation into Current Market Estimate while the Market Intelligence Engine is not yet implemented.

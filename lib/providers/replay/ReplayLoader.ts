@@ -5,7 +5,11 @@ import {
   REPLAY_FIXTURE_SCHEMA_VERSION,
   type ReplayFixture,
 } from "@/lib/providers/replay/ReplayMetadata";
-import type { ReplayFixtureLocation } from "@/lib/providers/replay/ReplayRegistry";
+import {
+  REPLAY_FIXTURE_ROOT,
+  replayIdentitiesMatch,
+  type ReplayFixtureLocation,
+} from "@/lib/providers/replay/ReplayRegistry";
 
 export type ReplayLoadResult<TRaw = unknown, TNormalized = unknown> = {
   fixture: ReplayFixture<TRaw, TNormalized>;
@@ -22,6 +26,48 @@ export class ReplayFixtureValidationError extends Error {
 
 export function replayFixtureExists(location: ReplayFixtureLocation) {
   return fs.existsSync(location.path);
+}
+
+export function explainReplayFixtureMiss(location: ReplayFixtureLocation) {
+  const identity = location.identity;
+  const root = path.join(REPLAY_FIXTURE_ROOT, location.provider, location.game);
+  const assetPath = path.join(root, identity.assetKey);
+  const printingPath = path.join(assetPath, identity.printingKey);
+  const finishPath = path.join(printingPath, identity.finishKey);
+  const conditionPath = path.join(finishPath, identity.conditionKey);
+
+  if (!fs.existsSync(assetPath)) {
+    return {
+      missingComponents: ["Asset Identity"],
+      reason: "Replay observation missing: asset identity not recorded.",
+    };
+  }
+
+  if (!fs.existsSync(printingPath)) {
+    return {
+      missingComponents: ["Printing"],
+      reason: "Replay observation missing: printing not recorded.",
+    };
+  }
+
+  if (!fs.existsSync(finishPath)) {
+    return {
+      missingComponents: ["Finish"],
+      reason: "Replay observation missing: finish not recorded.",
+    };
+  }
+
+  if (!fs.existsSync(conditionPath)) {
+    return {
+      missingComponents: ["Condition"],
+      reason: "Replay observation missing: condition not recorded.",
+    };
+  }
+
+  return {
+    missingComponents: ["Language"],
+    reason: "Replay observation missing: language not recorded for this identity.",
+  };
 }
 
 export function loadReplayFixture<TRaw, TNormalized>(
@@ -79,8 +125,16 @@ export function validateReplayFixture<TRaw, TNormalized>(
     throw new ReplayFixtureValidationError("Replay fixture game mismatch.");
   }
 
-  if (fixture.metadata.asset !== location.asset) {
+  if (fixture.metadata.asset !== location.identity.assetKey) {
     throw new ReplayFixtureValidationError("Replay fixture asset mismatch.");
+  }
+
+  if (!fixture.metadata.identity) {
+    throw new ReplayFixtureValidationError("Replay fixture identity is missing.");
+  }
+
+  if (!replayIdentitiesMatch(fixture.metadata.identity, location.identity)) {
+    throw new ReplayFixtureValidationError("Replay fixture identity mismatch.");
   }
 
   if (!fixture.metadata.sdkVersion) {

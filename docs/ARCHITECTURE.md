@@ -132,40 +132,55 @@ Core files:
 Fixtures live under:
 
 ```text
-fixtures/providers/{provider}/{game}/{asset}.json
+fixtures/providers/{provider}/{game}/{asset}/{printing}/{finish}/{condition}/{language}.json
 ```
 
 Example:
 
 ```text
-fixtures/providers/justtcg/magic/mox-opal.json
+fixtures/providers/justtcg/magic/mox-opal/6be9b1d5-9ab8-4adb-ba54-2c0117e842fa/normal/nm/english.json
 ```
 
-Each fixture stores:
+Each fixture stores one replay observation for one market identity:
 
 - `metadata.provider`
 - `metadata.schemaVersion`
 - `metadata.recordedAt`
 - `metadata.providerVersion`
 - `metadata.sdkVersion`
+- `metadata.identity.assetIdentity`
+- `metadata.identity.printing`
+- `metadata.identity.collectorNumber`
+- `metadata.identity.finish`
+- `metadata.identity.condition`
+- `metadata.identity.language`
+- `metadata.identity.providerProductIdentifier`
+- `metadata.identity.providerVariantIdentifier`
 - optional `metadata.checksum`
 - `raw` provider response
 - `normalized` provider observation snapshot
 
-The loader validates provider, game, asset, schema version, SDK version, timestamp, payload presence, and optional checksum before replay.
+The loader validates provider, game, asset, full identity, schema version, SDK version, timestamp, payload presence, and optional checksum before replay.
+
+### Fixture Identity Model
+
+Replay is keyed by the same market identity requested by the provider boundary: asset identity, printing, collector number, finish, condition, language, provider product identifier, and provider variant identifier. The replay layer does not infer the nearest card, printing, finish, condition, or language.
+
+The registry builds the fixture path from normalized identity keys and performs an exact file lookup. If no exact replay observation exists, `REPLAY` mode returns a replay observation missing failure with the first missing identity component, such as Printing, Finish, Condition, or Language.
 
 ### Replay Lifecycle
 
 1. Provider receives a normal request.
 2. `ReplayProvider.prepare()` resolves `LIVE`, `REPLAY`, or `AUTO`.
-3. In `REPLAY`, the fixture raw response is returned before SDK instantiation.
-4. In `AUTO`, the fixture is used if present; otherwise live provider execution proceeds.
-5. The existing provider normalizer converts raw observations into the same normalized response used by live mode.
-6. Diagnostics record fixture loaded, fixture age, recorded source, SDK version, skipped live request, and quota saved.
+3. The provider passes the requested market identity into the replay registry.
+4. In `REPLAY`, an exact fixture raw response is returned before SDK instantiation.
+5. In `AUTO`, an exact fixture is used if present; otherwise live provider execution proceeds.
+6. The existing provider normalizer converts raw observations into the same normalized response used by live mode.
+7. Diagnostics record requested identity, replay identity, exact match, missing components, fixture loaded, fixture age, recorded source, SDK version, skipped live request, and quota saved.
 
 ### Recording Workflow
 
-When `PROVIDER_RECORD_FIXTURES=true`, live provider responses can be recorded after normalization. The recorder writes raw response, normalized response, metadata, and checksum-ready fixture data to the provider fixture tree.
+When `PROVIDER_RECORD_FIXTURES=true`, live provider responses can be recorded after normalization. The recorder writes each provider variant as its own identity fixture with raw response, normalized response, metadata, and checksum-ready fixture data to the provider fixture tree.
 
 ### Provider Certification Workflow
 

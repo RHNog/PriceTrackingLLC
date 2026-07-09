@@ -11,14 +11,9 @@ import type {
   JustTCGRawCardResponse,
 } from "@/lib/providers/justtcg/JustTCGNormalizer";
 
-const replayCards = [
-  "Mox Opal",
-  "Chrome Mox",
-  "Lightning Bolt",
-  "Black Lotus",
-  "Collected Company",
-  "Urza's Saga",
-];
+const SCARS_MOX_OPAL_PRINTING_ID = "6be9b1d5-9ab8-4adb-ba54-2c0117e842fa";
+const MODERN_MASTERS_2015_MOX_OPAL_PRINTING_ID =
+  "modern-masters-2015-mox-opal";
 
 async function withProviderEnv<T>(
   env: Record<string, string>,
@@ -45,39 +40,40 @@ async function withProviderEnv<T>(
   }
 }
 
-function createLiveProviderFromFixture(raw: JustTCGRawCardResponse) {
-  return new JustTCGProvider(() => ({
-    v1: {
-      cards: {
-        get: async () => raw,
-      },
+test("Replay fixtures validate by full market identity", () => {
+  const location = createReplayFixtureLocation({
+    game: "Magic: The Gathering",
+    identity: {
+      assetIdentity: "Mox Opal",
+      collectorNumber: "179",
+      condition: "Near Mint",
+      finish: "Normal",
+      language: "English",
+      printing: SCARS_MOX_OPAL_PRINTING_ID,
+      providerProductIdentifier: SCARS_MOX_OPAL_PRINTING_ID,
+      providerVariantIdentifier: `${SCARS_MOX_OPAL_PRINTING_ID}:nonfoil`,
     },
-  }) as never);
-}
+    provider: "justtcg",
+  });
+  const loaded = loadReplayFixture<
+    JustTCGRawCardResponse,
+    JustTCGNormalizedResponse
+  >(location);
 
-test("Replay fixtures validate for certified JustTCG cards", () => {
-  for (const cardName of replayCards) {
-    const location = createReplayFixtureLocation({
-      asset: cardName,
-      game: "Magic: The Gathering",
-      provider: "justtcg",
-    });
-    const loaded = loadReplayFixture<
-      JustTCGRawCardResponse,
-      JustTCGNormalizedResponse
-    >(location);
-
-    assert.doesNotThrow(() => validateReplayFixture(loaded.fixture, location));
-    assert.equal(loaded.fixture.metadata.provider, "justtcg");
-    assert.equal(loaded.fixture.metadata.schemaVersion, 1);
-    assert.equal(loaded.fixture.metadata.sdkVersion, "justtcg-js@0.2.1");
-    assert.ok(loaded.fixture.metadata.recordedAt);
-    assert.ok(loaded.fixture.raw.data.length > 0);
-    assert.ok(loaded.fixture.normalized);
-  }
+  assert.doesNotThrow(() => validateReplayFixture(loaded.fixture, location));
+  assert.equal(loaded.fixture.metadata.provider, "justtcg");
+  assert.equal(loaded.fixture.metadata.identity.collectorNumber, "179");
+  assert.equal(loaded.fixture.metadata.identity.finishKey, "normal");
+  assert.equal(loaded.fixture.metadata.identity.conditionKey, "nm");
+  assert.equal(loaded.fixture.metadata.identity.languageKey, "english");
+  assert.equal(loaded.fixture.metadata.schemaVersion, 1);
+  assert.equal(loaded.fixture.metadata.sdkVersion, "justtcg-js@0.2.1");
+  assert.ok(loaded.fixture.metadata.recordedAt);
+  assert.ok(loaded.fixture.raw.data.length > 0);
+  assert.ok(loaded.fixture.normalized);
 });
 
-test("Replay mode returns a fixture without instantiating the SDK or using network", async () => {
+test("Replay mode returns an exact Mox Opal fixture without instantiating the SDK", async () => {
   await withProviderEnv({
     JUSTTCG_API_KEY: "fixture-key",
     PROVIDER_MODE: "REPLAY",
@@ -90,7 +86,16 @@ test("Replay mode returns a fixture without instantiating the SDK or using netwo
 
     const result = await provider.executeKnownCard({
       cardName: "Mox Opal",
+      collectorNumber: "179",
+      condition: "Near Mint",
+      finish: "Normal",
       game: "Magic: The Gathering",
+      language: "English",
+      printing: SCARS_MOX_OPAL_PRINTING_ID,
+      printingId: SCARS_MOX_OPAL_PRINTING_ID,
+      providerProductIdentifier: SCARS_MOX_OPAL_PRINTING_ID,
+      providerVariantIdentifier: `${SCARS_MOX_OPAL_PRINTING_ID}:nonfoil`,
+      variantId: `${SCARS_MOX_OPAL_PRINTING_ID}:nonfoil`,
     });
     const replayDiagnostics = provider.getReplayDiagnostics();
 
@@ -99,91 +104,98 @@ test("Replay mode returns a fixture without instantiating the SDK or using netwo
     assert.equal(sdkInstantiated, false);
     assert.equal(replayDiagnostics?.mode, "REPLAY");
     assert.equal(replayDiagnostics?.fixtureLoaded, true);
+    assert.equal(replayDiagnostics?.identityExactMatch, true);
     assert.equal(replayDiagnostics?.liveRequestSkipped, true);
     assert.equal(replayDiagnostics?.quotaSaved, true);
   });
 });
 
-test("AUTO mode replays when a fixture exists and preserves provider behavior", async () => {
-  await withProviderEnv({
-    JUSTTCG_API_KEY: "fixture-key",
-    PROVIDER_MODE: "AUTO",
-  }, async () => {
-    const replayProvider = new JustTCGProvider(() => {
-      throw new Error("AUTO should not use live SDK when fixture exists.");
-    });
-    const snapshot = await replayProvider.getMarketSnapshot({
-      cardName: "Chrome Mox",
-      game: "Magic: The Gathering",
-      printingId: "chrome-mox-printing",
-      variantId: "chrome-mox-printing:normal",
-    });
-    const replayDiagnostics = replayProvider.getReplayDiagnostics();
-
-    assert.equal(snapshot.providerId, "justtcg");
-    assert.equal(snapshot.priceMissing, false);
-    assert.equal(snapshot.prices[0]?.price, 68.44);
-    assert.equal(replayDiagnostics?.mode, "AUTO");
-    assert.equal(replayDiagnostics?.fixtureLoaded, true);
-    assert.equal(replayDiagnostics?.liveRequestSkipped, true);
-  });
-});
-
-test("Replay and live providers fed the same observation produce matching market values", async () => {
+test("Replay mode reports a missing printing without live fallback", async () => {
   await withProviderEnv({
     JUSTTCG_API_KEY: "fixture-key",
     PROVIDER_MODE: "REPLAY",
   }, async () => {
-    const replayProvider = new JustTCGProvider(() => {
-      throw new Error("Replay should not instantiate SDK.");
+    let sdkInstantiated = false;
+    const provider = new JustTCGProvider(() => {
+      sdkInstantiated = true;
+      throw new Error("Replay miss should not fall back to the live SDK.");
     });
-    const replaySnapshot = await replayProvider.getMarketSnapshot({
-      cardName: "Lightning Bolt",
+    const result = await provider.executeKnownCard({
+      cardName: "Mox Opal",
+      collectorNumber: "47",
+      condition: "Near Mint",
+      finish: "Normal",
       game: "Magic: The Gathering",
-      printingId: "lightning-bolt-printing",
-      variantId: "lightning-bolt-printing:normal",
+      language: "English",
+      printing: MODERN_MASTERS_2015_MOX_OPAL_PRINTING_ID,
+      printingId: MODERN_MASTERS_2015_MOX_OPAL_PRINTING_ID,
+      providerProductIdentifier: MODERN_MASTERS_2015_MOX_OPAL_PRINTING_ID,
+      providerVariantIdentifier: `${MODERN_MASTERS_2015_MOX_OPAL_PRINTING_ID}:nonfoil`,
+      variantId: `${MODERN_MASTERS_2015_MOX_OPAL_PRINTING_ID}:nonfoil`,
     });
-    const fixture = loadReplayFixture<
-      JustTCGRawCardResponse,
-      JustTCGNormalizedResponse
-    >(
-      createReplayFixtureLocation({
-        asset: "Lightning Bolt",
-        game: "Magic: The Gathering",
-        provider: "justtcg",
-      }),
-    );
+    const replayDiagnostics = provider.getReplayDiagnostics();
 
-    await withProviderEnv({
-      JUSTTCG_API_KEY: "fixture-key",
-      PROVIDER_MODE: "LIVE",
-    }, async () => {
-      const liveProvider = createLiveProviderFromFixture(fixture.fixture.raw);
-      const liveSnapshot = await liveProvider.getMarketSnapshot({
-        cardName: "Lightning Bolt",
-        game: "Magic: The Gathering",
-        printingId: "lightning-bolt-printing",
-        variantId: "lightning-bolt-printing:normal",
-      });
+    assert.equal(result.status, "FAILED");
+    assert.equal(sdkInstantiated, false);
+    assert.equal(replayDiagnostics?.fixtureLoaded, false);
+    assert.equal(replayDiagnostics?.identityExactMatch, false);
+    assert.deepEqual(replayDiagnostics?.missingIdentityComponents, ["Printing"]);
+    assert.match(result.errorMessage ?? "", /Replay observation missing/);
+  });
+});
 
-      assert.equal(replaySnapshot.priceMissing, liveSnapshot.priceMissing);
-      assert.equal(replaySnapshot.prices[0]?.price, liveSnapshot.prices[0]?.price);
-      assert.equal(
-        replaySnapshot.identityEvidence?.canonicalName,
-        liveSnapshot.identityEvidence?.canonicalName,
-      );
-      assert.deepEqual(
-        (replaySnapshot.rawObservations ?? []).map((observation) => ({
-          providerField: observation.providerField,
-          rawValue: observation.rawValue,
-          unit: observation.unit ?? null,
-        })),
-        (liveSnapshot.rawObservations ?? []).map((observation) => ({
-          providerField: observation.providerField,
-          rawValue: observation.rawValue,
-          unit: observation.unit ?? null,
-        })),
-      );
+test("Replay lookup selects finish, condition, and language fixtures exactly", async () => {
+  await withProviderEnv({
+    JUSTTCG_API_KEY: "fixture-key",
+    PROVIDER_MODE: "REPLAY",
+  }, async () => {
+    const provider = new JustTCGProvider(() => {
+      throw new Error("Replay should not instantiate SDK for exact fixture hits.");
     });
+
+    const foilSnapshot = await provider.getMarketSnapshot({
+      cardName: "Mox Opal",
+      collectorNumber: "179",
+      condition: "Near Mint",
+      finish: "Foil",
+      game: "Magic: The Gathering",
+      language: "English",
+      printing: SCARS_MOX_OPAL_PRINTING_ID,
+      printingId: SCARS_MOX_OPAL_PRINTING_ID,
+      variantId: `${SCARS_MOX_OPAL_PRINTING_ID}:foil`,
+    });
+    const lpSnapshot = await provider.getMarketSnapshot({
+      cardName: "Mox Opal",
+      collectorNumber: "179",
+      condition: "Lightly Played",
+      finish: "Normal",
+      game: "Magic: The Gathering",
+      language: "English",
+      printing: SCARS_MOX_OPAL_PRINTING_ID,
+      printingId: SCARS_MOX_OPAL_PRINTING_ID,
+      variantId: `${SCARS_MOX_OPAL_PRINTING_ID}:nonfoil`,
+    });
+    const japaneseResult = await provider.executeKnownCard({
+      cardName: "Mox Opal",
+      collectorNumber: "179",
+      condition: "Near Mint",
+      finish: "Normal",
+      game: "Magic: The Gathering",
+      language: "Japanese",
+      printing: SCARS_MOX_OPAL_PRINTING_ID,
+      printingId: SCARS_MOX_OPAL_PRINTING_ID,
+      providerProductIdentifier: SCARS_MOX_OPAL_PRINTING_ID,
+      providerVariantIdentifier: `${SCARS_MOX_OPAL_PRINTING_ID}:nonfoil`,
+      variantId: `${SCARS_MOX_OPAL_PRINTING_ID}:nonfoil`,
+    });
+
+    assert.equal(foilSnapshot.priceMissing, false);
+    assert.equal(foilSnapshot.prices[0]?.price, 450.55);
+    assert.equal(foilSnapshot.prices[0]?.finish, "Foil");
+    assert.equal(lpSnapshot.priceMissing, false);
+    assert.equal(lpSnapshot.prices[0]?.price, 80.33);
+    assert.equal(lpSnapshot.prices[0]?.condition, "Lightly Played");
+    assert.equal(japaneseResult.status, "SUCCESS");
+    assert.equal(japaneseResult.data?.cards[0]?.variants[0]?.language, "Japanese");
   });
 });

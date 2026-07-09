@@ -1,10 +1,12 @@
 import {
+  explainReplayFixtureMiss,
   loadReplayFixture,
   replayFixtureExists,
   type ReplayLoadResult,
 } from "@/lib/providers/replay/ReplayLoader";
 import {
   createReplayFixtureLocation,
+  type ReplayIdentityInput,
   type ReplayFixtureLocation,
 } from "@/lib/providers/replay/ReplayRegistry";
 import {
@@ -28,14 +30,14 @@ export type ReplayDecision<TRaw, TNormalized> = {
 
 export class ReplayProvider<TRaw, TNormalized> {
   prepare(input: {
-    asset: string;
     game: string;
+    identity: ReplayIdentityInput;
     provider: string;
   }): ReplayDecision<TRaw, TNormalized> {
     const mode = resolveReplayMode();
     const location = createReplayFixtureLocation(input);
     const session = createReplaySession({
-      asset: location.asset,
+      identity: location.identity,
       mode,
       provider: location.provider,
     });
@@ -47,10 +49,13 @@ export class ReplayProvider<TRaw, TNormalized> {
       session.fixtureAgeMs = fixture.fixtureAgeMs;
       session.fixtureLoaded = true;
       session.fixturePath = fixture.path;
+      session.exactMatch = true;
       session.liveRequestSkipped = true;
+      session.matchReason = "Exact replay identity match.";
       session.quotaSaved = true;
       session.recordedAt = fixture.fixture.metadata.recordedAt;
       session.recordedFrom = fixture.fixture.metadata.recordedFrom;
+      session.replayIdentity = fixture.fixture.metadata.identity;
       session.sdkVersion = fixture.fixture.metadata.sdkVersion;
       session.status = "REPLAY_HIT";
 
@@ -65,6 +70,10 @@ export class ReplayProvider<TRaw, TNormalized> {
     }
 
     if (mode === "REPLAY") {
+      const miss = explainReplayFixtureMiss(location);
+      session.fixturePath = location.path;
+      session.matchReason = miss.reason;
+      session.missingComponents = miss.missingComponents;
       session.status = "REPLAY_MISS";
 
       return {
@@ -76,6 +85,11 @@ export class ReplayProvider<TRaw, TNormalized> {
       };
     }
 
+    if (!hasFixture) {
+      const miss = explainReplayFixtureMiss(location);
+      session.matchReason = miss.reason;
+      session.missingComponents = miss.missingComponents;
+    }
     session.fixturePath = location.path;
     session.status = hasFixture ? "LIVE_REQUEST" : "REPLAY_MISS";
 
