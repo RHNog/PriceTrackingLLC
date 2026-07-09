@@ -1,6 +1,15 @@
 # Roadmap
 
-## Current Sprint: Sprint 33
+## Current Sprint: Sprint 34
+
+Market Intelligence now interprets provider observations into explainable market profiles.
+
+- Connected: Market Intelligence Engine, reasoning model, signal registry, market health, buying opportunity, confidence, trend interpretation, and volatility interpretation.
+- Verified: replay-only market intelligence generation for Mox Opal, Chrome Mox, Lightning Bolt, Black Lotus, Collected Company, and Urza's Saga.
+- Deferred: provider connections, repository redesign, ontology redesign, business-profile influence, negotiation behavior, BUY/PASS decisions, and UI redesign.
+- Compatibility: the engine consumes repository observations and replay-normalized observations; providers remain acquisition-only and business engines remain downstream.
+
+## Recently Completed: Sprint 33
 
 Provider Replay lets development replay certified provider observations without using live APIs.
 

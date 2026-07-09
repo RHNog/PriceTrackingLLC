@@ -2,6 +2,18 @@
 
 This file records logical product milestones. Sprint numbers may not perfectly match commit history.
 
+## Sprint 34
+
+Introduced the first Market Intelligence Engine.
+
+- Added `lib/market/intelligence/` for market reasoning, health, opportunity, confidence, trend, volatility, and signal interpretation.
+- Consumes repository observations and normalized replay observations without provider calls.
+- Generates explainable market signals such as Low Volatility, Healthy Uptrend, Cooling Demand, Near Historical Low, Near Historical High, Market Consolidation, Provider Confidence High, and Evidence Coverage Moderate.
+- Produces Market Health, Liquidity, Price Stability, Volatility, Momentum, Buying Opportunity, Confidence, and Reasoning.
+- Uses Evidence Sufficiency for confidence, where confidence reflects coverage, freshness, provider quality, and observation density rather than market attractiveness.
+- Added replay-only test coverage for Mox Opal, Chrome Mox, Lightning Bolt, Black Lotus, Collected Company, and Urza's Saga.
+- Preserved providers, repository design, ontology design, business profiles, strategy, negotiation, decision, and UI presentation.
+
 ## Sprint 33
 
 Introduced Provider Replay & Fixture Infrastructure.

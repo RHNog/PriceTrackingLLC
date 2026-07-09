@@ -1,5 +1,89 @@
 # Architecture
 
+## Sprint 34: Market Intelligence Engine
+
+The Market Intelligence Engine interprets market observations that already exist in repository or replay-normalized provider data.
+
+```text
+Provider / Replay Observation
+  -> Normalized observations
+  -> Market Repository evidence
+  -> Market Intelligence Engine
+  -> Market Intelligence Profile
+```
+
+The engine does not call providers, does not negotiate, and does not decide BUY, PASS, or NEGOTIATE. It consumes observations and produces intelligence.
+
+Core files:
+
+- `lib/market/intelligence/MarketIntelligenceEngine.ts`
+- `lib/market/intelligence/MarketReasoning.ts`
+- `lib/market/intelligence/MarketSignal.ts`
+- `lib/market/intelligence/MarketSignalRegistry.ts`
+- `lib/market/intelligence/MarketHealth.ts`
+- `lib/market/intelligence/MarketOpportunity.ts`
+- `lib/market/intelligence/MarketConfidence.ts`
+- `lib/market/intelligence/MarketTrendInterpreter.ts`
+- `lib/market/intelligence/MarketVolatilityInterpreter.ts`
+
+### Reasoning Model
+
+Market reasoning combines multiple observations:
+
+- Current variant valuation
+- Historical price range
+- Price history
+- Provider movement statistics
+- Trend slopes
+- Volatility statistics
+- Evidence freshness
+- Evidence confidence
+- Observation density
+
+Market Health is a multi-factor interpretation with ratings:
+
+- Excellent
+- Healthy
+- Neutral
+- Weak
+- Distressed
+
+Buying Opportunity is also market-only:
+
+- Very Strong
+- Strong
+- Moderate
+- Weak
+- Very Weak
+- Unknown
+
+It considers trend, volatility, historical range, current valuation, and evidence confidence. It does not use business profile, target margin, negotiation ladder, or purchase decision logic.
+
+Confidence uses Evidence Sufficiency. It reflects coverage, freshness, provider quality, and observation density, not whether the market is attractive.
+
+### Signal Registry
+
+The signal registry contains explainable market signals:
+
+- Stable Price History
+- Healthy Uptrend
+- Recovering Market
+- Cooling Demand
+- High Price Volatility
+- Low Volatility
+- Strong Momentum
+- Weak Momentum
+- Price Compression
+- Price Expansion
+- Near Historical Low
+- Near Historical High
+- Historical Recovery
+- Market Consolidation
+- Provider Confidence High
+- Evidence Coverage Moderate
+
+Signals are inputs to reasoning. They are not business decisions.
+
 ## Sprint 33: Provider Replay & Fixture Infrastructure
 
 Provider Replay separates provider acquisition from development playback.
