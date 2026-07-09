@@ -1,14 +1,22 @@
 # Project Atlas
 
-Atlas is the permanent project knowledge base for PriceTrackingLLC.
+Atlas is the permanent project knowledge base for PriceTrackingLLC and Project Phronesis (Engineering Initiative).
+
+Project Phronesis is the internal engineering identity for the initiative building an evidence-driven decision intelligence platform for collectible markets. It is not necessarily the future customer-facing product name.
 
 ## Documentation Index
 
 Planning documents are separated by responsibility:
 
+- Project Phronesis: `docs/PROJECT_PHRONESIS.md`
+- Brand philosophy: `docs/BRAND_PHILOSOPHY.md`
 - Engineering roadmap: `docs/ROADMAP.md`
 - Product roadmap: `docs/PRODUCT_ROADMAP.md`
 - Business strategy: `docs/BUSINESS_STRATEGY.md`
+- Partnership strategy: `docs/business/PARTNERSHIP_STRATEGY.md`
+- IP strategy: `docs/business/IP_STRATEGY.md`
+- Partner disclosure policy: `docs/business/PARTNER_DISCLOSURE_POLICY.md`
+- TCGplayer partnership proposal: `docs/business/TCGPLAYER_PARTNERSHIP_PROPOSAL.md`
 - Idea ledger: `docs/IDEA_LEDGER.md`
 - Monetization possibilities: `docs/MONETIZATION.md`
 - Platform v1.0 release freeze: `docs/releases/Platform-v1.0.md`
@@ -20,6 +28,30 @@ Planning documents are separated by responsibility:
 Rule:
 
 Engineering, product, and business planning should evolve independently. Product ideas should not be promoted into engineering work until they are scoped into an engineering roadmap item or work order.
+
+## Project Phronesis Registration
+
+Registered identity:
+
+- Name: Project Phronesis
+- Type: Engineering Identity
+- Role: internal engineering initiative
+- Philosophy: practical judgment, evidence before conclusions, explainable intelligence, observations separated from reasoning, and transparent business decisions
+- Brand rule: not the selected commercial product name
+- Partnership language: the internal engineering initiative responsible for building an evidence-driven decision intelligence platform for collectible markets
+
+## Partnership Documentation Registration
+
+Registered business documentation:
+
+- Project Phronesis Partnership Strategy: `docs/business/PARTNERSHIP_STRATEGY.md`
+- IP Strategy: `docs/business/IP_STRATEGY.md`
+- Disclosure Policy: `docs/business/PARTNER_DISCLOSURE_POLICY.md`
+- TCGplayer Partnership Proposal: `docs/business/TCGPLAYER_PARTNERSHIP_PROPOSAL.md`
+
+Partnership rule:
+
+Business value may be transparent while proprietary implementation details remain confidential. External materials should position Project Phronesis as the internal engineering initiative, not the commercial brand.
 
 ## Platform v1.0 Planning Split
 

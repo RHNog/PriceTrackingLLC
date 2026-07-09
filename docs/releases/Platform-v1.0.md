@@ -12,10 +12,20 @@ Platform v1.0 freezes the current PriceTrackingLLC platform as a recoverable bas
 
 No functionality, architecture, provider behavior, UI behavior, replay behavior, repository behavior, business logic, or engine logic is changed by this release document.
 
+## Engineering Identity
+
+Platform v1.0 is part of Project Phronesis (Engineering Initiative), the internal engineering initiative responsible for building an evidence-driven decision intelligence platform for collectible markets.
+
+Project Phronesis expresses the platform philosophy of practical judgment: evidence before conclusions, observations separated from reasoning, explainable intelligence, and transparent business decisions.
+
+This is not a commercial rebrand. The legal entity remains PriceTrackingLLC, and the future customer-facing product name remains intentionally undecided.
+
 ## Planning Framework
 
 Platform v1.0 separates future planning into independent lanes:
 
+- Engineering identity: `docs/PROJECT_PHRONESIS.md`
+- Brand philosophy: `docs/BRAND_PHILOSOPHY.md`
 - Engineering roadmap: `docs/ROADMAP.md`
 - Product roadmap: `docs/PRODUCT_ROADMAP.md`
 - Business strategy: `docs/BUSINESS_STRATEGY.md`
@@ -479,6 +489,7 @@ Release entry:
 - Type: recoverable platform release
 - Status: frozen documentation snapshot
 - Date: 2026-07-09
+- Engineering identity: Project Phronesis
 - Scope: architecture, engines, workflows, provider infrastructure, replay, ontology, evidence, assessment, market intelligence, eligibility, Atlas, limitations, and recovery
 - Non-scope: functionality changes, architecture changes, refactoring, feature implementation, provider behavior changes, replay behavior changes, repository changes, UI changes, business logic changes
 

@@ -2,6 +2,8 @@
 
 This is the engineering roadmap. Product-facing ideas now live in `docs/PRODUCT_ROADMAP.md`. Business strategy lives in `docs/BUSINESS_STRATEGY.md`. Monetization options live in `docs/MONETIZATION.md`. Unscoped ideas live in `docs/IDEA_LEDGER.md`.
 
+Project Phronesis (Engineering Initiative) is the engineering identity for this roadmap. It does not rename the repository, package, app, or future commercial product.
+
 ## Current Sprint: Sprint 34
 
 Market Intelligence now interprets provider observations into explainable market profiles.

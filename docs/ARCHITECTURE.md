@@ -1,5 +1,7 @@
 # Architecture
 
+Project Phronesis (Engineering Initiative) is the internal engineering identity for this architecture. The commercial product name remains undecided. The architecture reflects practical judgment: observations are separated from reasoning, evidence precedes conclusions, and business decisions remain explainable.
+
 ## Sprint 34: Market Intelligence Engine
 
 The Market Intelligence Engine interprets market observations that already exist in repository or replay-normalized provider data.
