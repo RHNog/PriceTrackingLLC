@@ -1,7 +1,5 @@
 import { notFound } from "next/navigation";
 import AppShell from "@/components/ui/AppShell";
-import { marketEvidenceLayer } from "@/lib/market/MarketEvidenceLayer";
-import { marketTruthEngine } from "@/lib/market/MarketTruthEngine";
 import { JustTCGProvider } from "@/lib/providers/justtcg/JustTCGProvider";
 import type { JustTCGKnownCardContext } from "@/lib/providers/justtcg/JustTCGNormalizer";
 
@@ -46,58 +44,6 @@ export default async function JustTCGDeveloperPage({
   };
   const provider = new JustTCGProvider();
   const inspection = await provider.inspectKnownCardForDevelopment(context);
-  const normalizedCard = inspection.normalized?.cards[0];
-  const normalizedVariant = normalizedCard?.variants[0];
-  const marketSnapshot =
-    normalizedCard && normalizedVariant
-      ? await provider.getMarketSnapshot({
-          cardName: normalizedCard.name,
-          game: normalizedCard.game,
-          printingId: normalizedCard.cardId,
-          variantId: `${normalizedCard.cardId}:${normalizedVariant.printing}`,
-        })
-      : null;
-  const truthReport =
-    normalizedCard && normalizedVariant && marketSnapshot
-      ? marketTruthEngine.evaluate({
-          context: {
-            cardIdentity: normalizedCard.name,
-            collectorNumber: normalizedCard.number ?? undefined,
-            condition: normalizedVariant.condition,
-            finish: normalizedVariant.printing,
-            game: normalizedCard.game,
-            language: normalizedVariant.language ?? undefined,
-            printingId: normalizedCard.cardId,
-            variantId: `${normalizedCard.cardId}:${normalizedVariant.printing}`,
-          },
-          snapshot: marketSnapshot,
-        }).report
-      : {
-          valid: false,
-          warnings: ["No normalized card variant was available to validate."],
-        };
-  const truthEvaluation =
-    normalizedCard && normalizedVariant && marketSnapshot
-      ? marketTruthEngine.evaluate({
-          context: {
-            cardIdentity: normalizedCard.name,
-            collectorNumber: normalizedCard.number ?? undefined,
-            condition: normalizedVariant.condition,
-            finish: normalizedVariant.printing,
-            game: normalizedCard.game,
-            language: normalizedVariant.language ?? undefined,
-            printingId: normalizedCard.cardId,
-            variantId: `${normalizedCard.cardId}:${normalizedVariant.printing}`,
-          },
-          snapshot: marketSnapshot,
-        })
-      : null;
-  const evidenceLayer = truthEvaluation
-    ? marketEvidenceLayer.apply({
-        existingEvidence: [],
-        incomingEvidence: truthEvaluation.evidence,
-      })
-    : null;
 
   return (
     <AppShell>
@@ -143,8 +89,6 @@ export default async function JustTCGDeveloperPage({
           <JsonPanel title="Normalized Response" value={inspection.normalized} />
         </div>
 
-        <JsonPanel title="Market Truth Report" value={truthReport} />
-        <JsonPanel title="Market Evidence Layer" value={evidenceLayer} />
         <JsonPanel title="Provider Diagnostics" value={inspection.diagnostics} />
       </div>
     </AppShell>

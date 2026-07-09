@@ -127,39 +127,39 @@ function applyFieldValues(
 
   fields.forEach((field) => {
     if (field === "marketPrice" && "marketPrice" in values) {
-      next.marketPrice = values.marketPrice ?? next.marketPrice;
+      next.marketPrice = values.marketPrice ?? null;
     }
 
     if (field === "lowestListing" && "lowestListing" in values) {
-      next.lowestListing = values.lowestListing ?? next.lowestListing;
+      next.lowestListing = values.lowestListing ?? null;
     }
 
     if (field === "listingCount" && "listingCount" in values) {
-      next.listingCount = values.listingCount ?? next.listingCount;
+      next.listingCount = values.listingCount ?? null;
     }
 
     if (field === "recentSales" && "recentSales" in values) {
-      next.recentSales = values.recentSales ?? next.recentSales;
+      next.recentSales = values.recentSales ?? null;
     }
 
     if (field === "spread" && "spread" in values) {
-      next.spread = values.spread ?? next.spread;
+      next.spread = values.spread ?? null;
     }
 
     if (field === "liquidity" && "liquidity" in values) {
-      next.liquidity = values.liquidity ?? next.liquidity;
+      next.liquidity = values.liquidity ?? null;
     }
 
     if (field === "salesVelocity" && "salesVelocity" in values) {
-      next.salesVelocity = values.salesVelocity ?? next.salesVelocity;
+      next.salesVelocity = values.salesVelocity ?? null;
     }
 
     if (field === "volatility" && "volatility" in values) {
-      next.volatility = values.volatility ?? next.volatility;
+      next.volatility = values.volatility ?? null;
     }
 
     if (field === "marketConfidence" && "marketConfidence" in values) {
-      next.marketConfidence = values.marketConfidence ?? next.marketConfidence;
+      next.marketConfidence = values.marketConfidence ?? null;
     }
   });
 
@@ -245,7 +245,7 @@ export class MarketIntelligenceRepository {
       },
     };
     const layeredEvidence = marketEvidenceLayer.apply({
-      existingEvidence: base.evidence,
+      existingEvidence: base.evidence ?? [],
       incomingEvidence: input.refresh.evidence,
       fields: marketSnapshotFields,
       now: new Date(now),

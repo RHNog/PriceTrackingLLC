@@ -1,5 +1,6 @@
 export type PriceType =
   | "market_estimate"
+  | "variant_valuation"
   | "lowest_known"
   | "buylist"
   | "recent_sale"

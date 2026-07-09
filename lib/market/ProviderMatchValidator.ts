@@ -36,6 +36,18 @@ function optionalMatch(expected: string | undefined, actual: string | null | und
   return normalize(expected) === normalize(actual);
 }
 
+function anyPriceMatches(
+  prices: MarketSnapshot["prices"],
+  expected: string | undefined,
+  selector: (price: MarketSnapshot["prices"][number]) => string | undefined,
+) {
+  if (!expected) {
+    return true;
+  }
+
+  return prices.some((price) => optionalMatch(expected, selector(price)));
+}
+
 export function validateProviderMatch(input: {
   context: MarketSnapshotRequestContext;
   snapshot: MarketSnapshot;
@@ -50,10 +62,14 @@ export function validateProviderMatch(input: {
   const matchedFinish = finishMatches(
     input.context.finish,
     identity?.finish ?? firstPrice?.finish,
-  );
+  ) || anyPriceMatches(input.snapshot.prices, input.context.finish, (price) => price.finish);
   const matchedCondition = optionalMatch(
     input.context.condition,
     identity?.condition,
+  ) || anyPriceMatches(
+    input.snapshot.prices,
+    input.context.condition,
+    (price) => price.condition,
   );
   const matchedGame = optionalMatch(input.context.game, identity?.game);
   const matchedLanguage = optionalMatch(

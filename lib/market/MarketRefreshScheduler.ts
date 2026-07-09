@@ -66,10 +66,13 @@ function mapProviderSnapshotToValues(
       evidence?.marketConfidence ??
       snapshot.prices.find((price) => price.priceType === "market_estimate")
         ?.confidence ??
+      snapshot.prices.find((price) => price.priceType === "variant_valuation")
+        ?.confidence ??
       null,
     marketPrice:
       evidence?.marketPrice ??
       snapshot.prices.find((price) => price.priceType === "market_estimate")?.price ??
+      snapshot.prices.find((price) => price.priceType === "variant_valuation")?.price ??
       null,
     providerId: snapshot.providerId,
     recentSales: evidence?.recentSalesCount ?? null,

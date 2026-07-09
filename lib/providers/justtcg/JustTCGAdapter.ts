@@ -32,11 +32,12 @@ export const justTCGMetadata: ProviderMetadata = {
     "Provider Usage",
   ],
   evidenceTypes: [
-    "Current Market Price",
-    "Variant Pricing",
-    "Price History",
-    "Market Movement",
-    "Provider Usage",
+    "Raw Card Observations",
+    "Raw Variant Observations",
+    "Variant Valuation Observations",
+    "Price History Observations",
+    "Provider Statistics Observations",
+    "Provider Metadata Observations",
   ],
   version: "justtcg-js@0.2.1",
 };
@@ -110,7 +111,7 @@ export class JustTCGAdapter
       explanation: hasCards
         ? `${evidenceType} is mapped from normalized JustTCG SDK data.`
         : `${evidenceType} requires a successful JustTCG SDK response.`,
-      mappedIndicatorIds: ["liquidity", "market-confidence", "volatility"],
+      mappedIndicatorIds: [],
       source: this.metadata.name,
       status,
     }));

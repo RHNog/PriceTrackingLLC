@@ -141,7 +141,14 @@ function getDomainFreshness(
 
 function evidenceHasHistoricalPricing(evidence: MarketProviderEvidence) {
   return evidence.rawObservations?.some((observation) =>
-    observation.providerField.startsWith("variant.priceHistory"),
+    observation.providerField.startsWith("variant.priceHistory") ||
+    observation.providerField.startsWith("priceHistory"),
+  ) ?? false;
+}
+
+function evidenceHasProviderMetadata(evidence: MarketProviderEvidence) {
+  return evidence.rawObservations?.some((observation) =>
+    observation.providerField.startsWith("provider."),
   ) ?? false;
 }
 
@@ -155,6 +162,10 @@ function evidenceMatchesDomain(
 
   if (domainId === "price-trend") {
     return evidence.field === "volatility" || evidenceHasHistoricalPricing(evidence);
+  }
+
+  if (domainId === "provider-metadata") {
+    return evidenceHasProviderMetadata(evidence) || domainFields[domainId].includes(evidence.field);
   }
 
   return domainFields[domainId].includes(evidence.field);

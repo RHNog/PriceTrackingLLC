@@ -6,6 +6,16 @@ import {
 import type { MarketIntelligenceRepositorySnapshot } from "@/lib/market/MarketSnapshot";
 import type { MarketPrice } from "@/types/marketPrice";
 import type { MarketSnapshot } from "@/types/marketSnapshot";
+import type { MarketSnapshotField } from "@/lib/market/MarketSnapshotMetadata";
+
+function getSelectedValue(
+  snapshot: MarketIntelligenceRepositorySnapshot,
+  field: MarketSnapshotField,
+) {
+  const selection = snapshot.evidenceSelections?.[field];
+
+  return selection?.provenance ? selection.value : null;
+}
 
 function createPrices(snapshot: MarketIntelligenceRepositorySnapshot): MarketPrice[] {
   const base = {
@@ -18,12 +28,15 @@ function createPrices(snapshot: MarketIntelligenceRepositorySnapshot): MarketPri
   };
   const prices: MarketPrice[] = [];
 
-  if (snapshot.marketPrice !== null) {
+  const selectedMarketPrice = getSelectedValue(snapshot, "marketPrice");
+  const selectedLowestListing = getSelectedValue(snapshot, "lowestListing");
+
+  if (selectedMarketPrice !== null) {
     prices.push({
       ...base,
       id: `repository:${snapshot.identity.printingId}:${snapshot.identity.variantId}:market`,
       confidence: snapshot.marketConfidence ?? 60,
-      price: snapshot.marketPrice,
+      price: selectedMarketPrice,
       priceType: "market_estimate",
       condition: snapshot.evidenceSelections?.marketPrice?.provenance?.node.condition,
       conditionSpecific:
@@ -38,12 +51,12 @@ function createPrices(snapshot: MarketIntelligenceRepositorySnapshot): MarketPri
     });
   }
 
-  if (snapshot.lowestListing !== null) {
+  if (selectedLowestListing !== null) {
     prices.push({
       ...base,
       id: `repository:${snapshot.identity.printingId}:${snapshot.identity.variantId}:lowest`,
       confidence: snapshot.marketConfidence ?? 60,
-      price: snapshot.lowestListing,
+      price: selectedLowestListing,
       priceType: "lowest_known",
       condition:
         snapshot.evidenceSelections?.lowestListing?.provenance?.node.condition,
@@ -67,6 +80,15 @@ function toApiMarketSnapshot(
   diagnostics?: MarketRepositoryReadResult["diagnostics"],
 ): MarketSnapshot {
   const prices = createPrices(snapshot);
+  const selectedListingCount = getSelectedValue(snapshot, "listingCount");
+  const selectedLiquidity = getSelectedValue(snapshot, "liquidity");
+  const selectedLowestListing = getSelectedValue(snapshot, "lowestListing");
+  const selectedMarketConfidence = getSelectedValue(snapshot, "marketConfidence");
+  const selectedMarketPrice = getSelectedValue(snapshot, "marketPrice");
+  const selectedRecentSales = getSelectedValue(snapshot, "recentSales");
+  const selectedSalesVelocity = getSelectedValue(snapshot, "salesVelocity");
+  const selectedSpread = getSelectedValue(snapshot, "spread");
+  const selectedVolatility = getSelectedValue(snapshot, "volatility");
   const selectedEvidence =
     snapshot.evidenceSelections?.marketPrice ??
     snapshot.evidenceSelections?.lowestListing ??
@@ -82,29 +104,29 @@ function toApiMarketSnapshot(
     sourceLabel: "Market Intelligence Repository",
     marketIntelligence: {
       apiStatus: "LIVE",
-      demandMomentum: snapshot.salesVelocity ?? 0,
+      demandMomentum: selectedSalesVelocity ?? 0,
       directLow: null,
-      evidenceCoverage: snapshot.marketConfidence ?? 0,
+      evidenceCoverage: selectedMarketConfidence ?? 0,
       healthStatus: "HEALTHY",
-      inventoryHealth: snapshot.listingCount ?? 0,
+      inventoryHealth: selectedListingCount ?? 0,
       lastSynchronizedAt: snapshot.metadata.lastRefresh,
       latencyMs: null,
-      liquidity: snapshot.liquidity ?? 0,
-      listingCount: snapshot.listingCount ?? 0,
-      lowestListing: snapshot.lowestListing,
-      marketConfidence: snapshot.marketConfidence ?? 0,
-      marketPrice: snapshot.marketPrice,
-      marketStability: Math.max(0, 100 - (snapshot.volatility ?? 0)),
+      liquidity: selectedLiquidity ?? 0,
+      listingCount: selectedListingCount ?? 0,
+      lowestListing: selectedLowestListing,
+      marketConfidence: selectedMarketConfidence ?? 0,
+      marketPrice: selectedMarketPrice,
+      marketStability: Math.max(0, 100 - (selectedVolatility ?? 0)),
       priceHistory: [],
       providerId: snapshot.providerId,
       providerName:
         snapshot.evidenceSelections?.marketPrice?.selectedProvider ??
         snapshot.providerId,
-      recentSalesCount: snapshot.recentSales ?? 0,
-      salesVelocity: snapshot.salesVelocity ?? 0,
-      spread: snapshot.spread ?? 0,
+      recentSalesCount: selectedRecentSales ?? 0,
+      salesVelocity: selectedSalesVelocity ?? 0,
+      spread: selectedSpread ?? 0,
       trend: "Unknown",
-      volatility: snapshot.volatility ?? 0,
+      volatility: selectedVolatility ?? 0,
     },
     marketEvidenceDiagnostics: {
       conditionSpecific: selectedNode?.conditionSpecific ?? false,

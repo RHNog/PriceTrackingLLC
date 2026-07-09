@@ -96,18 +96,19 @@ function normalizeCondition(value: string | undefined | null) {
 
 function createEvidenceNode(input: {
   context: MarketSnapshotRequestContext;
+  price?: MarketSnapshot["prices"][number];
   snapshot: MarketSnapshot;
 }): MarketEvidenceNode {
   const identity = input.snapshot.identityEvidence;
   const requestedCondition = input.context.condition ?? "NM";
-  const providerCondition = identity?.condition ?? null;
+  const providerCondition = input.price?.condition ?? identity?.condition ?? null;
   const conditionSpecific = Boolean(providerCondition);
   const condition = conditionSpecific
     ? normalizeCondition(providerCondition)
     : normalizeCondition(requestedCondition);
-  const finish = identity?.finish ?? input.context.finish ?? "Unknown";
+  const finish = input.price?.finish ?? identity?.finish ?? input.context.finish ?? "Unknown";
   const productIdentifier =
-    identity?.productIdentifier ?? input.snapshot.providerId;
+    input.price?.variantId ?? identity?.productIdentifier ?? input.snapshot.providerId;
 
   return {
     assetId: input.context.cardIdentity,
@@ -127,8 +128,74 @@ function createEvidenceNode(input: {
     printingId: input.context.printingId,
     productIdentifier,
     providerCondition: providerCondition ?? undefined,
-    variantId: input.context.variantId,
+    variantId: input.price?.variantId ?? input.context.variantId,
   };
+}
+
+function createIntelligenceRawObservations(snapshot: MarketSnapshot) {
+  const observedAt = snapshot.updatedAt;
+  const providerName = snapshot.marketIntelligence?.providerName ?? snapshot.providerId;
+  const intelligence = snapshot.marketIntelligence;
+
+  if (!intelligence) {
+    return snapshot.rawObservations ?? [];
+  }
+
+  return [
+    ...(snapshot.rawObservations ?? []),
+    {
+      observedAt,
+      providerField: "provider.id",
+      providerName,
+      rawValue: intelligence.providerId,
+    },
+    {
+      observedAt,
+      providerField: "provider.name",
+      providerName,
+      rawValue: intelligence.providerName,
+    },
+    {
+      observedAt,
+      providerField: "provider.apiStatus",
+      providerName,
+      rawValue: intelligence.apiStatus,
+    },
+    {
+      observedAt,
+      providerField: "provider.healthStatus",
+      providerName,
+      rawValue: intelligence.healthStatus,
+    },
+    {
+      observedAt,
+      providerField: "provider.latencyMs",
+      providerName,
+      rawValue: intelligence.latencyMs,
+      unit: "milliseconds",
+    },
+    {
+      observedAt,
+      providerField: "provider.lastSynchronizedAt",
+      providerName,
+      rawValue: intelligence.lastSynchronizedAt,
+    },
+    ...intelligence.priceHistory.flatMap((point, index) => [
+      {
+        observedAt,
+        providerField: `priceHistory.${index}.date`,
+        providerName,
+        rawValue: point.date,
+      },
+      {
+        observedAt,
+        providerField: `priceHistory.${index}.price`,
+        providerName,
+        rawValue: point.price,
+        unit: "USD",
+      },
+    ]),
+  ];
 }
 
 export function validateProviderEvidence(input: {
@@ -170,7 +237,7 @@ export function validateProviderEvidence(input: {
   const coverage =
     input.snapshot.marketIntelligence?.evidenceCoverage ?? validationConfidence;
   const providerSource = input.snapshot.sourceLabel;
-  const node = createEvidenceNode(input);
+  const rawObservations = createIntelligenceRawObservations(input.snapshot);
   const priceEvidence = input.snapshot.prices
     .map((price, index) =>
       createEvidence({
@@ -178,9 +245,13 @@ export function validateProviderEvidence(input: {
         confidence: Math.min(price.confidence, validationConfidence),
         coverage,
         field: price.priceType === "lowest_known" ? "lowestListing" : "marketPrice",
-        node,
+        node: createEvidenceNode({
+          context: input.context,
+          price,
+          snapshot: input.snapshot,
+        }),
         providerName,
-        rawObservations: input.snapshot.rawObservations,
+        rawObservations,
         retrievedAt: input.snapshot.updatedAt,
         source: price.source,
         value: price.price,
@@ -188,6 +259,7 @@ export function validateProviderEvidence(input: {
     )
     .filter((evidence): evidence is MarketProviderEvidence => Boolean(evidence));
   const intelligence = input.snapshot.marketIntelligence;
+  const intelligenceNode = createEvidenceNode(input);
   const intelligenceEvidence = intelligence
     ? [
         createEvidence({
@@ -195,9 +267,9 @@ export function validateProviderEvidence(input: {
           confidence: Math.min(intelligence.marketConfidence, validationConfidence),
           coverage,
           field: "marketPrice",
-          node,
+          node: intelligenceNode,
           providerName,
-          rawObservations: input.snapshot.rawObservations,
+          rawObservations,
           retrievedAt: input.snapshot.updatedAt,
           source: providerSource,
           value: intelligence.marketPrice,
@@ -207,9 +279,9 @@ export function validateProviderEvidence(input: {
           confidence: Math.min(intelligence.marketConfidence, validationConfidence),
           coverage,
           field: "lowestListing",
-          node,
+          node: intelligenceNode,
           providerName,
-          rawObservations: input.snapshot.rawObservations,
+          rawObservations,
           retrievedAt: input.snapshot.updatedAt,
           source: providerSource,
           value: intelligence.lowestListing,
@@ -219,9 +291,9 @@ export function validateProviderEvidence(input: {
           confidence: Math.min(intelligence.marketConfidence, validationConfidence),
           coverage,
           field: "listingCount",
-          node,
+          node: intelligenceNode,
           providerName,
-          rawObservations: input.snapshot.rawObservations,
+          rawObservations,
           retrievedAt: input.snapshot.updatedAt,
           source: providerSource,
           value: intelligence.listingCount,
@@ -231,9 +303,9 @@ export function validateProviderEvidence(input: {
           confidence: Math.min(intelligence.marketConfidence, validationConfidence),
           coverage,
           field: "recentSales",
-          node,
+          node: intelligenceNode,
           providerName,
-          rawObservations: input.snapshot.rawObservations,
+          rawObservations,
           retrievedAt: input.snapshot.updatedAt,
           source: providerSource,
           value: intelligence.recentSalesCount,
@@ -243,9 +315,9 @@ export function validateProviderEvidence(input: {
           confidence: Math.min(intelligence.marketConfidence, validationConfidence),
           coverage,
           field: "spread",
-          node,
+          node: intelligenceNode,
           providerName,
-          rawObservations: input.snapshot.rawObservations,
+          rawObservations,
           retrievedAt: input.snapshot.updatedAt,
           source: providerSource,
           value: intelligence.spread,
@@ -255,9 +327,9 @@ export function validateProviderEvidence(input: {
           confidence: Math.min(intelligence.marketConfidence, validationConfidence),
           coverage,
           field: "liquidity",
-          node,
+          node: intelligenceNode,
           providerName,
-          rawObservations: input.snapshot.rawObservations,
+          rawObservations,
           retrievedAt: input.snapshot.updatedAt,
           source: providerSource,
           value: intelligence.liquidity,
@@ -267,9 +339,9 @@ export function validateProviderEvidence(input: {
           confidence: Math.min(intelligence.marketConfidence, validationConfidence),
           coverage,
           field: "salesVelocity",
-          node,
+          node: intelligenceNode,
           providerName,
-          rawObservations: input.snapshot.rawObservations,
+          rawObservations,
           retrievedAt: input.snapshot.updatedAt,
           source: providerSource,
           value: intelligence.salesVelocity,
@@ -279,9 +351,9 @@ export function validateProviderEvidence(input: {
           confidence: Math.min(intelligence.marketConfidence, validationConfidence),
           coverage,
           field: "volatility",
-          node,
+          node: intelligenceNode,
           providerName,
-          rawObservations: input.snapshot.rawObservations,
+          rawObservations,
           retrievedAt: input.snapshot.updatedAt,
           source: providerSource,
           value: intelligence.volatility,
@@ -291,9 +363,9 @@ export function validateProviderEvidence(input: {
           confidence: Math.min(intelligence.marketConfidence, validationConfidence),
           coverage,
           field: "marketConfidence",
-          node,
+          node: intelligenceNode,
           providerName,
-          rawObservations: input.snapshot.rawObservations,
+          rawObservations,
           retrievedAt: input.snapshot.updatedAt,
           source: providerSource,
           value: intelligence.marketConfidence,

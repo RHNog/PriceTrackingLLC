@@ -103,6 +103,25 @@ export type JustTCGNormalizedCard = {
 export type JustTCGNormalizedResponse = {
   cards: JustTCGNormalizedCard[];
   fieldMappings: JustTCGFieldMapping[];
+  providerMetadata: {
+    pagination: {
+      hasMore: boolean;
+      limit: number;
+      offset: number;
+      total: number;
+    } | null;
+    rawObservations: MarketProviderRawObservation[];
+    usage: Pick<
+      UsageMeta,
+      | "apiDailyLimit"
+      | "apiDailyRequestsRemaining"
+      | "apiDailyRequestsUsed"
+      | "apiPlan"
+      | "apiRateLimit"
+      | "apiRequestsRemaining"
+      | "apiRequestsUsed"
+    >;
+  };
   pagination: {
     hasMore: boolean;
     limit: number;
@@ -291,6 +310,52 @@ function createVariantRawObservations(
     );
   });
 
+  [
+    ["variant.priceChange24hr", variant.priceChange24hr ?? null, "percent"],
+    ["variant.priceChange7d", variant.priceChange7d ?? null, "percent"],
+    ["variant.priceChange30d", variant.priceChange30d ?? null, "percent"],
+    ["variant.priceChange90d", variant.priceChange90d ?? null, "percent"],
+    ["variant.avgPrice", variant.avgPrice ?? null, "USD"],
+    ["variant.avgPrice30d", variant.avgPrice30d ?? null, "USD"],
+    ["variant.avgPrice90d", variant.avgPrice90d ?? null, "USD"],
+    ["variant.minPrice7d", variant.minPrice7d ?? null, "USD"],
+    ["variant.maxPrice7d", variant.maxPrice7d ?? null, "USD"],
+    ["variant.minPrice30d", variant.minPrice30d ?? null, "USD"],
+    ["variant.maxPrice30d", variant.maxPrice30d ?? null, "USD"],
+    ["variant.minPrice90d", variant.minPrice90d ?? null, "USD"],
+    ["variant.maxPrice90d", variant.maxPrice90d ?? null, "USD"],
+    ["variant.stddevPopPrice7d", variant.stddevPopPrice7d ?? null, "USD"],
+    ["variant.stddevPopPrice30d", variant.stddevPopPrice30d ?? null, "USD"],
+    ["variant.stddevPopPrice90d", variant.stddevPopPrice90d ?? null, "USD"],
+    ["variant.covPrice7d", variant.covPrice7d ?? null, null],
+    ["variant.covPrice30d", variant.covPrice30d ?? null, null],
+    ["variant.covPrice90d", variant.covPrice90d ?? null, null],
+    ["variant.iqrPrice7d", variant.iqrPrice7d ?? null, "USD"],
+    ["variant.iqrPrice30d", variant.iqrPrice30d ?? null, "USD"],
+    ["variant.iqrPrice90d", variant.iqrPrice90d ?? null, "USD"],
+    ["variant.trendSlope7d", variant.trendSlope7d ?? null, null],
+    ["variant.trendSlope30d", variant.trendSlope30d ?? null, null],
+    ["variant.trendSlope90d", variant.trendSlope90d ?? null, null],
+    ["variant.priceChangesCount7d", variant.priceChangesCount7d ?? null, "count"],
+    ["variant.priceChangesCount30d", variant.priceChangesCount30d ?? null, "count"],
+    ["variant.priceChangesCount90d", variant.priceChangesCount90d ?? null, "count"],
+    ["variant.priceRelativeTo30dRange", variant.priceRelativeTo30dRange ?? null, null],
+    ["variant.priceRelativeTo90dRange", variant.priceRelativeTo90dRange ?? null, null],
+    ["variant.minPriceAllTime", variant.minPriceAllTime ?? null, "USD"],
+    ["variant.maxPriceAllTime", variant.maxPriceAllTime ?? null, "USD"],
+    ["variant.minPriceAllTimeDate", variant.minPriceAllTimeDate ?? null, null],
+    ["variant.maxPriceAllTimeDate", variant.maxPriceAllTimeDate ?? null, null],
+  ].forEach(([providerField, rawValue, unit]) => {
+    observations.push(
+      createRawObservation({
+        observedAt,
+        providerField: providerField as string,
+        rawValue: rawValue as MarketProviderRawObservation["rawValue"],
+        unit: unit as string | undefined,
+      }),
+    );
+  });
+
   return observations;
 }
 
@@ -401,6 +466,51 @@ function normalizeCard(card: Card): JustTCGNormalizedCard {
   };
 }
 
+function normalizeProviderMetadata(raw: JustTCGRawCardResponse) {
+  const observedAt = new Date().toISOString();
+  const usage = {
+    apiDailyLimit: raw.usage.apiDailyLimit,
+    apiDailyRequestsRemaining: raw.usage.apiDailyRequestsRemaining,
+    apiDailyRequestsUsed: raw.usage.apiDailyRequestsUsed,
+    apiPlan: raw.usage.apiPlan,
+    apiRateLimit: raw.usage.apiRateLimit,
+    apiRequestsRemaining: raw.usage.apiRequestsRemaining,
+    apiRequestsUsed: raw.usage.apiRequestsUsed,
+  };
+  const pagination = raw.pagination
+    ? {
+        hasMore: raw.pagination.hasMore,
+        limit: raw.pagination.limit,
+        offset: raw.pagination.offset,
+        total: raw.pagination.total,
+      }
+    : null;
+  const rawObservations = [
+    ...Object.entries(usage).map(([providerField, rawValue]) =>
+      createRawObservation({
+        observedAt,
+        providerField: `provider.usage.${providerField}`,
+        rawValue: rawValue as MarketProviderRawObservation["rawValue"],
+      }),
+    ),
+    ...(pagination
+      ? Object.entries(pagination).map(([providerField, rawValue]) =>
+          createRawObservation({
+            observedAt,
+            providerField: `provider.pagination.${providerField}`,
+            rawValue: rawValue as MarketProviderRawObservation["rawValue"],
+          }),
+        )
+      : []),
+  ];
+
+  return {
+    pagination,
+    rawObservations,
+    usage,
+  };
+}
+
 export function normalizeJustTCGContext(
   context?: JustTCGKnownCardContext,
 ): Required<JustTCGKnownCardContext> {
@@ -415,18 +525,13 @@ export function normalizeJustTCGCardResponse(
   context?: JustTCGKnownCardContext,
 ): JustTCGNormalizedResponse {
   const normalizedContext = normalizeJustTCGContext(context);
+  const providerMetadata = normalizeProviderMetadata(raw);
 
   return {
     cards: raw.data.map(normalizeCard),
     fieldMappings: JUSTTCG_FIELD_MAPPINGS,
-    pagination: raw.pagination
-      ? {
-          hasMore: raw.pagination.hasMore,
-          limit: raw.pagination.limit,
-          offset: raw.pagination.offset,
-          total: raw.pagination.total,
-        }
-      : null,
+    providerMetadata,
+    pagination: providerMetadata.pagination,
     providerId: "justtcg",
     providerName: "JustTCG",
     request: {
@@ -436,14 +541,6 @@ export function normalizeJustTCGCardResponse(
       limit: normalizedContext.limit,
     },
     synchronizedAt: new Date().toISOString(),
-    usage: {
-      apiDailyLimit: raw.usage.apiDailyLimit,
-      apiDailyRequestsRemaining: raw.usage.apiDailyRequestsRemaining,
-      apiDailyRequestsUsed: raw.usage.apiDailyRequestsUsed,
-      apiPlan: raw.usage.apiPlan,
-      apiRateLimit: raw.usage.apiRateLimit,
-      apiRequestsRemaining: raw.usage.apiRequestsRemaining,
-      apiRequestsUsed: raw.usage.apiRequestsUsed,
-    },
+    usage: providerMetadata.usage,
   };
 }

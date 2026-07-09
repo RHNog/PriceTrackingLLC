@@ -1,6 +1,7 @@
 import type { PriceType } from "@/types/marketPrice";
 
 export type ProviderPriceClassification =
+  | "Variant Valuation"
   | "Market Price"
   | "Lowest Listing"
   | "Lowest NM Listing"
@@ -15,6 +16,10 @@ export function classifyProviderPrice(input: {
   priceType?: PriceType;
 }): ProviderPriceClassification {
   const label = input.label?.toLowerCase() ?? "";
+
+  if (input.priceType === "variant_valuation" || label.includes("variant valuation")) {
+    return "Variant Valuation";
+  }
 
   if (input.priceType === "market_estimate" || label.includes("market")) {
     return "Market Price";
