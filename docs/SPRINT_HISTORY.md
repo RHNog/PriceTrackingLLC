@@ -2,6 +2,82 @@
 
 This file records logical product milestones. Sprint numbers may not perfectly match commit history.
 
+## Sprint 32
+
+Introduced the Market Ontology.
+
+- Added `lib/market/ontology/` with market evidence domains, evidence capabilities, provider capabilities, capability registry, evidence questions, resolver, domain coverage, and ontology facade.
+- Defined Variant Valuation, Listing Intelligence, Transaction Intelligence, Historical Pricing, Inventory Intelligence, Price Trend, Volatility, Market Liquidity, Market Confidence, and Provider Metadata.
+- Registered JustTCG as supporting Variant Valuation, Historical Pricing, Price Trend, Volatility, Market Confidence, and Provider Metadata.
+- Marked JustTCG Listing Intelligence, Transaction Intelligence, and Inventory Intelligence unsupported.
+- Added capability-aware provider selection so unsupported providers are skipped for requested evidence domains.
+- Added capability-aware evidence validation so unsupported provider fields cannot become repository evidence.
+- Updated fallback language away from generic unavailable states and away from JustTCG listing/sales ownership.
+- Added ontology regression coverage for Mox Opal, Chrome Mox, Black Lotus, Lightning Bolt, Collected Company, and Urza's Saga.
+- Preserved Vendor Workspace, Asset Assessment, Business Profiles, Strategy, Negotiation, Decision, and Intelligence Console behavior.
+
+## Sprint 32.1
+
+Added the Transitional Evidence Projection Layer.
+
+- Added an internal projection flag for Current Market Estimate when JustTCG Variant Valuation is selected.
+- Preserved Sprint 32 ontology and provider capability enforcement.
+- Kept Lowest Listing restricted to Listing Intelligence.
+- Kept Recent Sales restricted to Transaction Intelligence.
+- Added developer diagnostics for requested UI field, resolved evidence domain, evidence source, and projection usage.
+- Documented that the bridge should be removed when the Market Intelligence Engine owns Current Market Estimate directly.
+
+## Sprint 31D
+
+Introduced the Market Evidence Layer.
+
+- Added `MarketEvidenceLayer`, `EvidenceAggregator`, `EvidenceResolver`, `EvidencePriority`, `EvidenceProvenance`, `EvidenceCoverage`, `EvidenceFallback`, and `EvidenceSelection`.
+- Changed repository market writes to preserve layered evidence instead of replacing a field with one provider's sparse response.
+- Added configurable provider priority per market field.
+- Added fallback chains for current market estimate, lowest listing, listing count, recent sales, spread, liquidity, sales velocity, volatility, and market confidence.
+- Added internal provenance for provider, retrieved at, confidence, classification, freshness, and priority.
+- Added provider coverage reporting by field.
+- Extended developer-only JustTCG diagnostics with Market Evidence Layer output.
+- Verified known-card evidence stacking for Mox Opal, Chrome Mox, Black Lotus, Urza's Saga, Collected Company, and Lightning Bolt.
+- Preserved Vendor Workspace, Asset Assessment, Business Profiles, Strategy, Negotiation, Decision, and Intelligence Console presentation.
+
+## Sprint 31C
+
+Introduced the Market Truth Model.
+
+- Added provider evidence validation under `lib/market/`.
+- Added provider match validation for canonical card identity, printing, collector number, finish, condition, language, game, product identifier, and provider timestamp.
+- Added price classification for Market Price, Lowest Listing, Lowest NM Listing, Direct Price, Average Sale, Recent Sale, Suggested Price, and Unknown.
+- Added evidence scoring so stored provider values retain provider name, retrieval time, confidence, classification, freshness, and coverage.
+- Added Market Truth reports and provider consistency reports before repository writes.
+- Extended the developer-only JustTCG inspection page with Market Truth validation output.
+- Added regression coverage for Mox Opal, Chrome Mox, Black Lotus, Lightning Bolt, Collected Company, and Urza's Saga.
+- Deferred consensus logic, extra providers, cache redesign, Assessment changes, and recommendation changes.
+
+## Sprint 31B
+
+Introduced the Market Intelligence Repository.
+
+- Added `lib/market/` with repository, snapshot, metadata, refresh policy, scheduler, freshness, validator, statistics, and diagnostics contracts.
+- Made the Market Snapshot API consume repository snapshots through `MarketRefreshScheduler`.
+- Centralized provider communication inside market infrastructure so application code no longer calls market providers directly.
+- Added per-field TTLs for card metadata, printing metadata, market price, lowest listing, listing count, recent sales, spread, liquidity, sales velocity, volatility, market confidence, provider health, and provider capabilities.
+- Added local JSON persistence with a storage boundary that can migrate to SQLite, PostgreSQL, Redis, or cloud storage.
+- Added repository statistics for cache hits, cache misses, provider calls, API calls saved, average refresh time, repository size, and average snapshot age.
+- Added regression coverage for first request provider usage, second request repository usage, and independent field refresh after TTL expiration.
+
+## Sprint 31A
+
+Established the first live provider connection through the official JustTCG JavaScript/TypeScript SDK.
+
+- Added `justtcg-js` as the official SDK dependency.
+- Added `lib/providers/justtcg/` with Provider, Adapter, Normalizer, and Diagnostics modules.
+- Wrapped the SDK behind the Provider SDK so application code does not call JustTCG directly.
+- Verified `JUSTTCG_API_KEY` authentication with a known-card Mox Opal request.
+- Normalized JustTCG card, variant, price, price history, statistics, usage, and pagination fields.
+- Added a temporary developer-only `/dev/justtcg` inspection page for raw SDK response, normalized response, latency, authentication status, and diagnostics.
+- Preserved Assessment, Strategy, Negotiation, Decision, and UI business logic.
+
 ## Sprint 30
 
 Integrated TCGplayer as the primary Market Intelligence provider.

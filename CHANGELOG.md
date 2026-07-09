@@ -9,6 +9,34 @@ The format is inspired by "Keep a Changelog".
 ## [Unreleased]
 
 ### Added
+- Transitional Evidence Projection Layer for projecting JustTCG Variant Valuation into Current Market Estimate while the Market Intelligence Engine is not yet implemented.
+- Developer diagnostics for requested UI field, resolved evidence domain, evidence source, and projection usage.
+- Sprint 32 Market Ontology under `lib/market/ontology/`.
+- Canonical evidence domains for Variant Valuation, Listing Intelligence, Transaction Intelligence, Historical Pricing, Inventory Intelligence, Price Trend, Volatility, Market Liquidity, Market Confidence, and Provider Metadata.
+- Provider capability matrix for JustTCG, TCGplayer, Scryfall, Cardmarket, and eBay market evidence domains.
+- Evidence question resolution so market fields map to evidence domains before provider selection.
+- Domain coverage reporting for connected, planned, partial, and unsupported provider capability states.
+- Regression coverage for Market Ontology resolution across Mox Opal, Chrome Mox, Black Lotus, Lightning Bolt, Collected Company, and Urza's Saga.
+- JustTCG provider data model mapping document covering card fields, variant fields, response metadata, condition-specific variant representation, and raw-observation versus provider-derived metric classification.
+- Raw provider observation storage on market evidence so repository evidence can retain JustTCG card, variant, price, timestamp, SKU, and price-history observations.
+- Sprint 31D Market Evidence Layer for stacked provider evidence.
+- Evidence aggregation, resolution, priority, provenance, coverage, fallback, and selection contracts under `lib/market/`.
+- Layered market evidence storage so multiple providers can contribute to each field without reducing previously available information.
+- Developer-only Market Evidence Layer diagnostics on the JustTCG inspection page.
+- Market Evidence Layer regression coverage for Mox Opal, Chrome Mox, Black Lotus, Urza's Saga, Collected Company, and Lightning Bolt.
+- Sprint 31C Market Truth Model for provider evidence validation.
+- `lib/market/` validation pipeline for provider match checks, evidence scoring, price classification, field mapping, consistency reports, and Market Truth reports.
+- Repository-stored provider evidence metadata for provider name, retrieval time, confidence, price classification, freshness, and coverage.
+- Developer-only JustTCG inspection page now includes a Market Truth Report for normalized provider validation.
+- Market Truth regression coverage for Mox Opal, Chrome Mox, Black Lotus, Lightning Bolt, Collected Company, and Urza's Saga.
+- Sprint 31B Market Intelligence Repository infrastructure.
+- `lib/market/` repository, snapshot, metadata, refresh policy, freshness, scheduler, validator, statistics, and diagnostics contracts.
+- Per-field Market Intelligence TTL policy with repository-backed market snapshot reads.
+- Local JSON persistence for Market Intelligence snapshots with future database migration boundary.
+- Sprint 31A JustTCG live provider connection.
+- Official `justtcg-js` SDK dependency and SDK-backed JustTCG Provider Adapter.
+- `lib/providers/justtcg/` provider, adapter, normalizer, and diagnostics modules for known-card connectivity.
+- Temporary developer-only JustTCG inspection page showing raw SDK response, normalized response, latency, and authentication status.
 - Sprint 30 TCGplayer Market Intelligence provider integration.
 - `TCGplayerIntelligenceProvider` using the Provider SDK as the primary market intelligence source with Scryfall fallback when provider-backed evidence is unavailable.
 - Normalized Market Intelligence evidence for market price, direct low, lowest listing, listing count, recent sales, market trend, price history, liquidity, inventory health, sales velocity, spread, market confidence, volatility, market stability, and demand momentum.
@@ -151,6 +179,25 @@ The format is inspired by "Keep a Changelog".
 - Architecture, roadmap, decision, product spec, prompt history, and documentation changelog files.
 
 ### Changed
+- Current Market Estimate now preserves JustTCG Variant Valuation through a temporary projection bridge.
+- Lowest Listing remains restricted to Listing Intelligence and Recent Sales remains restricted to Transaction Intelligence.
+- Market refresh now skips providers that cannot answer any requested evidence domain.
+- Provider evidence validation now drops unsupported provider fields before repository storage.
+- JustTCG is now treated as a variant-level valuation/history/trend/volatility provider, not a listing, transaction, or inventory provider.
+- Fallback language no longer names JustTCG as the source for listing, sales, spread, inventory, or sales velocity evidence.
+- JustTCG normalization now preserves raw card and variant observations separately from provider-supplied derived metrics.
+- Market Truth evidence mapping now carries raw observations into repository evidence objects.
+- Market evidence nodes now retain asset, printing, variant, finish, condition, provider condition, product identifier, and future certification identity.
+- Vendor Workspace market loading now explicitly reloads and validates snapshots for the selected condition.
+- Condition-specific provider prices are no longer condition-adjusted a second time.
+- Current sprint updated to Sprint 31D.
+- Market Intelligence Repository now derives displayed market fields from layered evidence selections instead of single-provider replacement values.
+- Current sprint updated to Sprint 31C.
+- Market provider data is now validated and attributed as evidence before it can update Market Intelligence Repository snapshots.
+- Current sprint updated to Sprint 31B.
+- Market snapshot API now consumes the Market Intelligence Repository scheduler instead of calling providers directly.
+- Current sprint updated to Sprint 31A.
+- Atlas now treats JustTCG as the first live official SDK connection using `JUSTTCG_API_KEY`.
 - Playability business conclusions now reflect card roles and demand sources instead of generic format summaries.
 - Playability Key Signals now include role-derived signals such as Fast Mana, Combo Enabler, Commander Staple, and Engine.
 - Intelligence confidence now reflects evidence quality before producing a conclusion.

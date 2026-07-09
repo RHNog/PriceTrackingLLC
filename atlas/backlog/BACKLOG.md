@@ -2,6 +2,20 @@
 
 ## High Priority
 
+- Add Atlas visual Market Ontology capability matrix.
+- Remove Transitional Evidence Projection after Market Intelligence Engine implementation.
+- Add domain-level provider priority configuration.
+- Add Market Ontology consensus rules after multiple connected providers support the same domain.
+- Add database-backed Market Intelligence Repository storage.
+- Add future Market Consensus Engine once multiple validated market providers are available.
+- Add Atlas Evidence Stack visual explorer for market provider provenance.
+- Add provider-priority configuration editor once provider administration exists.
+- Expand provider identity evidence coverage for collector number, language, product identifiers, and timestamps.
+- Add distributed background refresh workers for stale repository fields.
+- Add repository storage adapters for SQLite, PostgreSQL, Redis, and cloud object storage.
+- Add JustTCG Provider SDK retry hooks.
+- Add JustTCG Provider SDK cache hooks.
+- Expand JustTCG known-card retrieval into production-safe lookup flows.
 - Add official-provider Certification population ingestion once permitted sources are selected.
 - Configure credentialed TCGplayer API access for live marketplace synchronization.
 - Expand TCGplayer provider coverage beyond Sprint 30 verification assets.

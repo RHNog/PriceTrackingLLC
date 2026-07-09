@@ -2,76 +2,72 @@
 
 ## Sprint
 
-Sprint 30 - TCGplayer Market Intelligence Provider
+Sprint 31D - Market Evidence Layer
 
 ## Summary
 
-Integrated TCGplayer as the first SDK-backed Market Intelligence provider.
+Introduced layered market evidence so providers add knowledge instead of replacing each other.
 
 ## Goal
 
-Convert TCGplayer market data into normalized Market Intelligence evidence without exposing raw provider responses.
+Never treat one provider as market truth. Every provider contributes evidence, repository snapshots store the evidence stack, and the Market Evidence Layer selects the best available value per field.
 
 ## Files Added
 
-- `lib/providers/market/TCGplayerIntelligenceProvider.ts`
-- `tests/tcgplayer-market-intelligence.test.ts`
+- `lib/market/MarketEvidenceLayer.ts`
+- `lib/market/EvidenceAggregator.ts`
+- `lib/market/EvidenceResolver.ts`
+- `lib/market/EvidencePriority.ts`
+- `lib/market/EvidenceProvenance.ts`
+- `lib/market/EvidenceCoverage.ts`
+- `lib/market/EvidenceFallback.ts`
+- `lib/market/EvidenceSelection.ts`
+- `tests/market-evidence-layer.test.ts`
 
 ## Files Modified
 
+- `CHANGELOG.md`
 - `app/api/market/snapshot/route.ts`
-- `features/vendor/components/AtlasInspector.tsx`
-- `features/vendor/components/PurchasePanel.tsx`
-- `features/vendor/components/VendorWorkspace.tsx`
-- `lib/engines/cardIntelligence/SignalFactory.ts`
-- `lib/engines/market/createConditionMarketSnapshot.ts`
-- `lib/engines/negotiation/OfferCalculator.ts`
-- `lib/providers/TCGplayerProvider.ts`
-- `lib/providers/sdk/ProviderRegistry.ts`
-- `tests/provider-sdk.test.ts`
-- `types/conditionMarketSnapshot.ts`
-- `types/marketSnapshot.ts`
-- Sprint documentation and Atlas files.
+- `app/dev/justtcg/page.tsx`
+- `lib/market/MarketIntelligenceRepository.ts`
+- `lib/market/MarketRefreshScheduler.ts`
+- `lib/market/MarketRepositoryDiagnostics.ts`
+- `lib/market/MarketSnapshot.ts`
+- `docs/CHANGELOG.md`
+- `docs/SPRINT_HISTORY.md`
+- `docs/ARCHITECTURE.md`
+- `docs/DECISIONS.md`
+- `docs/ROADMAP.md`
+- `docs/ATLAS.md`
+- `docs/AGENT_HANDOFF.md`
+- `docs/PROMPTS.md`
+- `atlas/PROJECT_SUMMARY.md`
+- `atlas/architecture/ARCHITECTURE_SNAPSHOT.md`
+- `atlas/backlog/BACKLOG.md`
+- `atlas/knowledge/PROJECT_KNOWLEDGE.md`
+- `atlas/reports/ATLAS_SPRINT_REPORT.md`
 
 ## Architecture Changes
 
-- TCGplayer is primary in the market snapshot API with Scryfall fallback.
-- Normalized market intelligence evidence flows into signals, Asset Assessment, and Offer Ladder.
-- Atlas Provider Trace tracks provider coverage, health, latency, evidence coverage, last synchronization, and API status.
-- Raw provider-shaped data is not exposed outside the provider adapter.
+- Market providers are collected as evidence sources instead of short-circuiting on the first provider with prices.
+- Market Truth validation still gates provider responses before evidence enters the repository.
+- Market Evidence Layer merges new evidence into the existing evidence stack.
+- Repository selected values are resolved from evidence, not sparse provider value objects.
+- Missing fields from a new provider do not erase populated fields from previous evidence.
+- Developer diagnostics can inspect stack, selected provider, fallback reason, priority, freshness, and coverage.
 
-## Documentation Updated
+## Fallback Model
 
-- CHANGELOG
-- SPRINT_HISTORY
-- ROADMAP
-- ARCHITECTURE
-- DECISIONS
-- AGENT_HANDOFF
-- PROMPTS
-- ATLAS
-- Atlas backlog, project knowledge, architecture snapshot, and sprint report
+- Current Market Estimate: future consensus, JustTCG, Scryfall, repository snapshot, unavailable.
+- Lowest Listing: JustTCG, repository snapshot, unavailable.
+- Recent Sales: JustTCG, repository snapshot, unavailable.
 
-## Technical Debt
+## Coverage Model
 
-- TCGplayer credentialed API access remains future operational work.
-- Provider-backed fixture coverage is limited to Sprint 30 verification assets.
-
-## Known Issues
-
-- Raw Node test runner still requires the existing project test harness for `@/` aliases.
-
-## Tests Added
-
-- TCGplayer Market Intelligence tests verify Chrome Mox, Mox Opal, Lightning Bolt, Collected Company, and Urza's Saga.
-- Tests verify provider-backed Liquidity, Market Confidence, Asset Assessment evidence, and negotiation lift.
+Provider coverage is tracked independently per market field. A provider can cover market estimate without covering listings, or cover listings without covering recent sales.
 
 ## Build Status
 
-- `npm run lint`: passed.
 - `npx tsc --noEmit`: passed.
+- `npm run lint`: passed.
 - `npm run build`: passed after allowing Next.js to fetch Google font assets.
-
-## Suggested Next Sprint
-
-Configure credentialed TCGplayer API access and broaden provider-backed market coverage.

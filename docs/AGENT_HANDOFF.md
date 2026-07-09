@@ -1,5 +1,88 @@
 # Agent Handoff
 
+## Sprint 32 Handoff
+
+Market semantics now live in `lib/market/ontology/`.
+
+- Ontology facade: `MarketOntology.ts`
+- Domains: `EvidenceDomain.ts`
+- Capability contracts: `EvidenceCapability.ts` and `ProviderCapability.ts`
+- Registry: `CapabilityRegistry.ts`
+- Questions: `EvidenceQuestion.ts`
+- Resolver: `EvidenceResolver.ts`
+- Coverage: `DomainCoverage.ts`
+
+Do not treat market fields as provider capabilities by default. Resolve a requested field to its evidence domain first, then ask the provider capability matrix whether a connected provider supports that domain.
+
+JustTCG is connected for Variant Valuation, Historical Pricing, Price Trend, Volatility, Market Confidence, and Provider Metadata. It is not connected for Listing Intelligence, Transaction Intelligence, or Inventory Intelligence. Do not map JustTCG variant price to Lowest Listing, listing count, recent sales, spread, seller competition, shipping, quantity, or inventory depth.
+
+`MarketRefreshScheduler` now skips providers that cannot answer any requested evidence domain. `ProviderEvidenceValidator` now drops unsupported provider fields before repository storage. Future providers should register domain capabilities before their observations enter the repository.
+
+Sprint 32.1 adds a temporary compatibility bridge in `lib/market/TransitionalEvidenceProjection.ts`. Current Market Estimate may project JustTCG Variant Valuation while the Market Intelligence Engine is not implemented. This must not be copied to Lowest Listing, listing count, recent sales, spread, seller competition, shipping, quantity, or inventory depth. Atlas diagnostics expose Requested UI Field, Resolved Evidence Domain, Evidence Source, and Projection Used.
+
+## Sprint 31D Handoff
+
+Market evidence is layered before selected values reach downstream consumers.
+
+- Layer: `lib/market/MarketEvidenceLayer.ts`
+- Aggregation: `EvidenceAggregator.ts`
+- Selection: `EvidenceResolver.ts`
+- Priority config: `EvidencePriority.ts`
+- Provenance: `EvidenceProvenance.ts`
+- Coverage: `EvidenceCoverage.ts`
+- Fallback chains: `EvidenceFallback.ts`
+- Selection contract: `EvidenceSelection.ts`
+
+Do not reintroduce single-provider overwrite behavior. If a provider lacks a market field, preserve existing evidence and selected values from other providers. Provider priority is configurable per field, and production UI should keep showing selected market values without evidence-stack diagnostics.
+
+Developer-only diagnostics can expose evidence stack, selected provider, fallback reason, provider priority, freshness, and coverage.
+
+Condition-specific evidence nodes carry asset, printing, variant, finish, condition, provider condition, product identifier, and optional certification identity. Do not collapse LP/MP/HP/DMG provider data into NM or generic market evidence.
+
+JustTCG mapping document: `docs/providers/JUSTTCG_DATA_MODEL.md`. Preserve raw observations from JustTCG separately from provider-supplied derived metrics. Repository evidence may store raw observations, but production UI should consume internally derived Market Intelligence fields.
+
+## Sprint 31C Handoff
+
+Market Truth now sits between normalized market providers and `MarketIntelligenceRepository`.
+
+- Engine: `lib/market/MarketTruthEngine.ts`
+- Evidence validation: `ProviderEvidenceValidator.ts`
+- Match validation: `ProviderMatchValidator.ts`
+- Price classification: `ProviderPricingClassifier.ts`
+- Evidence scoring: `ProviderEvidenceScore.ts`
+- Reports: `ProviderConsistencyReport.ts` and `MarketTruthReport.ts`
+
+Provider responses must match the selected asset context before repository write. Validate canonical card identity, printing, collector number, finish, condition, language, game, product identifier, and provider timestamp. Missing legacy metadata can warn; conflicting metadata rejects.
+
+Do not add consensus behavior yet. Do not route Assessment, Strategy, Negotiation, Decision, or recommendation logic directly to providers. The repository stores attributed evidence with provider name, retrieval timestamp, confidence, classification, freshness, and coverage.
+
+## Sprint 31B Handoff
+
+Market Intelligence now flows through `lib/market/`.
+
+- Repository: `MarketIntelligenceRepository`
+- Scheduler: `MarketRefreshScheduler`
+- Snapshot model: `MarketSnapshot`, `MarketSnapshotMetadata`
+- Policy: `MarketRefreshPolicy`, `MarketFreshness`
+- Diagnostics: `MarketRepositoryStatistics`, `MarketRepositoryDiagnostics`
+- Validation: `MarketSnapshotValidator`
+
+Do not call market providers from application code. Use `MarketRefreshScheduler`, which checks repository freshness, returns fresh repository snapshots, refreshes only expired fields, and allows slightly stale snapshots to refresh in the background.
+
+Local persistence file: `.market-intelligence-repository.json`. It is ignored by git and exists only until a database-backed store is selected.
+
+## Sprint 31A Handoff
+
+JustTCG is the first live provider connection.
+
+- Dependency: `justtcg-js@0.2.1`.
+- Required local env var: `JUSTTCG_API_KEY`.
+- Provider files: `lib/providers/justtcg/JustTCGProvider.ts`, `JustTCGAdapter.ts`, `JustTCGNormalizer.ts`, and `JustTCGDiagnostics.ts`.
+- Registry: `ProviderRegistry` registers `justtcg` as an active provider.
+- Dev tool: `/dev/justtcg` is development-only and displays raw SDK response, normalized response, latency, authentication status, and diagnostics.
+
+Do not move JustTCG into production UI yet. Sprint 31A is connectivity only: no caching, retries, Assessment changes, Strategy changes, Negotiation changes, Decision changes, or production UI redesign.
+
 ## What Is This Project?
 
 PriceTrackingLLC is a Professional TCG Decision Operating System.
@@ -8,7 +91,7 @@ It helps trading-card buyers discover opportunities, evaluate in-person purchase
 
 ## Current Development Phase
 
-Current sprint: Sprint 30, TCGplayer Market Intelligence Provider.
+Current sprint: Sprint 32, Market Ontology.
 
 The app now evaluates a selected card through deterministic Vendor Workflow states, Card Profile, Asset Intelligence models, condition-adjusted market context, strategy-weighted signals, Negotiation Ladder, and deterministic Decision Resolver output.
 
@@ -23,6 +106,14 @@ Planned SDK providers are metadata-only for EDHREC, PSA, BGS, CGC, Cardmarket, T
 Sprint 30 promotes TCGplayer to the first SDK-backed Market Intelligence provider. TCGplayer data is normalized into `MarketSnapshot.marketIntelligence`; raw provider-shaped data must not leave the provider adapter.
 
 Provider-backed market evidence now feeds Liquidity, Market Confidence, Demand, Volatility, Asset Assessment, and Offer Ladder spread/liquidity behavior.
+
+Sprint 31C adds Market Truth validation before repository writes. Provider data is evidence until validated and classified; consensus across providers is still deferred.
+
+Sprint 31D adds the Market Evidence Layer. Provider evidence is stacked, repository snapshots preserve prior evidence, and selected values are resolved by freshness, configured priority, confidence, and recency.
+
+Sprint 32 adds the Market Ontology. Evidence domains define what providers know before provider selection. Provider capabilities must be explicit, and unsupported provider fields must not become repository evidence.
+
+Sprint 32.1 adds Transitional Evidence Projection so valid JustTCG Variant Valuation continues to populate Current Market Estimate until the Market Intelligence Engine replaces the bridge.
 
 Playability Intelligence now measures why a card has play demand. It is registered in the Asset Intelligence Framework, backed first by Scryfall legalities, exposed on `CardProfile.playabilityProfile`, and consumed by strategies through configurable `Playability` signal weights.
 

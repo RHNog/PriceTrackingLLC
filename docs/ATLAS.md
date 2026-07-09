@@ -2,6 +2,128 @@
 
 Atlas is the permanent project knowledge base for PriceTrackingLLC.
 
+## Sprint 31D Synchronization
+
+Market Evidence Layer:
+
+- Layer: `MarketEvidenceLayer`
+- Aggregation: `EvidenceAggregator`
+- Selection: `EvidenceResolver` and `EvidenceSelection`
+- Priority: `EvidencePriority`
+- Provenance: `EvidenceProvenance`
+- Coverage: `EvidenceCoverage`
+- Fallback: `EvidenceFallback`
+
+Architecture rule:
+
+Every provider contributes evidence. Repository snapshots store layered evidence. The evidence layer selects the best available value per field. A provider that lacks a field must never erase a value supplied by another provider or by an existing repository snapshot.
+
+Developer diagnostics:
+
+- Evidence stack
+- Selected provider
+- Fallback reason
+- Provider priority
+- Freshness
+- Coverage
+
+Production rule:
+
+Vendor Workspace continues to display selected market values without exposing provider internals, implementation notes, or evidence stack diagnostics.
+
+## JustTCG Provider Data Model
+
+JustTCG responses are documented in `docs/providers/JUSTTCG_DATA_MODEL.md`.
+
+Provider model rule:
+
+JustTCG fields are not UI fields. The provider returns raw card observations, raw variant observations, price observations, price history observations, and provider-supplied derived statistics. The platform must store raw observations as evidence and derive Market Intelligence internally.
+
+Condition-specific representation:
+
+JustTCG represents condition-specific market data as separate variant objects with fields such as `condition`, `printing`, `language`, `price`, `lastUpdated`, `tcgplayerSkuId`, and `priceHistory`. Near Mint, Lightly Played, Moderately Played, Heavily Played, and Damaged variants must not be collapsed into a generic market snapshot.
+
+Observed special product coverage includes Judge Promos, Buy-A-Box Promos, FNM Promos, Secret Lair Drop Series, Special Guests, and Masterpiece Series: Kaladesh Inventions.
+
+## Sprint 31C Synchronization
+
+Market Truth Model:
+
+- Engine: `MarketTruthEngine`
+- Validation: `ProviderEvidenceValidator` and `ProviderMatchValidator`
+- Scoring: `ProviderEvidenceScore`
+- Classification: `ProviderPricingClassifier`
+- Mapping: `ProviderFieldMapping`
+- Reports: `ProviderConsistencyReport` and `MarketTruthReport`
+
+Architecture rule:
+
+The repository stores attributed provider evidence, not unexamined provider truth. Provider responses must be normalized, matched to the selected printing, classified by price concept, scored for confidence and coverage, and validated before repository writes.
+
+Validated fields:
+
+- Canonical card identity
+- Printing
+- Collector number
+- Finish
+- Condition
+- Language
+- Game
+- Product identifier
+- Provider timestamp
+
+Deferred:
+
+Multi-provider consensus remains future architecture. Sprint 31C does not add extra providers, cache redesign, Asset Assessment changes, recommendation changes, Strategy changes, Negotiation changes, or Decision changes.
+
+## Sprint 31B Synchronization
+
+Market Intelligence Repository:
+
+- Repository Health: tracked through `MarketRepositoryDiagnostics`
+- Average Freshness: ratio of fresh fields across snapshots
+- Cache Hit Rate: cache hits divided by total cache reads
+- Provider Usage: snapshot count grouped by provider
+- Estimated API Cost Saved: repository hits that avoided provider calls
+- Oldest Snapshot: oldest repository update timestamp
+- Newest Snapshot: newest repository update timestamp
+
+Architecture rule:
+
+Providers update the repository. Asset Session and business logic consume repository snapshots. Application market routes call `MarketRefreshScheduler`, not providers directly.
+
+Refresh policy:
+
+Every field owns its own TTL. Fresh fields are preserved when another field expires. Slightly stale cached data can be returned immediately while a background refresh updates the repository.
+
+Storage:
+
+Sprint 31B uses local JSON persistence only. The boundary is designed for SQLite, PostgreSQL, Redis, or cloud storage migration.
+
+## Sprint 31A Synchronization
+
+JustTCG live provider connection:
+
+- Provider Registry entry: `justtcg`
+- Provider Status: Active
+- SDK: `justtcg-js@0.2.1`
+- Authentication Status: `JUSTTCG_API_KEY` configured through `.env.local`
+- Connection Status: known-card Mox Opal request succeeded during Sprint 31A validation
+- Required environment variables: `JUSTTCG_API_KEY`
+- Developer inspection: `/dev/justtcg` in development mode only
+
+Architecture rule:
+
+Application code routes through Provider SDK -> JustTCG Adapter -> official JustTCG SDK -> JustTCG API. Application code must not call the SDK directly.
+
+Why the official SDK was selected:
+
+The official SDK owns API versioning, environment authentication, typed card and variant models, usage metadata, pagination metadata, and SDK-level error handling. A custom HTTP client would duplicate provider responsibilities already supplied by JustTCG.
+
+Sprint limits:
+
+No caching, retries, Assessment changes, Strategy changes, Negotiation changes, Decision changes, or production UI changes.
+
 ## Sprint 30 Synchronization
 
 TCGplayer Market Intelligence:

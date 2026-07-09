@@ -42,10 +42,15 @@ export function createConditionMarketSnapshot(
     {} as ConditionMarketSnapshot["pricesByCondition"],
   );
 
+  const selectedPrice =
+    basePrice.conditionSpecific && basePrice.condition === selectedCondition
+      ? basePrice
+      : pricesByCondition[selectedCondition];
+
   return {
     marketIntelligence,
     selectedCondition,
-    selectedPrice: pricesByCondition[selectedCondition],
+    selectedPrice,
     pricesByCondition,
   };
 }

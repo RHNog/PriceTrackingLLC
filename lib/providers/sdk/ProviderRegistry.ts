@@ -1,4 +1,5 @@
 import type { ProviderAdapter } from "@/lib/providers/sdk/ProviderAdapter";
+import { JustTCGAdapter } from "@/lib/providers/justtcg/JustTCGAdapter";
 import { TCGplayerIntelligenceProviderAdapter } from "@/lib/providers/market/TCGplayerIntelligenceProvider";
 import { createPlannedCoverage } from "@/lib/providers/sdk/ProviderCoverage";
 import { createProviderDiagnostics } from "@/lib/providers/sdk/ProviderDiagnostics";
@@ -262,6 +263,7 @@ plannedProviders
 providerRegistry.register(
   new TCGplayerIntelligenceProviderAdapter() as RegisteredProviderAdapter,
 );
+providerRegistry.register(new JustTCGAdapter() as RegisteredProviderAdapter);
 
 export function getProviderSdkSnapshot() {
   return {

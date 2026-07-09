@@ -44,6 +44,22 @@ Sprint 30 integrates TCGplayer Market Intelligence.
 
 `TCGplayerIntelligenceProvider` is now the first SDK-backed Market Intelligence provider. It normalizes TCGplayer-shaped market data into `MarketSnapshot.marketIntelligence`, including market price, direct low, lowest listing, listing count, recent sales, trend, price history, liquidity, inventory health, sales velocity, spread, confidence, volatility, stability, and demand momentum. Raw provider responses remain private to the provider layer.
 
+Sprint 31A establishes the first live official SDK provider connection.
+
+JustTCG is integrated through the official `justtcg-js@0.2.1` SDK and wrapped by the Provider SDK. Authentication uses `JUSTTCG_API_KEY` from `.env.local`. The first live validation uses a known-card Mox Opal request and normalizes card, variant, current price, price history, statistics, usage, and pagination fields. `/dev/justtcg` is a temporary development-only inspection page for raw SDK response, normalized response, latency, authentication status, and diagnostics.
+
+Sprint 31B introduces the Market Intelligence Repository.
+
+`lib/market/` now owns repository snapshots, per-field freshness metadata, refresh policy, background refresh scheduling, validation, statistics, and diagnostics. Market providers update the repository through `MarketRefreshScheduler`; application code consumes repository snapshots. Local JSON persistence is used for now, with a boundary ready for SQLite, PostgreSQL, Redis, or cloud storage.
+
+Sprint 31C introduces the Market Truth Model.
+
+Provider responses are now evidence until validated. `MarketTruthEngine` checks provider evidence against the selected asset context, classifies provider price concepts, scores confidence and coverage, and records Market Truth reports before repository writes. The repository stores provider attribution, retrieval time, classification, freshness, and coverage for provider-derived values. Multi-provider consensus remains future architecture.
+
+Sprint 31D introduces the Market Evidence Layer.
+
+Market provider evidence is now stacked by field and selected through `MarketEvidenceLayer`. The repository preserves existing evidence when a new provider lacks a field, tracks provider coverage, and selects best available values by freshness, configured provider priority, confidence, and recency. Developer diagnostics expose provenance and coverage; production surfaces continue to show selected values only.
+
 ## Current Architecture
 
 PriceTrackingLLC is a Next.js, TypeScript, and Tailwind CSS application for professional trading-card buying decisions.
@@ -54,6 +70,9 @@ The runtime architecture separates:
 - Printing, finish, and condition resolution.
 - Market provider normalization.
 - Provider SDK lifecycle normalization.
+- Market Truth validation and evidence attribution.
+- Market Evidence Layer aggregation and selection.
+- Market Intelligence Repository snapshots.
 - Business Profile and Offer Policy assumptions.
 - System Readiness and Pipeline Integrity.
 - Card and Asset Intelligence.
@@ -68,11 +87,11 @@ Atlas is not part of this runtime architecture. It is an internal companion syst
 
 ## Current Sprint
 
-Sprint 30: TCGplayer Market Intelligence Provider
+Sprint 31D: Market Evidence Layer
 
 ## Current Milestone
 
-Provider-backed Market Intelligence evidence.
+Layered provider evidence with best-available market field selection.
 
 ## Open Issues
 
@@ -84,11 +103,13 @@ Provider-backed Market Intelligence evidence.
 - Assessment driver weights are deterministic and should be calibrated with future outcome history.
 - Provider SDK adapters are metadata-only until approved integration paths exist.
 - TCGplayer evidence is currently normalized through provider-backed fixture records for verified Sprint 30 assets until credentialed API access is configured.
+- Multi-provider market consensus is not implemented yet; validated provider evidence is stored independently.
 
 ## Technical Debt
 
 - Business Profile persistence remains future work.
 - Readiness Reports and Pipeline Reports are not persisted.
+- Market Truth metadata currently warns on missing legacy provider identity fields instead of requiring every provider to expose full collector/language metadata.
 - Live marketplace listings and recent sales are not integrated.
 - Browser visual regression coverage is not active.
 - Atlas has no drift detection yet.

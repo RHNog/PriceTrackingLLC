@@ -4,6 +4,26 @@
 
 ### Added
 
+- Sprint 32.1 Transitional Evidence Projection documentation.
+- Developer diagnostics for requested UI field, resolved evidence domain, evidence source, and projection usage.
+- Sprint 32 Market Ontology documentation.
+- Market evidence domains for Variant Valuation, Listing Intelligence, Transaction Intelligence, Historical Pricing, Inventory Intelligence, Price Trend, Volatility, Market Liquidity, Market Confidence, and Provider Metadata.
+- Provider capability matrix documentation for JustTCG, TCGplayer, Scryfall, Cardmarket, and eBay market evidence domains.
+- Evidence question resolution documentation for mapping market fields to evidence domains before provider selection.
+- Domain coverage documentation for connected, planned, partial, and unsupported provider capability states.
+- JustTCG provider data model mapping documentation.
+- Raw-observation storage documentation for JustTCG card, variant, price, timestamp, SKU, price history, and provider metadata fields.
+- Sprint 31D Market Evidence Layer documentation.
+- Evidence stacking, aggregation, resolver, configurable provider priority, provenance, coverage, fallback chains, and selection documentation.
+- Documentation that adding provider evidence must never reduce already available market information.
+- Sprint 31C Market Truth Model documentation.
+- Provider evidence validation, provider match validation, provider price classification, evidence scoring, field mapping, consistency reporting, and Market Truth Report documentation.
+- Documentation that repository market values store provider evidence attribution rather than claiming provider responses are truth.
+- Future consensus engine documentation as deferred architecture.
+- Sprint 31B Market Intelligence Repository documentation.
+- Repository-owned Market Snapshot model, per-field refresh policies, background refresh, repository statistics, local persistence, and Atlas diagnostics documentation.
+- Sprint 31A JustTCG live provider connection documentation.
+- Official `justtcg-js` SDK integration, `JUSTTCG_API_KEY` authentication, known-card live request, normalization mapping, provider diagnostics, and developer-only inspection page documentation.
 - Sprint 30 TCGplayer Market Intelligence Provider documentation.
 - Provider-backed market evidence, normalized MarketSnapshot intelligence, Atlas provider trace, and negotiation benefit documentation.
 - Sprint 29 Intelligence Provider SDK documentation.
@@ -71,6 +91,20 @@
 
 ### Changed
 
+- Current Market Estimate now preserves JustTCG Variant Valuation through a temporary projection bridge until the Market Intelligence Engine exists.
+- Lowest Listing and Recent Sales remain restricted to Listing Intelligence and Transaction Intelligence respectively.
+- Current sprint updated to Sprint 32.
+- Documentation now treats Market Ontology as the owner of market evidence semantics before provider selection.
+- Documentation now records JustTCG as unsupported for Listing Intelligence, Transaction Intelligence, and Inventory Intelligence.
+- Documentation now distinguishes provider raw observations from provider-supplied derived metrics and platform-derived Market Intelligence.
+- Current sprint updated to Sprint 31D.
+- Documentation now treats the Market Evidence Layer as the owner of best-available field selection.
+- Current sprint updated to Sprint 31C.
+- Documentation now treats provider evidence validation as the required gate before Market Intelligence Repository writes.
+- Current sprint updated to Sprint 31B.
+- Documentation now treats Market Intelligence Repository as the single source of truth between providers and Asset Session.
+- Current sprint updated to Sprint 31A.
+- Documentation now records JustTCG as the first live official SDK provider connection and explains why the official SDK was selected over a custom HTTP client.
 - Current sprint updated to Sprint 30.
 - Documentation now treats TCGplayer as the first active SDK-backed Market Intelligence provider.
 - Current sprint updated to Sprint 29.

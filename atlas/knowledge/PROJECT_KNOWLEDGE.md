@@ -25,8 +25,13 @@ Decision Resolver should remain deterministic after receiving a validated Offer 
 
 - Identity Providers and Market Providers are separate provider families.
 - Provider responses must be normalized before entering engines or UI.
+- Market provider responses must be stored as Market Intelligence Repository snapshots before Asset Session or business logic consumes them.
+- Market provider responses are evidence until Market Truth validation classifies, scores, and attributes them.
+- Market evidence is layered; providers add evidence and may not reduce existing platform knowledge.
 - Future providers must follow the Provider SDK lifecycle.
 - Providers supply data only; SDK infrastructure owns normalization, health, caching hooks, diagnostics, evidence mapping, confidence contribution, metadata, retry hooks, and validation hooks.
+- JustTCG is the first live official SDK provider connection and must be accessed through Provider SDK wrappers, never directly from application code.
+- `JUSTTCG_API_KEY` is required locally and must not be hardcoded.
 - TCGplayer is the primary Market Intelligence provider and must expose only normalized Market Intelligence evidence.
 - Variant Resolution Policy owns automatic finish defaults.
 - Workflow Command Processor owns Vendor Workspace context progression.
@@ -51,6 +56,108 @@ Decision Resolver should remain deterministic after receiving a validated Offer 
 - Atlas Inspector owns Intelligence layer 4: Implementation.
 - Final Intelligence Console panels use Grade/Confidence, Business Conclusion, Key Signals, and Supporting Evidence only.
 - Offer Ladder Validator blocks invalid negotiation math before Decision Resolver executes.
+
+## JustTCG Provider Knowledge
+
+JustTCG lives under `lib/providers/justtcg/`.
+
+Core contracts:
+
+- `JustTCGProvider`
+- `JustTCGAdapter`
+- `JustTCGNormalizer`
+- `JustTCGDiagnostics`
+
+Integration rules:
+
+- The official `justtcg-js` SDK is the only JustTCG API access path.
+- The SDK reads `JUSTTCG_API_KEY` from the environment.
+- Application code consumes Provider SDK results, not SDK objects.
+- Raw SDK responses are limited to the temporary development-only `/dev/justtcg` inspection page.
+- Sprint 31A is connectivity only; it does not change Assessment, Strategy, Negotiation, or Decision behavior.
+
+Provider data model:
+
+- Canonical mapping document: `docs/providers/JUSTTCG_DATA_MODEL.md`.
+- Card-level fields are raw observations.
+- Variant-level `condition`, `printing`, `language`, `price`, `lastUpdated`, `tcgplayerSkuId`, and `priceHistory` are raw observations.
+- Variant-level movement, range, volatility, trend, and activity statistics are provider-supplied derived metrics.
+- Market Intelligence must derive platform metrics internally from raw observations instead of assuming provider fields map directly to UI fields.
+- Condition-specific prices are represented as separate variant objects and must stay distinct in repository evidence.
+
+## Market Intelligence Repository Knowledge
+
+The Market Intelligence Repository lives under `lib/market/`.
+
+Core contracts:
+
+- `MarketIntelligenceRepository`
+- `MarketSnapshot`
+- `MarketSnapshotMetadata`
+- `MarketRefreshPolicy`
+- `MarketRefreshScheduler`
+- `MarketFreshness`
+- `MarketSnapshotValidator`
+- `MarketRepositoryStatistics`
+- `MarketRepositoryDiagnostics`
+
+Integration rules:
+
+- Providers update repository snapshots.
+- Application market routes use `MarketRefreshScheduler`.
+- Business engines consume repository-derived snapshots.
+- Every market field owns its own TTL.
+- Fresh repository data prevents provider calls.
+- Slightly stale data can return immediately while background refresh runs.
+- Missing or expired fields refresh through market infrastructure before returning.
+
+## Market Truth Model Knowledge
+
+The Market Truth Model lives under `lib/market/`.
+
+Core contracts:
+
+- `MarketTruthEngine`
+- `ProviderEvidenceValidator`
+- `ProviderEvidenceScore`
+- `ProviderMatchValidator`
+- `ProviderPricingClassifier`
+- `ProviderFieldMapping`
+- `ProviderConsistencyReport`
+- `MarketTruthReport`
+
+Integration rules:
+
+- Provider responses must match the selected printing before repository write.
+- Validate canonical card identity, printing, collector number, finish, condition, language, game, product identifier, and provider timestamp.
+- Classify provider price concepts as Market Price, Lowest Listing, Lowest NM Listing, Direct Price, Average Sale, Recent Sale, Suggested Price, or Unknown.
+- Store provider name, retrieval time, confidence, classification, freshness, and coverage with provider-derived values.
+- Multi-provider consensus remains future work.
+
+## Market Evidence Layer Knowledge
+
+The Market Evidence Layer lives under `lib/market/`.
+
+Core contracts:
+
+- `MarketEvidenceLayer`
+- `EvidenceAggregator`
+- `EvidenceResolver`
+- `EvidencePriority`
+- `EvidenceProvenance`
+- `EvidenceCoverage`
+- `EvidenceFallback`
+- `EvidenceSelection`
+
+Integration rules:
+
+- Repository snapshots store evidence stacks.
+- New provider evidence is merged without deleting other provider evidence.
+- Selected values are resolved by freshness, configured provider priority, confidence, and recency.
+- Provider coverage is tracked independently by field.
+- Fallback chains are field-specific.
+- Production UI consumes selected values only.
+- Developer tooling may expose provenance, selected provider, fallback reason, priority, freshness, and coverage.
 
 ## Asset Knowledge Graph Knowledge
 

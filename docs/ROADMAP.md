@@ -1,5 +1,60 @@
 # Roadmap
 
+## Current Sprint: Sprint 32
+
+Market Ontology now defines what each market evidence domain means and which providers can answer each domain.
+
+- Connected: evidence domains, provider capability matrix, evidence question resolution, domain coverage, JustTCG supported/unsupported domains, scheduler provider eligibility, and validation filtering.
+- Verified: known-card ontology resolution for Mox Opal, Chrome Mox, Black Lotus, Lightning Bolt, Collected Company, and Urza's Saga.
+- Deferred: multi-provider consensus, Atlas visual capability matrix, production provenance UI, new live providers, and recommendation changes.
+- Compatibility: Current Market Estimate temporarily projects JustTCG Variant Valuation until the Market Intelligence Engine owns the field directly.
+
+## Recently Completed: Sprint 31D
+
+Market Evidence Layer now selects best available market evidence from layered provider contributions.
+
+- Connected: evidence aggregation, resolver, provider priority, provenance, coverage, fallback chains, and repository selection.
+- Verified: known-card evidence stacking preserves populated fields and adds new provider fields.
+- Deferred: provider consensus, production provenance UI, new providers, and Assessment/Strategy/Negotiation changes.
+
+## Recently Completed: Sprint 31C
+
+Market Truth Model is now the validation layer for provider evidence.
+
+- Connected: provider match validation, price classification, evidence scoring, and Market Truth reports.
+- Verified: known-card evidence validation for Mox Opal, Chrome Mox, Black Lotus, Lightning Bolt, Collected Company, and Urza's Saga.
+- Deferred: multi-provider consensus, cache redesign, additional live providers, Assessment changes, recommendation changes, and production UI exposure.
+
+## Previously Completed: Sprint 31B
+
+Market Intelligence Repository is now the infrastructure owner for market snapshots.
+
+- Connected: local repository persistence and per-field refresh policy.
+- Verified: first request provider call, second request repository hit, and independent expired-field refresh.
+- Deferred: database-backed persistence, distributed background workers, and repository admin UI.
+
+## Previously Completed: Sprint 31A
+
+JustTCG is connected through the official `justtcg-js` SDK as the first live provider connection.
+
+- Connected: official SDK initialization with `JUSTTCG_API_KEY`.
+- Verified: known-card Mox Opal request, normalized response, provider diagnostics, and developer-only inspection page.
+- Deferred: caching, retries, Assessment integration, Strategy integration, Negotiation integration, Decision integration, and production UI exposure.
+
+## Provider Backlog
+
+- Add Atlas visual capability matrix for Market Ontology domains and providers.
+- Remove Transitional Evidence Projection when the Market Intelligence Engine owns Current Market Estimate.
+- Add consensus rules for domains with multiple connected providers.
+- Add domain-level provider priority configuration once provider administration exists.
+- Add future Market Consensus Engine after multiple validated providers are available.
+- Add production-safe provider provenance display if a future product surface needs it.
+- Expand provider identity evidence coverage for collector number, language, product identifiers, and provider timestamps.
+- Add retry policy through Provider SDK hooks.
+- Add provider cache through Provider SDK cache hooks.
+- Expand known-card connectivity into provider-backed card lookup flows.
+- Keep raw SDK responses restricted to development-only tooling.
+
 ## Completed Or Mostly Completed
 
 - Application shell
@@ -69,18 +124,6 @@
 - Vendor Workflow State Machine
 - Context Invalidation Engine
 - Project Atlas
-
-## Current Sprint
-
-Sprint 30: TCGplayer Market Intelligence Provider
-
-Goals:
-
-- Integrate TCGplayer as the primary Market Intelligence provider.
-- Convert TCGplayer data into normalized market evidence without exposing raw API responses.
-- Generate Liquidity, Inventory Health, Sales Velocity, Spread, Market Confidence, Volatility, Market Stability, and Demand Momentum evidence.
-- Feed provider-backed market evidence into Asset Assessment without modifying Assessment architecture.
-- Let Offer Ladder benefit from real liquidity, spread, and market confidence.
 
 ## Near-Term Roadmap
 

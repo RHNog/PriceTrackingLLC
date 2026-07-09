@@ -18,4 +18,6 @@ export interface MarketPrice {
   priceType: PriceType;
   updatedAt: string;
   confidence: number;
+  condition?: string;
+  conditionSpecific?: boolean;
 }

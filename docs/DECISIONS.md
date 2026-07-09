@@ -1,8 +1,89 @@
 # Decisions
 
+## Sprint 32: Market Ontology Owns Market Semantics
+
+Decision: introduce `lib/market/ontology/` as the canonical vocabulary for market evidence domains and provider capabilities.
+
+Rationale:
+
+- A provider can know variant valuation without knowing live listings.
+- Market fields such as Lowest Listing, Recent Sales, and Volatility should resolve to evidence domains before provider selection.
+- Providers must not be forced to answer outside their capability.
+- The repository should store observations only after the ontology confirms the provider can supply that evidence domain.
+
+Constraint: no Vendor Workspace redesign, Assessment change, Business Profile change, Strategy change, Negotiation change, Decision change, Intelligence Console change, or new live provider.
+
+Rule: JustTCG is a variant-level valuation, history, trend, volatility, confidence, and metadata provider. It is not a listing, transaction, or inventory provider.
+
+## Sprint 31D: Evidence Is Layered
+
+Decision: introduce `MarketEvidenceLayer` as the owner of market evidence aggregation and selection.
+
+Rationale:
+
+- A provider can have strong evidence for one field and no evidence for another.
+- Adding provider data should increase platform knowledge, not replace populated fields with unavailable values.
+- Field selection needs configurable priorities and fallback chains rather than one global provider winner.
+- Business logic should consume selected market evidence, not provider-specific responses.
+
+Constraint: no Vendor Workspace redesign, Asset Assessment change, Business Profile change, Strategy change, Negotiation change, Decision change, Intelligence Console change, or new provider integration.
+
+Rule: repository snapshots store layered evidence. The evidence layer selects best available values. No provider may reduce existing platform knowledge by omitting a field.
+
+## Sprint 31C: Provider Evidence Is Not Market Truth
+
+Decision: introduce `MarketTruthEngine` as a validation gate between normalized provider responses and Market Intelligence Repository writes.
+
+Rationale:
+
+- Provider fields can describe different products, variants, conditions, languages, or price concepts.
+- The repository should retain attributed provider evidence rather than silently converting provider output into unquestioned truth.
+- Business engines need validated market knowledge, not raw SDK objects or ambiguous provider labels.
+- A separate Market Truth boundary prepares the platform for future multi-provider consensus without changing Assessment, Strategy, Negotiation, or Decision architecture.
+
+Constraint: no consensus engine, extra provider integrations, cache redesign, Asset Assessment changes, recommendation changes, Strategy changes, Negotiation changes, or Decision changes.
+
+Validation rule: conflicting canonical identity, printing, collector number, finish, condition, language, game, product identifier, or provider timestamp rejects the provider response before repository write.
+
+## Sprint 31B: Repository Owns Market Knowledge
+
+Decision: introduce `MarketIntelligenceRepository` as the single source of truth for market snapshots.
+
+Rationale:
+
+- Provider responses should become durable platform knowledge instead of transient request data.
+- Business logic should consume repository snapshots, not providers.
+- Per-field TTLs reduce unnecessary provider calls and preserve fresh fields when only one signal expires.
+- A repository boundary allows local persistence now and database-backed storage later without redesigning business engines.
+
+Constraint: no Asset Assessment, Business Profile, Strategy, Negotiation, Decision, Intelligence Model, Intelligence Console, or UI redesign changes.
+
+Refresh rule: fresh data returns from repository, slightly stale data returns immediately with background refresh, and missing or expired fields are refreshed through market infrastructure before returning.
+
+## Sprint 31A: Use Official JustTCG SDK
+
+Decision: integrate JustTCG through the official `justtcg-js` SDK and wrap it with the existing Provider SDK.
+
+Rationale:
+
+- The SDK is published as the official JavaScript/TypeScript SDK for the JustTCG API.
+- It supports environment-variable authentication through `JUSTTCG_API_KEY`.
+- It provides typed card, variant, usage, pagination, price history, and statistic models.
+- It keeps API versioning behind `client.v1`, reducing custom request code inside the application.
+
+Constraint: application code may not call the SDK directly. The allowed path is Application -> Provider SDK -> JustTCG Adapter -> official SDK -> JustTCG API.
+
+Scope: Sprint 31A validates connectivity only. It does not add caching, retries, Assessment consumption, Strategy consumption, Negotiation changes, Decision changes, or production UI changes.
+
 ## Major Product And Architecture Decisions
 
 0.9. TCGplayer is the primary Market Intelligence provider. Its data must enter through the Provider SDK and normalized MarketSnapshot evidence; raw provider responses must never reach UI, Assessment, Strategy, Business Profile, Negotiation, or Decision layers.
+
+0.95. Market provider values are evidence until validated. Market Truth validation must classify price concepts and attach provider attribution before the repository stores those values.
+
+0.96. Market evidence is layered. Provider priority, fallback chains, freshness, confidence, and provenance determine selected field values.
+
+0.97. Market evidence semantics belong to the Market Ontology. A provider must declare whether it supports, partially supports, does not support, or has unknown support for every market evidence domain before its evidence can be stored for that domain.
 
 0.8. Future providers must follow the Provider SDK lifecycle. Providers supply data; SDK infrastructure owns normalization, health, cache hooks, diagnostics, evidence mapping, confidence contribution, metadata, retry hooks, and validation hooks.
 

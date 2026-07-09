@@ -8,6 +8,7 @@ import {
 } from "@/lib/providers/sdk/ProviderRegistry";
 
 const requiredProviders = [
+  "justtcg",
   "edhrec",
   "psa",
   "bgs",
@@ -32,9 +33,16 @@ test("Provider SDK registers planned future providers", () => {
     metadata.find((provider) => provider.id === "tcgplayer")?.lifecycleStatus,
     "ACTIVE",
   );
+  assert.equal(
+    metadata.find((provider) => provider.id === "justtcg")?.lifecycleStatus,
+    "ACTIVE",
+  );
   assert.ok(
     metadata
-      .filter((provider) => provider.id !== "tcgplayer")
+      .filter(
+        (provider) =>
+          !["justtcg", "tcgplayer"].includes(provider.id),
+      )
       .every((provider) => provider.lifecycleStatus === "PLANNED"),
   );
   assert.ok(metadata.every((provider) => provider.supportedInputs.length > 0));

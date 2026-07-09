@@ -32,6 +32,40 @@ export interface MarketIntelligenceEvidence {
   volatility: number;
 }
 
+export interface MarketProviderRawObservation {
+  observedAt: string;
+  providerField: string;
+  providerName: string;
+  rawValue: boolean | number | string | null;
+  unit?: string;
+}
+
+export interface MarketEvidenceDiagnostics {
+  conditionSpecific: boolean;
+  evidenceSource: string | null;
+  evidenceNodeId: string | null;
+  fallbackReason: string;
+  fallbackUsed: boolean;
+  finish: string;
+  providerCondition: string | null;
+  projectionUsed: boolean;
+  requestedCondition: string;
+  requestedUiField: string | null;
+  resolvedEvidenceDomain: string | null;
+  selectedProvider: string | null;
+}
+
+export interface MarketSnapshotIdentityEvidence {
+  canonicalName?: string | null;
+  collectorNumber?: string | null;
+  condition?: string | null;
+  finish?: string | null;
+  game?: string | null;
+  language?: string | null;
+  productIdentifier?: string | null;
+  providerTimestamp?: string | null;
+}
+
 export interface MarketSnapshot {
   printingId: string;
   variantId: string;
@@ -39,8 +73,11 @@ export interface MarketSnapshot {
   providerId: string;
   updatedAt: string;
   sourceLabel: string;
+  identityEvidence?: MarketSnapshotIdentityEvidence;
+  rawObservations?: MarketProviderRawObservation[];
   rawPrices?: Record<string, string | null | undefined>;
   marketIntelligence?: MarketIntelligenceEvidence;
+  marketEvidenceDiagnostics?: MarketEvidenceDiagnostics;
   durationMs?: number;
   errorMessage?: string;
   priceMissing?: boolean;

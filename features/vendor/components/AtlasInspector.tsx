@@ -480,6 +480,68 @@ export default function AtlasInspector({
           label="Last Synchronization"
           value={marketSnapshot?.marketIntelligence?.lastSynchronizedAt}
         />
+        <KeyValue
+          label="Evidence Node"
+          value={marketSnapshot?.marketEvidenceDiagnostics?.evidenceNodeId}
+        />
+        <KeyValue
+          label="Requested UI Field"
+          value={marketSnapshot?.marketEvidenceDiagnostics?.requestedUiField}
+        />
+        <KeyValue
+          label="Resolved Evidence Domain"
+          value={marketSnapshot?.marketEvidenceDiagnostics?.resolvedEvidenceDomain}
+        />
+        <KeyValue
+          label="Evidence Source"
+          value={marketSnapshot?.marketEvidenceDiagnostics?.evidenceSource}
+        />
+        <KeyValue
+          label="Projection Used"
+          value={
+            marketSnapshot?.marketEvidenceDiagnostics
+              ? marketSnapshot.marketEvidenceDiagnostics.projectionUsed
+                ? "Yes"
+                : "No"
+              : undefined
+          }
+        />
+        <KeyValue
+          label="Selected Evidence Provider"
+          value={marketSnapshot?.marketEvidenceDiagnostics?.selectedProvider}
+        />
+        <KeyValue
+          label="Evidence Finish"
+          value={marketSnapshot?.marketEvidenceDiagnostics?.finish}
+        />
+        <KeyValue
+          label="Provider Condition"
+          value={marketSnapshot?.marketEvidenceDiagnostics?.providerCondition}
+        />
+        <KeyValue
+          label="Condition-Specific Evidence"
+          value={
+            marketSnapshot?.marketEvidenceDiagnostics
+              ? marketSnapshot.marketEvidenceDiagnostics.conditionSpecific
+                ? "Yes"
+                : "No"
+              : undefined
+          }
+        />
+        <KeyValue
+          label="Condition Fallback"
+          value={
+            marketSnapshot?.marketEvidenceDiagnostics
+              ? marketSnapshot.marketEvidenceDiagnostics.fallbackUsed
+                ? "Yes"
+                : "No"
+              : undefined
+          }
+        />
+        <KeyValue
+          label="Fallback Reason"
+          value={marketSnapshot?.marketEvidenceDiagnostics?.fallbackReason}
+        />
       </InspectorSection>
 
       <InspectorSection title="Provider SDK">

@@ -1,5 +1,214 @@
 # Architecture
 
+## Sprint 32: Market Ontology
+
+The Market Ontology is the canonical vocabulary for market evidence. It defines what each evidence domain means before providers are asked for data.
+
+```text
+Provider Observations
+  -> Evidence Domains
+  -> Market Intelligence Repository
+  -> Asset Assessment
+```
+
+Core files:
+
+- `lib/market/ontology/MarketOntology.ts`
+- `lib/market/ontology/EvidenceDomain.ts`
+- `lib/market/ontology/EvidenceCapability.ts`
+- `lib/market/ontology/ProviderCapability.ts`
+- `lib/market/ontology/CapabilityRegistry.ts`
+- `lib/market/ontology/EvidenceQuestion.ts`
+- `lib/market/ontology/EvidenceResolver.ts`
+- `lib/market/ontology/DomainCoverage.ts`
+
+Evidence domains:
+
+- Variant Valuation
+- Listing Intelligence
+- Transaction Intelligence
+- Historical Pricing
+- Inventory Intelligence
+- Price Trend
+- Volatility
+- Market Liquidity
+- Market Confidence
+- Provider Metadata
+
+Provider capability rule:
+
+- Providers declare supported, unsupported, partial, and unknown domains explicitly.
+- Market questions resolve to a domain before provider selection.
+- Unsupported providers are not queried for that domain.
+- Unsupported provider fields are not written as repository evidence.
+
+JustTCG capabilities:
+
+- Supported: Variant Valuation, Historical Pricing, Price Trend, Volatility, Market Confidence, Provider Metadata.
+- Partial: Market Liquidity, because valuation and movement help context but do not prove depth.
+- Unsupported: Listing Intelligence, Transaction Intelligence, Inventory Intelligence.
+
+If a UI or engine asks for Lowest Listing, the platform resolves that question to Listing Intelligence. JustTCG is not eligible for that domain. A listing-capable provider such as TCGplayer can answer now, while Cardmarket and eBay remain future mappings.
+
+### Transitional Evidence Projection
+
+Until the Market Intelligence Engine exists, Current Market Estimate uses a compatibility bridge:
+
+```text
+Current Market Estimate
+  -> Consensus Market Estimate (future)
+  -> Variant Valuation (JustTCG)
+  -> Historical Repository Estimate
+  -> No connected evidence
+```
+
+This projection is internal and does not weaken provider capability enforcement. JustTCG still cannot answer Listing Intelligence, Transaction Intelligence, or Inventory Intelligence. The bridge only allows Variant Valuation to keep the Current Market Estimate populated so Vendor Workspace does not lose valid valuation evidence.
+
+Developer diagnostics expose Requested UI Field, Resolved Evidence Domain, Evidence Source, and Projection Used. Production users see the valuation result, not implementation details.
+
+Removal plan: retire `TransitionalEvidenceProjection` when the Market Intelligence Engine owns Current Market Estimate natively.
+
+## Sprint 31D: Market Evidence Layer
+
+Market values are now selected from layered provider evidence. A single provider response is never treated as complete market truth, and adding a provider must not reduce already available information.
+
+```text
+Market Providers
+  -> Provider Validation
+  -> Market Evidence Layer
+  -> Market Intelligence Repository
+  -> Asset Assessment
+```
+
+Core files:
+
+- `lib/market/MarketEvidenceLayer.ts`
+- `lib/market/EvidenceAggregator.ts`
+- `lib/market/EvidenceResolver.ts`
+- `lib/market/EvidencePriority.ts`
+- `lib/market/EvidenceProvenance.ts`
+- `lib/market/EvidenceCoverage.ts`
+- `lib/market/EvidenceFallback.ts`
+- `lib/market/EvidenceSelection.ts`
+
+Responsibilities:
+
+- Aggregate evidence from multiple providers.
+- Preserve existing evidence when a new provider lacks a field.
+- Select best available evidence by freshness, configured provider priority, confidence, and recency.
+- Retain provider provenance internally.
+- Report provider coverage independently by field.
+- Keep production UI on the same market snapshot contract.
+
+Fallback examples:
+
+- Current Market Estimate: future consensus -> JustTCG -> Scryfall -> repository snapshot -> unavailable.
+- Lowest Listing: JustTCG -> repository snapshot -> unavailable.
+- Recent Sales: JustTCG -> repository snapshot -> unavailable.
+
+Production surfaces receive selected market values. Developer tooling can inspect evidence stack, selected provider, fallback reason, provider priority, freshness, and coverage.
+
+Condition-specific evidence:
+
+- Evidence nodes retain asset, printing, variant, finish, condition, provider condition, and product identifier.
+- Provider condition-specific values are stored separately from generic market estimates.
+- Generic evidence can be used as fallback, but condition-specific evidence is preferred when freshness is comparable.
+- Future graded variants can use the evidence node certification envelope for PSA, BGS, CGC, grade, and serial identity without redesigning repository storage.
+
+JustTCG raw-observation rule:
+
+- `docs/providers/JUSTTCG_DATA_MODEL.md` is the provider mapping source of record.
+- JustTCG `card` and `variant` fields are preserved as raw observations.
+- JustTCG movement, range, trend, volatility, and activity statistics are classified as provider-supplied derived metrics.
+- Repository evidence stores raw observations; Market Intelligence derives platform metrics internally.
+- Provider fields must not be assumed to correspond directly to UI fields.
+
+## Sprint 31C: Market Truth Model
+
+The repository stores provider evidence, not provider truth. A provider response must pass Market Truth validation before it can update Market Intelligence Repository fields.
+
+```text
+Selected Printing
+  -> Market Provider
+  -> Normalization
+  -> Market Truth Model
+  -> Market Intelligence Repository
+  -> Asset Session
+```
+
+Core files:
+
+- `lib/market/MarketTruthEngine.ts`
+- `lib/market/ProviderEvidenceValidator.ts`
+- `lib/market/ProviderEvidenceScore.ts`
+- `lib/market/ProviderMatchValidator.ts`
+- `lib/market/ProviderPricingClassifier.ts`
+- `lib/market/ProviderFieldMapping.ts`
+- `lib/market/ProviderConsistencyReport.ts`
+- `lib/market/MarketTruthReport.ts`
+
+Validation covers canonical card identity, printing, collector number, finish, condition, language, game, product identifier, and provider timestamp. Missing legacy metadata can warn; conflicting metadata rejects the provider response.
+
+Price classification maps provider values into business-readable categories: Market Price, Lowest Listing, Lowest NM Listing, Direct Price, Average Sale, Recent Sale, Suggested Price, or Unknown.
+
+Every stored provider-derived value retains provider name, retrieval timestamp, confidence, classification, freshness, and coverage. A future consensus engine may compare multiple validated providers, but Sprint 31C intentionally does not create consensus or alter Assessment, Strategy, Negotiation, Recommendation, or cache architecture.
+
+## Sprint 31B: Market Intelligence Repository
+
+Market provider responses are no longer treated as transient request output. They are normalized into Market Intelligence snapshots owned by the platform.
+
+```text
+Provider
+  -> Normalization
+  -> Market Intelligence Repository
+  -> Asset Session
+  -> Assessment
+  -> Strategy
+  -> Negotiation
+  -> Decision
+```
+
+`app/api/market/snapshot` now consumes `MarketRefreshScheduler`, which reads and updates `MarketIntelligenceRepository`. Provider communication is centralized inside market infrastructure. Application code does not call market providers directly.
+
+The snapshot model stores card identity, printing, finish, condition, current market price, lowest listing, listing count, recent sales, spread, market confidence, liquidity, sales velocity, volatility, provider, last refresh, per-field expiration, and snapshot version.
+
+Refresh philosophy:
+
+- Every field owns its own TTL.
+- Fresh repository data returns without provider contact.
+- Slightly stale data returns immediately and refreshes asynchronously.
+- Expired or missing fields block for provider refresh.
+- Only expired or missing fields are refreshed.
+
+Initial local persistence uses `.market-intelligence-repository.json`. The repository boundary is intentionally narrow so storage can migrate to SQLite, PostgreSQL, Redis, or cloud storage without changing business engines.
+
+Atlas diagnostics track repository health, average freshness, cache hit rate, provider usage, estimated API cost saved, oldest snapshot, and newest snapshot.
+
+## Sprint 31A: JustTCG Live Provider Connection
+
+The first live provider connection uses the official `justtcg-js` JavaScript/TypeScript SDK.
+
+```text
+Application
+  -> Provider SDK
+  -> JustTCG Provider Adapter
+  -> official justtcg-js SDK
+  -> JustTCG API
+```
+
+Application code must not instantiate or call `JustTCG` directly. `JustTCGProvider` owns SDK initialization, `JustTCGAdapter` owns Provider SDK compatibility, and `JustTCGNormalizer` maps SDK response fields into internal normalized provider data.
+
+Current scope is connectivity only:
+
+- Known-card request: `Mox Opal`.
+- Authentication: `JUSTTCG_API_KEY` from the environment.
+- SDK version: `justtcg-js@0.2.1`.
+- No caching, retries, Assessment changes, Strategy changes, Negotiation changes, Decision changes, or production UI redesign.
+
+Normalized field mapping is documented in `JUSTTCG_FIELD_MAPPINGS` and covers card identity, set metadata, external identifiers, variant condition, printing, language, current USD price, update timestamp, price history, movement percentages, and price statistics.
+
+The temporary `/dev/justtcg` page is development-only. It displays the raw SDK response for inspection, the normalized response used by the Provider SDK, provider latency, authentication status, and diagnostics. Production surfaces continue to receive normalized provider data only.
+
 ## Application Structure
 
 PriceTrackingLLC is a Next.js application using TypeScript and Tailwind CSS.

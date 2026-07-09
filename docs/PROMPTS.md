@@ -2,6 +2,56 @@
 
 This file summarizes major prompts and architectural instructions. It intentionally avoids copying every prompt in full.
 
+## Sprint 32
+
+Purpose: introduce the Market Ontology.
+
+Core instruction: providers contribute observations, observations belong to evidence domains, evidence domains feed Market Intelligence, and providers must never answer outside their capability.
+
+Major files affected: `lib/market/ontology/`, market refresh scheduling, provider evidence validation, evidence fallback language, JustTCG provider semantics, market ontology tests, and Atlas documentation.
+
+Result: market questions now resolve to semantic domains before provider selection. JustTCG is registered for variant valuation, historical pricing, price trend, volatility, market confidence, and provider metadata, and explicitly unsupported for listing, transaction, and inventory intelligence.
+
+## Sprint 31D
+
+Purpose: introduce the Market Evidence Layer.
+
+Core instruction: every provider contributes evidence, evidence is layered, and adding a provider must never reduce available market information.
+
+Major files affected: `lib/market/`, Market Intelligence Repository, Market Refresh Scheduler, JustTCG developer inspection page, Market Evidence tests, and Atlas documentation.
+
+Result: provider evidence now stacks by field, repository snapshots preserve existing populated fields, provider priorities and fallback chains drive best-available selection, and developer tooling can inspect provenance and coverage.
+
+## Sprint 31C
+
+Purpose: introduce the Market Truth Model.
+
+Core instruction: the repository stores provider evidence, not truth. Provider responses must be validated, classified, scored, and attributed before they become Market Intelligence Repository values.
+
+Major files affected: `lib/market/`, JustTCG developer inspection page, market repository snapshot contracts, market repository scheduler, Market Truth tests, and Atlas documentation.
+
+Result: selected-printing market provider responses now pass through provider match validation, price classification, evidence scoring, and Market Truth reporting before repository writes. Consensus, extra providers, cache redesign, Assessment changes, and recommendation changes remain deferred.
+
+## Sprint 31B
+
+Purpose: introduce the Market Intelligence Repository.
+
+Core instruction: provider responses should become repository-owned Market Intelligence. Providers update the repository, Asset Session consumes repository snapshots, and business logic must not communicate directly with providers.
+
+Major files affected: `lib/market/`, market snapshot API route, Vendor Workspace market request context, repository tests, local persistence ignore rule, and Atlas documentation.
+
+Result: market snapshots now flow through repository freshness checks with per-field TTLs, local persistence, statistics, and diagnostics.
+
+## Sprint 31A
+
+Purpose: establish the first live provider connection.
+
+Core instruction: integrate the official `justtcg-js` SDK through the Provider SDK, authenticate with `JUSTTCG_API_KEY`, retrieve one known card, normalize SDK fields, and keep raw SDK data out of production application flows.
+
+Major files affected: `lib/providers/justtcg/`, `ProviderRegistry`, `/dev/justtcg`, package dependency files, provider tests, environment example, and Atlas documentation.
+
+Result: JustTCG SDK authentication was validated with a known-card Mox Opal request, normalization mappings were documented, and a temporary developer-only inspection page was added.
+
 ## Sprint 30
 
 Purpose: integrate the first real Intelligence Provider.

@@ -13,6 +13,11 @@ Atlas Sprint A1
 - Provider-independent engines under `lib/engines/`.
 - External and mock providers under `lib/providers/`.
 - Provider SDK under `lib/providers/sdk/`.
+- Market Intelligence Repository under `lib/market/`.
+- Market Truth Model under `lib/market/`.
+- Market Evidence Layer under `lib/market/`.
+- Market Ontology under `lib/market/ontology/`.
+- JustTCG official SDK provider under `lib/providers/justtcg/`.
 - Business profile system under `lib/business/`.
 - Workflow command and context systems under `lib/workflow/`.
 - Intelligence framework, Playability model, and Certification model under `lib/intelligence/`.
@@ -31,6 +36,14 @@ Runtime architecture flows through normalized domain objects:
 Query and identity interpretation -> printing and variant resolution -> certification profile -> market snapshot -> readiness and pipeline validation -> card intelligence -> asset assessment -> business profile -> strategy -> negotiation ladder -> offer validation -> decision -> presentation.
 
 Atlas is outside this runtime chain.
+
+Live provider connectivity flow:
+
+Application -> Provider SDK -> JustTCG Adapter -> official `justtcg-js` SDK -> JustTCG API.
+
+Market repository flow:
+
+Provider -> Normalization -> Market Ontology -> Market Truth Model -> Market Evidence Layer -> Market Intelligence Repository -> Asset Session -> Assessment -> Strategy -> Negotiation -> Decision.
 
 Semantic relationship flow:
 
@@ -55,6 +68,11 @@ Intelligence model evidence -> Evidence Sufficiency -> Asset Assessment Engine -
 ## Providers
 
 - Provider SDK lifecycle for metadata, health, coverage, evidence, diagnostics, caching hooks, retry hooks, validation hooks, and normalization.
+- Market Intelligence Repository for local persistence, per-field TTLs, background refresh, statistics, diagnostics, and repository-owned market snapshots.
+- Market Truth Model for provider match validation, price classification, evidence scoring, consistency reporting, and repository write gating.
+- Market Evidence Layer for evidence stacking, configurable provider priority, fallback chains, provenance, coverage, and selected field values.
+- Market Ontology for evidence domains, provider capability declarations, evidence question resolution, and domain coverage.
+- JustTCG as the first live official SDK provider connection, authenticated by `JUSTTCG_API_KEY`.
 - TCGplayer Market Intelligence Provider as the first active SDK-backed market provider.
 - Scryfall Identity Provider.
 - Scryfall Market Provider.
@@ -63,6 +81,18 @@ Intelligence model evidence -> Evidence Sufficiency -> Asset Assessment Engine -
 - Planned SDK metadata for EDHREC, PSA, BGS, CGC, Cardmarket, Melee, MTGO, LigaMagic, and eBay.
 
 Provider rule: providers supply data only. SDK infrastructure owns lifecycle behavior, and provider data must be adapted into domain objects before engines or UI consume it.
+
+Market Truth rule: provider values are evidence until validated against the selected printing and classified by price concept. Repository snapshots store provider attribution, retrieval time, confidence, classification, freshness, and coverage.
+
+Market Evidence rule: adding provider evidence must never reduce platform knowledge. Missing fields do not erase populated values from other providers.
+
+Market Ontology rule: providers must declare supported, unsupported, partial, or unknown capability by evidence domain. Unsupported providers are skipped for requested domains and unsupported fields are not stored as repository evidence.
+
+Transitional Projection rule: Current Market Estimate may project JustTCG Variant Valuation until the Market Intelligence Engine is implemented. Lowest Listing and Recent Sales must not use projected Variant Valuation.
+
+JustTCG data model rule: JustTCG provider responses are raw observations plus provider-supplied derived statistics. Repository evidence stores raw observations, and platform Market Intelligence derives selected market metrics internally.
+
+JustTCG capability rule: JustTCG supports Variant Valuation, Historical Pricing, Price Trend, Volatility, Market Confidence, and Provider Metadata. It does not support Listing Intelligence, Transaction Intelligence, or Inventory Intelligence.
 
 ## Intelligence Models
 

@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local environment variables
+.env.local
+.env
+.env.*
+!.env.example
+
+# Local market repository persistence
+.market-intelligence-repository.json

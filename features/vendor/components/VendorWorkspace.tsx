@@ -287,6 +287,8 @@ export default function VendorWorkspace({
   const activeMarketSnapshot =
     marketSnapshot?.printingId === selectedCard?.id &&
     marketSnapshot?.variantId === selectedVariant?.id &&
+    (marketSnapshot?.marketEvidenceDiagnostics?.requestedCondition ??
+      selectedCondition) === selectedCondition &&
     marketSnapshotId === workflow.assetContext.marketSnapshotId
       ? marketSnapshot
       : undefined;
@@ -334,6 +336,9 @@ export default function VendorWorkspace({
     const controller = new AbortController();
     const printingId = selectedCard.id;
     const variantId = selectedVariant.id;
+    const cardName = selectedCard.name;
+    const finish = selectedVariant.finish;
+    const game = selectedCard.game;
     const assetContextGeneration = workflow.assetContext.generation;
 
     async function loadMarketSnapshot() {
@@ -343,7 +348,15 @@ export default function VendorWorkspace({
         const response = await fetch(
           `/api/market/snapshot?printingId=${encodeURIComponent(
             printingId,
-          )}&variantId=${encodeURIComponent(variantId)}`,
+          )}&variantId=${encodeURIComponent(
+            variantId,
+          )}&cardName=${encodeURIComponent(
+            cardName,
+          )}&game=${encodeURIComponent(
+            game,
+          )}&finish=${encodeURIComponent(
+            finish,
+          )}&condition=${encodeURIComponent(selectedCondition)}`,
           { signal: controller.signal },
         );
         const snapshot = (await response.json()) as MarketSnapshot;
@@ -402,9 +415,14 @@ export default function VendorWorkspace({
     loadMarketSnapshot();
 
     return () => controller.abort();
-    // Market loading is tied to Asset Context generation so condition changes refresh it.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCard, selectedVariant, workflow.assetContext.generation]);
+  }, [
+    filteredPrintingCandidates.length,
+    searchResults.length,
+    selectedCard,
+    selectedCondition,
+    selectedVariant,
+    workflow.assetContext.generation,
+  ]);
 
   useEffect(() => {
     function handleDeveloperShortcut(event: KeyboardEvent) {
