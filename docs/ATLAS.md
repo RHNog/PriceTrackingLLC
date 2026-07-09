@@ -2,6 +2,33 @@
 
 Atlas is the permanent project knowledge base for PriceTrackingLLC.
 
+## Documentation Index
+
+Planning documents are separated by responsibility:
+
+- Engineering roadmap: `docs/ROADMAP.md`
+- Product roadmap: `docs/PRODUCT_ROADMAP.md`
+- Business strategy: `docs/BUSINESS_STRATEGY.md`
+- Idea ledger: `docs/IDEA_LEDGER.md`
+- Monetization possibilities: `docs/MONETIZATION.md`
+- Platform v1.0 release freeze: `docs/releases/Platform-v1.0.md`
+- Architecture: `docs/ARCHITECTURE.md`
+- Decisions: `docs/DECISIONS.md`
+- Sprint history: `docs/SPRINT_HISTORY.md`
+- Agent handoff: `docs/AGENT_HANDOFF.md`
+
+Rule:
+
+Engineering, product, and business planning should evolve independently. Product ideas should not be promoted into engineering work until they are scoped into an engineering roadmap item or work order.
+
+## Platform v1.0 Planning Split
+
+Platform v1.0 freezes the current architecture while creating permanent planning lanes:
+
+- Engineering owns implementation sequencing and platform infrastructure.
+- Product owns customer-facing capabilities and product surface evolution.
+- Business owns customers, value proposition, growth strategy, monetization philosophy, and open strategic questions.
+
 ## Sprint 31D Synchronization
 
 Market Evidence Layer:

@@ -1,5 +1,7 @@
 # Roadmap
 
+This is the engineering roadmap. Product-facing ideas now live in `docs/PRODUCT_ROADMAP.md`. Business strategy lives in `docs/BUSINESS_STRATEGY.md`. Monetization options live in `docs/MONETIZATION.md`. Unscoped ideas live in `docs/IDEA_LEDGER.md`.
+
 ## Current Sprint: Sprint 34
 
 Market Intelligence now interprets provider observations into explainable market profiles.
@@ -154,6 +156,8 @@ Sprint 27: Printing Descriptor Engine
 
 ## Future Roadmap
 
+Future engineering roadmap items:
+
 - Additional Market Provider integrations through the Provider SDK
 - Provider SDK migration for existing Scryfall identity and market providers
 - Pricing normalization
@@ -207,15 +211,14 @@ Sprint 27: Printing Descriptor Engine
 - Development-only workflow context inspector
 - Persisted Vendor Workspace preferences
 - Full browser visual regression checks once Playwright browsers are installed
-- Portfolio intelligence
-- Inventory management
-- Strategy builder
 - Knowledge Feedback Engine
 - Behavior Engine
 - Vendor Intelligence Engine
 - Personal vocabulary
 - Community vocabulary
 - AI Knowledge Curator
+
+Product-facing future ideas have moved to `docs/PRODUCT_ROADMAP.md`, including Inventory Management, Portfolio Tracking, Watchlists, Alerts, CRM, Marketplace Integrations, Mobile, Analytics, Collection Management, Future AI Assistant, and Future Multi-store Support.
 
 ## Roadmap Rule
 

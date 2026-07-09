@@ -12,6 +12,18 @@ Platform v1.0 freezes the current PriceTrackingLLC platform as a recoverable bas
 
 No functionality, architecture, provider behavior, UI behavior, replay behavior, repository behavior, business logic, or engine logic is changed by this release document.
 
+## Planning Framework
+
+Platform v1.0 separates future planning into independent lanes:
+
+- Engineering roadmap: `docs/ROADMAP.md`
+- Product roadmap: `docs/PRODUCT_ROADMAP.md`
+- Business strategy: `docs/BUSINESS_STRATEGY.md`
+- Idea ledger: `docs/IDEA_LEDGER.md`
+- Monetization possibilities: `docs/MONETIZATION.md`
+
+Product-facing ideas should live in the Product Roadmap or Idea Ledger until they are promoted into scoped engineering work. Monetization ideas should remain possibilities until a pricing model is selected.
+
 ## Platform Summary
 
 PriceTrackingLLC v1.0 is a professional TCG decision operating system. The platform resolves an asset, validates workflow eligibility, gathers provider-backed market evidence, stores and layers evidence, interprets market conditions, synthesizes asset assessment, applies business context and strategy, builds a negotiation ladder, and resolves a purchase decision.
