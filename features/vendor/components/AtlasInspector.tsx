@@ -542,6 +542,36 @@ export default function AtlasInspector({
           label="Fallback Reason"
           value={marketSnapshot?.marketEvidenceDiagnostics?.fallbackReason}
         />
+        <KeyValue
+          label="Missing Evidence"
+          value={marketSnapshot?.marketEvidenceDiagnostics?.missingEvidence?.join(", ")}
+        />
+        <KeyValue
+          label="Providers Queried"
+          value={marketSnapshot?.marketEvidenceDiagnostics?.providersQueried?.join(", ")}
+        />
+        <KeyValue
+          label="Providers Skipped"
+          value={marketSnapshot?.marketEvidenceDiagnostics?.providersSkipped
+            ?.map((provider) => `${provider.providerName}: ${provider.reason}`)
+            .join(" | ")}
+        />
+        <KeyValue
+          label="Merge Result"
+          value={marketSnapshot?.marketEvidenceDiagnostics?.mergeResult}
+        />
+        <div className="mt-3 rounded-md border border-zinc-800 bg-zinc-950/60 px-3 py-2">
+          <p className="font-medium text-zinc-500">Evidence Coverage</p>
+          <div className="mt-2 grid gap-1">
+            {marketSnapshot?.marketEvidenceDiagnostics?.coverage?.map((entry) => (
+              <KeyValue
+                key={entry.domainName}
+                label={entry.domainName}
+                value={`${entry.status} / ${entry.freshness}`}
+              />
+            )) ?? <KeyValue label="Coverage" value="None" />}
+          </div>
+        </div>
       </InspectorSection>
 
       <InspectorSection title="Provider SDK">

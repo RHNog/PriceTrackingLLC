@@ -4,6 +4,9 @@
 
 ### Added
 
+- Sprint 32.2 coverage-driven market refresh documentation.
+- Evidence Coverage Map documentation for asset, printing, finish, condition, coverage status, and domain freshness.
+- Developer diagnostics documentation for coverage, freshness, missing evidence, providers queried, providers skipped, and merge result.
 - Sprint 32.1 Transitional Evidence Projection documentation.
 - Developer diagnostics for requested UI field, resolved evidence domain, evidence source, and projection usage.
 - Sprint 32 Market Ontology documentation.
@@ -91,6 +94,8 @@
 
 ### Changed
 
+- Market refresh now requires both freshness and evidence-domain coverage before skipping provider requests.
+- Fresh but incomplete snapshots now fetch only missing refreshable evidence domains.
 - Current Market Estimate now preserves JustTCG Variant Valuation through a temporary projection bridge until the Market Intelligence Engine exists.
 - Lowest Listing and Recent Sales remain restricted to Listing Intelligence and Transaction Intelligence respectively.
 - Current sprint updated to Sprint 32.

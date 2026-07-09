@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { marketRefreshScheduler } from "@/lib/market/MarketRefreshScheduler";
+import {
+  marketRefreshScheduler,
+  type MarketRepositoryReadResult,
+} from "@/lib/market/MarketRefreshScheduler";
 import type { MarketIntelligenceRepositorySnapshot } from "@/lib/market/MarketSnapshot";
 import type { MarketPrice } from "@/types/marketPrice";
 import type { MarketSnapshot } from "@/types/marketSnapshot";
@@ -61,6 +64,7 @@ function createPrices(snapshot: MarketIntelligenceRepositorySnapshot): MarketPri
 
 function toApiMarketSnapshot(
   snapshot: MarketIntelligenceRepositorySnapshot,
+  diagnostics?: MarketRepositoryReadResult["diagnostics"],
 ): MarketSnapshot {
   const prices = createPrices(snapshot);
   const selectedEvidence =
@@ -104,6 +108,11 @@ function toApiMarketSnapshot(
     },
     marketEvidenceDiagnostics: {
       conditionSpecific: selectedNode?.conditionSpecific ?? false,
+      coverage: diagnostics?.coverage.map((entry) => ({
+        domainName: entry.domainName,
+        freshness: entry.freshness,
+        status: entry.status,
+      })),
       evidenceSource:
         selectedEvidence?.projection?.evidenceSource ??
         selectedEvidence?.provenance?.source ??
@@ -114,7 +123,11 @@ function toApiMarketSnapshot(
         "No selected market evidence was available.",
       fallbackUsed: !(selectedNode?.conditionSpecific ?? false),
       finish: selectedNode?.finish ?? snapshot.identity.finish,
+      mergeResult: diagnostics?.mergeResult,
+      missingEvidence: diagnostics?.missingEvidence,
       providerCondition: selectedNode?.providerCondition ?? null,
+      providersQueried: diagnostics?.providersQueried,
+      providersSkipped: diagnostics?.providersSkipped,
       projectionUsed: selectedEvidence?.projection?.projectionUsed ?? false,
       requestedCondition: snapshot.identity.condition,
       requestedUiField:
@@ -158,5 +171,7 @@ export async function GET(request: Request) {
     variantId,
   });
 
-  return NextResponse.json(toApiMarketSnapshot(result.repositorySnapshot));
+  return NextResponse.json(
+    toApiMarketSnapshot(result.repositorySnapshot, result.diagnostics),
+  );
 }

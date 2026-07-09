@@ -20,6 +20,8 @@ JustTCG is connected for Variant Valuation, Historical Pricing, Price Trend, Vol
 
 Sprint 32.1 adds a temporary compatibility bridge in `lib/market/TransitionalEvidenceProjection.ts`. Current Market Estimate may project JustTCG Variant Valuation while the Market Intelligence Engine is not implemented. This must not be copied to Lowest Listing, listing count, recent sales, spread, seller competition, shipping, quantity, or inventory depth. Atlas diagnostics expose Requested UI Field, Resolved Evidence Domain, Evidence Source, and Projection Used.
 
+Sprint 32.2 changes scheduling behavior only. Fresh repository snapshots must still evaluate evidence coverage before returning. `lib/market/EvidenceCoverageMap.ts` derives domain coverage and domain freshness from stored evidence. `MarketRefreshScheduler` fetches only preferred capable providers for missing refreshable domains and merges valid evidence back into the repository.
+
 ## Sprint 31D Handoff
 
 Market evidence is layered before selected values reach downstream consumers.
@@ -114,6 +116,8 @@ Sprint 31D adds the Market Evidence Layer. Provider evidence is stacked, reposit
 Sprint 32 adds the Market Ontology. Evidence domains define what providers know before provider selection. Provider capabilities must be explicit, and unsupported provider fields must not become repository evidence.
 
 Sprint 32.1 adds Transitional Evidence Projection so valid JustTCG Variant Valuation continues to populate Current Market Estimate until the Market Intelligence Engine replaces the bridge.
+
+Sprint 32.2 adds coverage-driven refresh. Freshness alone must not skip provider requests when evidence coverage is incomplete.
 
 Playability Intelligence now measures why a card has play demand. It is registered in the Asset Intelligence Framework, backed first by Scryfall legalities, exposed on `CardProfile.playabilityProfile`, and consumed by strategies through configurable `Playability` signal weights.
 

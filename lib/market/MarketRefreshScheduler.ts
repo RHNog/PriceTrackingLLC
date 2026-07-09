@@ -13,7 +13,16 @@ import type {
 } from "@/lib/market/MarketSnapshot";
 import type { MarketSnapshotField } from "@/lib/market/MarketSnapshotMetadata";
 import { marketSnapshotFields } from "@/lib/market/MarketRefreshPolicy";
-import { canProviderAnswerAnyMarketField } from "@/lib/market/ontology/EvidenceResolver";
+import {
+  createEvidenceCoverageMap,
+  createEvidenceRefreshDiagnostics,
+  getFieldsForEvidenceDomains,
+  getPreferredProvidersForEvidenceDomains,
+  type EvidenceRefreshDiagnostics,
+} from "@/lib/market/EvidenceCoverageMap";
+import { capabilityRegistry } from "@/lib/market/ontology/CapabilityRegistry";
+import type { EvidenceDomainId } from "@/lib/market/ontology/EvidenceDomain";
+import { getProviderCapabilityForDomain } from "@/lib/market/ontology/ProviderCapability";
 import type { MarketSnapshot } from "@/types/marketSnapshot";
 
 export interface MarketSnapshotProviderClient {
@@ -34,6 +43,7 @@ export interface PrintingMarketSnapshotProviderClient {
 }
 
 export interface MarketRepositoryReadResult {
+  diagnostics: EvidenceRefreshDiagnostics;
   fieldsRefreshed: MarketSnapshotField[];
   freshness: ReturnType<MarketIntelligenceRepository["getFreshness"]>;
   repositorySnapshot: MarketIntelligenceRepositorySnapshot;
@@ -89,6 +99,23 @@ function getProviderBackedFields(fields: MarketSnapshotField[]) {
   );
 }
 
+function canProviderAnswerAnyEvidenceDomain(input: {
+  domainIds: EvidenceDomainId[];
+  providerIdOrName: string;
+}) {
+  const provider = capabilityRegistry.getProvider(input.providerIdOrName);
+
+  if (!provider || provider.connectionStatus !== "CONNECTED") {
+    return false;
+  }
+
+  return input.domainIds.some((domainId) => {
+    const capability = getProviderCapabilityForDomain(provider, domainId);
+
+    return capability.status === "SUPPORTED" || capability.status === "PARTIAL";
+  });
+}
+
 export class MarketRefreshScheduler {
   constructor(
     private readonly repository = marketIntelligenceRepository,
@@ -105,10 +132,26 @@ export class MarketRefreshScheduler {
   ): Promise<MarketRepositoryReadResult> {
     const snapshot = this.repository.getSnapshot(context);
     const freshness = this.repository.getFreshness(context, marketSnapshotFields);
+    const coverageMap = createEvidenceCoverageMap({
+      context,
+      snapshot,
+    });
 
-    if (snapshot && freshness.state === "Fresh") {
+    if (
+      snapshot &&
+      freshness.state === "Fresh" &&
+      coverageMap.refreshableDomains.length === 0
+    ) {
       this.repository.recordHit();
       return {
+        diagnostics: createEvidenceRefreshDiagnostics({
+          coverageMap,
+          mergeResult: "Skipped provider refresh because freshness and coverage are satisfied.",
+          providersQueried: [],
+          providersSkipped: this.createProviderSkipDiagnostics(
+            coverageMap.refreshableDomains,
+          ),
+        }),
         fieldsRefreshed: [],
         freshness,
         repositorySnapshot: snapshot,
@@ -118,9 +161,25 @@ export class MarketRefreshScheduler {
 
     if (snapshot && freshness.state === "Stale") {
       this.repository.recordHit();
-      this.refreshFields(context, freshness.staleFields).catch(() => undefined);
+      const fieldsToRefresh = [
+        ...new Set([
+          ...freshness.staleFields,
+          ...getFieldsForEvidenceDomains(coverageMap.refreshableDomains),
+        ]),
+      ];
+
+      this.refreshFields(context, fieldsToRefresh).catch(() => undefined);
 
       return {
+        diagnostics: createEvidenceRefreshDiagnostics({
+          coverageMap,
+          mergeResult:
+            "Returned stale repository snapshot while missing or stale evidence refreshes asynchronously.",
+          providersQueried: [],
+          providersSkipped: this.createProviderSkipDiagnostics(
+            coverageMap.refreshableDomains,
+          ),
+        }),
         fieldsRefreshed: [],
         freshness,
         repositorySnapshot: snapshot,
@@ -130,14 +189,21 @@ export class MarketRefreshScheduler {
 
     this.repository.recordMiss();
     const fieldsToRefresh = snapshot
-      ? [...freshness.missingFields, ...freshness.expiredFields]
+      ? [
+          ...new Set([
+            ...freshness.missingFields,
+            ...freshness.expiredFields,
+            ...getFieldsForEvidenceDomains(coverageMap.refreshableDomains),
+          ]),
+        ]
       : marketSnapshotFields;
-    const refreshed = await this.refreshFields(context, fieldsToRefresh);
+    const refresh = await this.refreshFields(context, fieldsToRefresh, coverageMap);
 
     return {
+      diagnostics: refresh.diagnostics,
       fieldsRefreshed: getProviderBackedFields(fieldsToRefresh),
       freshness: this.repository.getFreshness(context, marketSnapshotFields),
-      repositorySnapshot: refreshed,
+      repositorySnapshot: refresh.snapshot,
       source: "Provider",
     };
   }
@@ -145,13 +211,25 @@ export class MarketRefreshScheduler {
   async refreshFields(
     context: MarketSnapshotRequestContext,
     fields: MarketSnapshotField[],
+    coverageMap = createEvidenceCoverageMap({
+      context,
+      snapshot: this.repository.getSnapshot(context),
+    }),
   ) {
     const fieldsToRefresh = getProviderBackedFields(fields);
     const startedAt = Date.now();
-    const providerSnapshots = await this.fetchProviderSnapshots(
+    const existingSnapshot = this.repository.getSnapshot(context);
+    const domainsToRefresh = coverageMap.refreshableDomains.length
+      ? coverageMap.refreshableDomains
+      : createEvidenceCoverageMap({
+          context,
+          snapshot: existingSnapshot,
+        }).refreshableDomains;
+    const providerFetch = await this.fetchProviderSnapshots(
       context,
-      fieldsToRefresh,
+      domainsToRefresh,
     );
+    const providerSnapshots = providerFetch.snapshots;
     const validatedSnapshots = providerSnapshots
       .map((snapshot) => ({
         snapshot,
@@ -163,14 +241,26 @@ export class MarketRefreshScheduler {
       .filter((result) => result.validation.report.valid);
 
     if (validatedSnapshots.length === 0) {
-      throw new Error(
-        "Provider response rejected: no valid market evidence was available.",
-      );
+      if (existingSnapshot) {
+        return {
+          diagnostics: createEvidenceRefreshDiagnostics({
+            coverageMap,
+            mergeResult:
+              providerSnapshots.length === 0
+                ? "No provider request was available for missing evidence domains; existing snapshot returned."
+                : "Provider responses produced no valid evidence; existing snapshot returned.",
+            providersQueried: providerFetch.providersQueried,
+            providersSkipped: providerFetch.providersSkipped,
+          }),
+          snapshot: existingSnapshot,
+        };
+      }
+
+      throw new Error("Provider response rejected: no valid market evidence was available.");
     }
 
     const primarySnapshot = validatedSnapshots[0].snapshot;
-
-    return this.repository.upsertSnapshot({
+    const refreshed = this.repository.upsertSnapshot({
       context,
       refresh: {
         evidence: validatedSnapshots.flatMap((result) => result.validation.evidence),
@@ -181,24 +271,42 @@ export class MarketRefreshScheduler {
         values: mapProviderSnapshotToValues(primarySnapshot),
       },
     });
+
+    return {
+      diagnostics: createEvidenceRefreshDiagnostics({
+        coverageMap: createEvidenceCoverageMap({
+          context,
+          snapshot: refreshed,
+        }),
+        mergeResult: `Merged ${validatedSnapshots.length} provider response(s) into repository evidence.`,
+        providersQueried: providerFetch.providersQueried,
+        providersSkipped: providerFetch.providersSkipped,
+      }),
+      snapshot: refreshed,
+    };
   }
 
   private async fetchProviderSnapshots(
     context: MarketSnapshotRequestContext,
-    fields: MarketSnapshotField[],
+    domainIds: EvidenceDomainId[],
   ) {
     const snapshots: MarketSnapshot[] = [];
+    const providersQueried: string[] = [];
+    const providersSkipped: EvidenceRefreshDiagnostics["providersSkipped"] = [];
     const visitedProviders = new Set<object>();
+    const preferredProviders = getPreferredProvidersForEvidenceDomains(domainIds);
 
     if (
       context.cardIdentity &&
       !visitedProviders.has(this.justTcgProvider) &&
-      canProviderAnswerAnyMarketField({
-        fields,
+      preferredProviders.includes("justtcg") &&
+      canProviderAnswerAnyEvidenceDomain({
+        domainIds,
         providerIdOrName: "justtcg",
       })
     ) {
       visitedProviders.add(this.justTcgProvider);
+      providersQueried.push("JustTCG");
       const justTcgSnapshot = await this.justTcgProvider.getMarketSnapshot({
         cardName: context.cardIdentity,
         condition: context.condition,
@@ -210,16 +318,25 @@ export class MarketRefreshScheduler {
       if (justTcgSnapshot.prices.length > 0 && !justTcgSnapshot.priceMissing) {
         snapshots.push(justTcgSnapshot);
       }
+    } else {
+      providersSkipped.push({
+        providerName: "JustTCG",
+        reason: context.cardIdentity
+          ? "No missing evidence domain requires JustTCG."
+          : "Card identity is required before JustTCG can be queried.",
+      });
     }
 
     if (
       !visitedProviders.has(this.tcgplayerProvider) &&
-      canProviderAnswerAnyMarketField({
-        fields,
+      preferredProviders.includes("tcgplayer") &&
+      canProviderAnswerAnyEvidenceDomain({
+        domainIds,
         providerIdOrName: "tcgplayer",
       })
     ) {
       visitedProviders.add(this.tcgplayerProvider);
+      providersQueried.push("TCGplayer");
       const tcgplayerSnapshot = await this.tcgplayerProvider.getMarketSnapshot(
         context.printingId,
         context.variantId,
@@ -228,16 +345,23 @@ export class MarketRefreshScheduler {
       if (tcgplayerSnapshot.prices.length > 0 && !tcgplayerSnapshot.priceMissing) {
         snapshots.push(tcgplayerSnapshot);
       }
+    } else {
+      providersSkipped.push({
+        providerName: "TCGplayer",
+        reason: "No missing evidence domain requires TCGplayer.",
+      });
     }
 
     if (
       !visitedProviders.has(this.scryfallProvider) &&
-      canProviderAnswerAnyMarketField({
-        fields,
+      preferredProviders.includes("scryfall-market") &&
+      canProviderAnswerAnyEvidenceDomain({
+        domainIds,
         providerIdOrName: "scryfall-market",
       })
     ) {
       visitedProviders.add(this.scryfallProvider);
+      providersQueried.push("Scryfall Market Provider");
       const scryfallSnapshot = await this.scryfallProvider.getMarketSnapshot(
         context.printingId,
         context.variantId,
@@ -246,9 +370,29 @@ export class MarketRefreshScheduler {
       if (scryfallSnapshot.prices.length > 0 && !scryfallSnapshot.priceMissing) {
         snapshots.push(scryfallSnapshot);
       }
+    } else {
+      providersSkipped.push({
+        providerName: "Scryfall Market Provider",
+        reason: "No missing evidence domain requires Scryfall market data.",
+      });
     }
 
-    return snapshots;
+    return {
+      providersQueried,
+      providersSkipped,
+      snapshots,
+    };
+  }
+
+  private createProviderSkipDiagnostics(domainIds: EvidenceDomainId[]) {
+    const preferredProviders = getPreferredProvidersForEvidenceDomains(domainIds);
+
+    return ["JustTCG", "TCGplayer", "Scryfall Market Provider"].map((providerName) => ({
+      providerName,
+      reason: preferredProviders.length
+        ? "Provider refresh was not needed for this satisfied repository snapshot."
+        : "No missing evidence domains were refreshable.",
+    }));
   }
 }
 

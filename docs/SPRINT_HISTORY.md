@@ -27,6 +27,17 @@ Added the Transitional Evidence Projection Layer.
 - Added developer diagnostics for requested UI field, resolved evidence domain, evidence source, and projection usage.
 - Documented that the bridge should be removed when the Market Intelligence Engine owns Current Market Estimate directly.
 
+## Sprint 32.2
+
+Added coverage-driven market refresh scheduling.
+
+- Scheduler now checks both freshness and evidence-domain coverage before returning repository snapshots.
+- Added an Evidence Coverage Map for asset, printing, finish, condition, coverage status, and domain freshness.
+- Fresh but incomplete snapshots now fetch only missing refreshable evidence domains.
+- Existing evidence is merged with new provider evidence rather than replaced.
+- Unsupported domains do not trigger provider requests or errors.
+- Developer diagnostics now expose coverage, freshness, missing evidence, providers queried, providers skipped, and merge result.
+
 ## Sprint 31D
 
 Introduced the Market Evidence Layer.

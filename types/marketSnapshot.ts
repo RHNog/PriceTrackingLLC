@@ -42,12 +42,24 @@ export interface MarketProviderRawObservation {
 
 export interface MarketEvidenceDiagnostics {
   conditionSpecific: boolean;
+  coverage?: {
+    domainName: string;
+    freshness: string;
+    status: string;
+  }[];
   evidenceSource: string | null;
   evidenceNodeId: string | null;
   fallbackReason: string;
   fallbackUsed: boolean;
   finish: string;
+  mergeResult?: string;
+  missingEvidence?: string[];
   providerCondition: string | null;
+  providersQueried?: string[];
+  providersSkipped?: {
+    providerName: string;
+    reason: string;
+  }[];
   projectionUsed: boolean;
   requestedCondition: string;
   requestedUiField: string | null;

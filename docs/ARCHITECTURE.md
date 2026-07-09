@@ -68,6 +68,34 @@ Developer diagnostics expose Requested UI Field, Resolved Evidence Domain, Evide
 
 Removal plan: retire `TransitionalEvidenceProjection` when the Market Intelligence Engine owns Current Market Estimate natively.
 
+### Coverage-Driven Refresh
+
+Market refresh now evaluates both field freshness and evidence-domain coverage before returning a repository snapshot.
+
+```text
+Repository Snapshot
+  -> Fresh?
+  -> Coverage Complete?
+  -> Return only when both are satisfied
+```
+
+The scheduler builds an Evidence Coverage Map for the selected asset, printing, finish, and condition. Each evidence domain receives a coverage status and freshness state:
+
+- Variant Valuation
+- Historical Pricing
+- Listing Intelligence
+- Transaction Intelligence
+- Inventory Intelligence
+- Price Trend
+- Volatility
+- Market Liquidity
+- Market Confidence
+- Provider Metadata
+
+If a field is fresh but a required evidence domain is missing or only partially covered, the scheduler fetches only the preferred capable provider for that missing domain. Existing evidence remains in the repository and new valid provider evidence is merged through the Market Evidence Layer. Unsupported domains are marked unsupported and do not trigger provider calls.
+
+Developer diagnostics expose coverage, freshness, missing evidence, providers queried, providers skipped, and merge result.
+
 ## Sprint 31D: Market Evidence Layer
 
 Market values are now selected from layered provider evidence. A single provider response is never treated as complete market truth, and adding a provider must not reduce already available information.

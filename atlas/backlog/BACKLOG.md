@@ -4,6 +4,7 @@
 
 - Add Atlas visual Market Ontology capability matrix.
 - Remove Transitional Evidence Projection after Market Intelligence Engine implementation.
+- Add persistent Atlas Evidence Coverage Map explorer.
 - Add domain-level provider priority configuration.
 - Add Market Ontology consensus rules after multiple connected providers support the same domain.
 - Add database-backed Market Intelligence Repository storage.

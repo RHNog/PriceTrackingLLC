@@ -5,6 +5,7 @@
 Market Ontology now defines what each market evidence domain means and which providers can answer each domain.
 
 - Connected: evidence domains, provider capability matrix, evidence question resolution, domain coverage, JustTCG supported/unsupported domains, scheduler provider eligibility, and validation filtering.
+- Connected: coverage-driven market refresh so fresh snapshots still fetch missing evidence domains.
 - Verified: known-card ontology resolution for Mox Opal, Chrome Mox, Black Lotus, Lightning Bolt, Collected Company, and Urza's Saga.
 - Deferred: multi-provider consensus, Atlas visual capability matrix, production provenance UI, new live providers, and recommendation changes.
 - Compatibility: Current Market Estimate temporarily projects JustTCG Variant Valuation until the Market Intelligence Engine owns the field directly.

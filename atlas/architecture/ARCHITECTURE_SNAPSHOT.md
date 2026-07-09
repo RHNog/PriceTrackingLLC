@@ -88,6 +88,8 @@ Market Evidence rule: adding provider evidence must never reduce platform knowle
 
 Market Ontology rule: providers must declare supported, unsupported, partial, or unknown capability by evidence domain. Unsupported providers are skipped for requested domains and unsupported fields are not stored as repository evidence.
 
+Coverage refresh rule: repository freshness is not sufficient by itself. The scheduler must also verify evidence-domain coverage before skipping provider requests.
+
 Transitional Projection rule: Current Market Estimate may project JustTCG Variant Valuation until the Market Intelligence Engine is implemented. Lowest Listing and Recent Sales must not use projected Variant Valuation.
 
 JustTCG data model rule: JustTCG provider responses are raw observations plus provider-supplied derived statistics. Repository evidence stores raw observations, and platform Market Intelligence derives selected market metrics internally.

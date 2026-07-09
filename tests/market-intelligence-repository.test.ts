@@ -15,6 +15,8 @@ function createStoragePath() {
 }
 
 function createProviderSnapshot(price: number): MarketSnapshot {
+  const updatedAt = new Date().toISOString();
+
   return {
     printingId: "mox-opal-printing",
     variantId: "mox-opal-printing:nonfoil",
@@ -30,12 +32,12 @@ function createProviderSnapshot(price: number): MarketSnapshot {
         finish: "Nonfoil",
         price,
         priceType: "market_estimate",
-        updatedAt: new Date().toISOString(),
+        updatedAt,
         confidence: 88,
       },
     ],
     providerId: "tcgplayer",
-    updatedAt: new Date().toISOString(),
+    updatedAt,
     sourceLabel: "TCGplayer Market Intelligence",
     marketIntelligence: {
       apiStatus: "LIVE",
@@ -44,7 +46,7 @@ function createProviderSnapshot(price: number): MarketSnapshot {
       evidenceCoverage: 88,
       healthStatus: "HEALTHY",
       inventoryHealth: 20,
-      lastSynchronizedAt: new Date().toISOString(),
+      lastSynchronizedAt: updatedAt,
       latencyMs: 7,
       liquidity: 74,
       listingCount: 20,
@@ -61,6 +63,51 @@ function createProviderSnapshot(price: number): MarketSnapshot {
       trend: "Stable",
       volatility: 10,
     },
+    rawObservations: [
+      {
+        observedAt: updatedAt,
+        providerField: "variant.price",
+        providerName: "TCGplayer",
+        rawValue: price,
+        unit: "USD",
+      },
+      {
+        observedAt: updatedAt,
+        providerField: "variant.priceHistory[0].p",
+        providerName: "TCGplayer",
+        rawValue: price - 1,
+        unit: "USD",
+      },
+    ],
+    priceMissing: false,
+  };
+}
+
+function createScryfallSnapshot(price: number): MarketSnapshot {
+  const updatedAt = new Date().toISOString();
+
+  return {
+    printingId: "mox-opal-printing",
+    variantId: "mox-opal-printing:nonfoil",
+    prices: [
+      {
+        id: "scryfall-market-price",
+        cardId: "mox-opal-printing",
+        printingId: "mox-opal-printing",
+        variantId: "mox-opal-printing:nonfoil",
+        providerId: "scryfall-market",
+        source: "Scryfall Daily Market Estimate",
+        currency: "USD",
+        finish: "Nonfoil",
+        price,
+        priceType: "market_estimate",
+        updatedAt,
+        confidence: 70,
+      },
+    ],
+    providerId: "scryfall-market",
+    updatedAt,
+    sourceLabel: "Scryfall Daily Market Estimate",
     priceMissing: false,
   };
 }
@@ -191,6 +238,65 @@ test("Market refresh skips providers that cannot answer requested evidence domai
 
   assert.equal(justTcgCalls, 0);
   assert.equal(tcgplayerCalls, 1);
+  assert.equal(scryfallCalls, 0);
+
+  fs.rmSync(storagePath, { force: true });
+});
+
+test("Fresh Scryfall snapshot with missing Variant Valuation still calls JustTCG", async () => {
+  const storagePath = createStoragePath();
+  const repository = new MarketIntelligenceRepository(storagePath);
+  let justTcgCalls = 0;
+  let tcgplayerCalls = 0;
+  let scryfallCalls = 0;
+  const justTcgProvider = {
+    async getMarketSnapshot() {
+      justTcgCalls += 1;
+      return createProviderSnapshot(125);
+    },
+  };
+  const tcgplayerProvider = {
+    async getMarketSnapshot() {
+      tcgplayerCalls += 1;
+      return createProviderSnapshot(124);
+    },
+  };
+  const scryfallProvider = {
+    async getMarketSnapshot() {
+      scryfallCalls += 1;
+      return createScryfallSnapshot(90);
+    },
+  };
+  const scheduler = new MarketRefreshScheduler(
+    repository,
+    justTcgProvider,
+    tcgplayerProvider,
+    scryfallProvider,
+  );
+  const context = {
+    cardIdentity: "Mox Opal",
+    condition: "NM",
+    finish: "Nonfoil",
+    game: "Magic",
+    printingId: "mox-opal-printing",
+    variantId: "mox-opal-printing:nonfoil",
+  };
+
+  repository.upsertSnapshot({
+    context,
+    refresh: {
+      evidence: [],
+      fields: ["marketPrice"],
+      providerId: "scryfall-market",
+      refreshedAt: new Date().toISOString(),
+      refreshTimeMs: 4,
+      values: {},
+    },
+  });
+  await scheduler.refreshFields(context, ["marketPrice"]);
+
+  assert.equal(justTcgCalls, 1);
+  assert.equal(tcgplayerCalls, 0);
   assert.equal(scryfallCalls, 0);
 
   fs.rmSync(storagePath, { force: true });

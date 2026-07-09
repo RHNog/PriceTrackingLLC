@@ -9,6 +9,8 @@ The format is inspired by "Keep a Changelog".
 ## [Unreleased]
 
 ### Added
+- Evidence Coverage Map for market refresh scheduling by asset, printing, finish, condition, domain coverage, and domain freshness.
+- Scheduler diagnostics for coverage, freshness, missing evidence, providers queried, providers skipped, and merge result.
 - Transitional Evidence Projection Layer for projecting JustTCG Variant Valuation into Current Market Estimate while the Market Intelligence Engine is not yet implemented.
 - Developer diagnostics for requested UI field, resolved evidence domain, evidence source, and projection usage.
 - Sprint 32 Market Ontology under `lib/market/ontology/`.
@@ -179,6 +181,8 @@ The format is inspired by "Keep a Changelog".
 - Architecture, roadmap, decision, product spec, prompt history, and documentation changelog files.
 
 ### Changed
+- Market refresh now requires both freshness and evidence-domain coverage before returning a cached repository snapshot.
+- Fresh but incomplete snapshots now fetch only missing refreshable evidence domains.
 - Current Market Estimate now preserves JustTCG Variant Valuation through a temporary projection bridge.
 - Lowest Listing remains restricted to Listing Intelligence and Recent Sales remains restricted to Transaction Intelligence.
 - Market refresh now skips providers that cannot answer any requested evidence domain.
