@@ -6,6 +6,17 @@ Project Phronesis (Engineering Initiative) is the engineering identity for this 
 
 ## Current Sprint: Sprint 36
 
+### PHR-UX-004 Lightweight Watch History
+
+- Membership creation metadata, successful refresh observations, watch age, market-since-added change, sparkline, and expandable details are complete.
+- Full historical analytics remains explicitly outside Market Watch v1.0.
+
+### PHR-UX-003 Capability-Aware Workflows
+
+- Market Watch membership Create/View/Edit/Remove, confirmation, persistence, and undo are complete.
+- Shared game capability/status resolution is connected to Market Watch presentation and refresh guards.
+- Multiple-watchlist UI and provider administration remain future work; membership is already scoped by `watchlistId`.
+
 ### PHR-ARCH-004 Identity Platform
 
 - Provider-agnostic orchestration, registry, selection, canonical normalization, diagnostics, and lifecycle-aware errors are complete.

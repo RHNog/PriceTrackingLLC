@@ -17,6 +17,7 @@ import { conditionProfiles, type CardConditionCode } from "@/types/conditionProf
 import type { PrintingVariant } from "@/types/printingVariant";
 import type { SearchResult } from "@/types/searchResult";
 import type { IdentityProviderDiagnostics } from "@/lib/engines/identity/IdentityProviderDiagnostics";
+import { resolveFinishDisplay } from "@/lib/capabilities/PlatformCapabilityResolver";
 
 type CommandPaletteProps = {
   context: CommandPaletteContext;
@@ -32,8 +33,9 @@ function getVariants(printing: Card): PrintingVariant[] {
     ? printing.availableFinishes
     : [printing.finish];
 
+  const displayFinish = resolveFinishDisplay(printing.game, finishes);
   return finishes.map((finish) => ({
-    finish,
+    finish: finish.toLowerCase() === "unknown" ? displayFinish : finish,
     id: `${printing.id}:${finish.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
     imageUrls: printing.imageUrls,
     isAvailable: true,
@@ -234,13 +236,13 @@ export default function CommandPalette({ context, open, onClose }: CommandPalett
             return (
               <button aria-selected={index === activeIndex} className={`flex w-full items-center gap-3 border-b border-zinc-900 px-4 py-3 text-left ${index === activeIndex ? "bg-cyan-400/10" : "hover:bg-zinc-900"}`} key={result.item.id} onClick={() => { setActiveIndex(index); setIdentity(result.item); setStep("printing"); }} role="option" type="button">
                 <CardThumbnail alt={`${result.item.name}, ${card.set}`} assetKey={card.id} candidates={[{ source: "Provider", urls: card.imageUrls ?? { normal: card.imageUrl } }]} className="w-12" developerMode={developerMode} selected={index === activeIndex} />
-                <span className="min-w-0 flex-1"><span className="block font-medium text-white">{result.item.name}</span><span className="mt-1 block text-xs text-zinc-400">{result.item.game} · {card.set} · #{card.number}</span><span className="mt-1 block text-xs text-zinc-500">{(card.availableFinishes ?? [card.finish]).join(", ")}</span></span>
+                <span className="min-w-0 flex-1"><span className="block font-medium text-white">{result.item.name}</span><span className="mt-1 block text-xs text-zinc-400">{result.item.game} · {card.set} · #{card.number}</span><span className="mt-1 block text-xs text-zinc-500">{resolveFinishDisplay(card.game, card.availableFinishes ?? [card.finish])}</span></span>
                 <span className="text-xs text-zinc-500">{result.score}%</span>
               </button>
             );
           }) : null}
 
-          {step === "printing" ? identity?.printings.map((card, index) => <button aria-selected={index === activeIndex} className={`flex w-full items-center gap-3 border-b border-zinc-900 px-4 py-3 text-left ${index === activeIndex ? "bg-cyan-400/10" : "hover:bg-zinc-900"}`} key={card.id} onClick={() => { setPrinting(card); setStep("finish"); setActiveIndex(0); }} role="option" type="button"><CardThumbnail alt={`${card.name}, ${card.set}`} assetKey={card.id} candidates={[{ source: "Provider", urls: card.imageUrls ?? { normal: card.imageUrl } }]} className="w-12" selected={index === activeIndex} /><span><span className="block font-medium text-white">{card.set}</span><span className="mt-1 block text-xs text-zinc-400">#{card.number} · {card.language ?? "English"} · {(card.availableFinishes ?? [card.finish]).join(", ")}</span></span></button>) : null}
+          {step === "printing" ? identity?.printings.map((card, index) => <button aria-selected={index === activeIndex} className={`flex w-full items-center gap-3 border-b border-zinc-900 px-4 py-3 text-left ${index === activeIndex ? "bg-cyan-400/10" : "hover:bg-zinc-900"}`} key={card.id} onClick={() => { setPrinting(card); setStep("finish"); setActiveIndex(0); }} role="option" type="button"><CardThumbnail alt={`${card.name}, ${card.set}`} assetKey={card.id} candidates={[{ source: "Provider", urls: card.imageUrls ?? { normal: card.imageUrl } }]} className="w-12" selected={index === activeIndex} /><span><span className="block font-medium text-white">{card.set}</span><span className="mt-1 block text-xs text-zinc-400">#{card.number} · {card.language ?? "English"} · {resolveFinishDisplay(card.game, card.availableFinishes ?? [card.finish])}</span></span></button>) : null}
 
           {step === "finish" && printing ? getVariants(printing).map((item, index) => <button aria-selected={index === activeIndex} className={`flex w-full justify-between border-b border-zinc-900 px-4 py-4 text-left ${index === activeIndex ? "bg-cyan-400/10 text-cyan-100" : "text-zinc-200 hover:bg-zinc-900"}`} key={item.id} onClick={() => { setVariant(item); setStep("condition"); setActiveIndex(0); }} role="option" type="button"><span>{item.finish}</span><span className="text-xs text-zinc-500">Available</span></button>) : null}
 

@@ -16,6 +16,8 @@ The Feature Registry records permanent Project Phronesis feature identifiers and
 | `PHR-UX-002` | Global Command Palette | Completed | UX / UI / Workflow | `docs/ux/PHR-UX-002-global-command-palette.md` |
 | `PHR-ARCH-004` | Provider-Agnostic Identity Platform | Completed | Architecture / Technical / API | `docs/architecture/PHR-ARCH-004-identity-platform.md` |
 | `PHR-API-001` | Lorcast Identity Provider | Completed | API / Technical / Architecture | `docs/api/PHR-API-001-lorcast-identity-provider.md` |
+| `PHR-UX-003` | Capability-Aware Workflows | Completed | UX / UI / Workflow / Technical | `docs/ux/PHR-UX-003-capability-aware-workflows.md` |
+| `PHR-UX-004` | Lightweight Watch History | Completed | UX / UI / Workflow / Technical | `docs/ux/PHR-UX-004-watch-history.md` |
 
 ## Registry Rule
 

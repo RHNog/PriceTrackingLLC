@@ -1,5 +1,20 @@
 # Sprint History
 
+## PHR-UX-004 — Lightweight Watch History
+
+- Added stable watch creation, initial observation, last-successful refresh, refresh source, reason, and bounded observation metadata.
+- Added independent market-since-added absolute/percentage calculations and human watch age.
+- Added compact accessible SVG movement sparklines and expandable desktop/mobile details.
+- Excluded full repository/provider history and historical analytics.
+
+## PHR-UX-003 — Capability-Aware Workflows
+
+- Completed Market Watch entry CRUD with target/notes edit, overflow removal, confirmation, persistence, and undo.
+- Added default watchlist membership scope in preparation for multiple watchlists.
+- Added shared platform capability registry, resolver, CapabilityCard, and StatusBadge.
+- Prevented unsupported Lorcana market refresh and replaced zero/unknown technical states with capability explanations.
+- Preserved identity, repository observations, replay fixtures, and history during membership removal.
+
 ## Epic 2 — PHR-ARCH-004 Identity Platform
 
 - Moved provider selection behind Identity Orchestrator and Registry.

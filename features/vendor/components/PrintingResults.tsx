@@ -1,5 +1,6 @@
 import CardThumbnail from "@/components/cards/CardThumbnail";
 import type { PrintingMatchCandidate } from "@/types/printingResolution";
+import { resolveFinishDisplay } from "@/lib/capabilities/PlatformCapabilityResolver";
 
 type PrintingResultsProps = {
   candidates: PrintingMatchCandidate[];
@@ -95,7 +96,7 @@ export default function PrintingResults({
                   </p>
                   <p className="mt-1 text-xs opacity-75">
                     #{printing.number} / {printing.language ?? "English"} /{" "}
-                    {formatList(candidate.availableFinishes)}
+                    {resolveFinishDisplay(printing.game, candidate.availableFinishes)}
                   </p>
                   <p className="mt-1 text-xs opacity-75">
                     {getPrintingStyle(candidate)} / {printing.releaseYear ?? "Unknown"}

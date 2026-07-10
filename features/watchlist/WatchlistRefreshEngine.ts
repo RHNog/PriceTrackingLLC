@@ -1,4 +1,10 @@
 import type { MarketSnapshot } from "@/types/marketSnapshot";
+import { resolveCapability } from "@/lib/capabilities/PlatformCapabilityResolver";
+import {
+  appendSuccessfulWatchObservation,
+  ensureWatchHistory,
+  type WatchHistoryMetadata,
+} from "@/features/watchlist/WatchHistory";
 
 export type WatchlistRefreshStatus =
   | "Idle"
@@ -28,6 +34,7 @@ export type WatchlistMarketStatus =
   | "Above Target"
   | "Recently Refreshed"
   | "Refresh Recommended"
+  | "Market Data Pending"
   | "Stale Observation";
 
 export type WatchlistRefreshPriority =
@@ -71,12 +78,15 @@ export interface WatchlistEntry {
   lastRefresh: string | null;
   marketStatus: WatchlistMarketStatus;
   marketTrend: WatchlistMarketTrend;
+  notes?: string;
   observationSource: WatchlistObservationSource;
   percentDifference: number | null;
   percentToTarget: number | null;
   refreshPriority: WatchlistRefreshPriority;
   refreshStatus: WatchlistRefreshStatus;
   targetPrice: number;
+  watchlistId: string;
+  watchHistory?: WatchHistoryMetadata;
 }
 
 export interface WatchlistDeveloperDiagnostics {
@@ -114,7 +124,10 @@ export function calculateWatchlistMetrics(
     | "refreshPriority"
   >,
 ): WatchlistEntry {
-  const current = entry.currentValuation;
+  const marketCapability = resolveCapability(entry.assetIdentity.game, "marketData");
+  const current = marketCapability.status === "Operational"
+    ? entry.currentValuation
+    : null;
   const difference = current === null ? null : current - entry.targetPrice;
   const percentToTarget =
     current === null || entry.targetPrice === 0
@@ -131,11 +144,26 @@ export function calculateWatchlistMetrics(
     percentToTarget,
   };
   const refreshPriority = getRefreshPriority(provisional);
+  const watchHistory = ensureWatchHistory(entry.watchHistory, {
+    addedAt: entry.lastObservation ?? entry.lastRefresh,
+    currentValuation: current,
+    lastRefresh: entry.lastRefresh,
+    observationSource: entry.observationSource,
+  });
 
   return {
     ...provisional,
-    marketStatus: getMarketStatus(provisional),
+    currentValuation: current,
+    marketStatus:
+      marketCapability.status === "Operational"
+        ? getMarketStatus(provisional)
+        : "Market Data Pending",
     refreshPriority,
+    refreshStatus:
+      marketCapability.status === "Operational"
+        ? entry.refreshStatus
+        : "Refresh Skipped",
+    watchHistory,
   };
 }
 
@@ -231,6 +259,10 @@ export function getMarketStatus(
 }
 
 export function justifyProviderRequest(entry: WatchlistEntry, manual = false) {
+  const marketCapability = resolveCapability(entry.assetIdentity.game, "marketData");
+  if (marketCapability.status !== "Operational") {
+    return marketCapability.reason;
+  }
   const priority = getRefreshPriority(entry, manual);
 
   if (isRepositoryFresh(entry)) {
@@ -284,8 +316,42 @@ export async function refreshWatchlistEntry(input: {
 }): Promise<WatchlistEntry> {
   const { entry, manual = false } = input;
   const providerRequestJustification = justifyProviderRequest(entry, manual);
+  const marketCapability = resolveCapability(entry.assetIdentity.game, "marketData");
+
+  if (marketCapability.status !== "Operational") {
+    return calculateWatchlistMetrics({
+      ...entry,
+      currentValuation: null,
+      developerDiagnostics: {
+        ...entry.developerDiagnostics,
+        apiSaved: true,
+        errorMessage: undefined,
+        providerHit: false,
+        providerRequestJustification,
+        repositoryHit: false,
+      },
+      refreshStatus: "Refresh Skipped",
+    });
+  }
 
   if (isRepositoryFresh(entry)) {
+    const refreshedAt = new Date().toISOString();
+    const watchHistory =
+      entry.currentValuation === null
+        ? entry.watchHistory
+        : appendSuccessfulWatchObservation(
+            ensureWatchHistory(entry.watchHistory, {
+              addedAt: entry.lastObservation ?? entry.lastRefresh,
+              currentValuation: entry.currentValuation,
+              lastRefresh: entry.lastRefresh,
+              observationSource: entry.observationSource,
+            }),
+            {
+              observedAt: refreshedAt,
+              source: "Repository",
+              valuation: entry.currentValuation,
+            },
+          );
     return calculateWatchlistMetrics({
       ...entry,
       developerDiagnostics: {
@@ -297,7 +363,9 @@ export async function refreshWatchlistEntry(input: {
         providerRequestJustification,
         repositoryHit: true,
       },
+      lastRefresh: refreshedAt,
       refreshStatus: "Repository Reused",
+      watchHistory,
     });
   }
 
@@ -335,6 +403,23 @@ export async function refreshWatchlistEntry(input: {
       : providerHit
         ? "Provider"
         : "Repository";
+    const refreshedAt = new Date().toISOString();
+    const watchHistory =
+      valuation === null
+        ? entry.watchHistory
+        : appendSuccessfulWatchObservation(
+            ensureWatchHistory(entry.watchHistory, {
+              addedAt: entry.lastObservation ?? entry.lastRefresh,
+              currentValuation: entry.currentValuation,
+              lastRefresh: entry.lastRefresh,
+              observationSource: entry.observationSource,
+            }),
+            {
+              observedAt: refreshedAt,
+              source: observationSource,
+              valuation,
+            },
+          );
 
     return calculateWatchlistMetrics({
       ...entry,
@@ -350,7 +435,7 @@ export async function refreshWatchlistEntry(input: {
         repositorySource: repositorySource ?? undefined,
       },
       lastObservation: observedAt,
-      lastRefresh: new Date().toISOString(),
+      lastRefresh: refreshedAt,
       marketTrend: snapshot.marketIntelligence?.trend ?? "Unknown",
       observationSource,
       refreshStatus: replay
@@ -358,6 +443,7 @@ export async function refreshWatchlistEntry(input: {
         : providerHit
           ? "Provider Refreshed"
           : "Repository Reused",
+      watchHistory,
     });
   } catch (error) {
     return calculateWatchlistMetrics({

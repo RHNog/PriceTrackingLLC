@@ -85,6 +85,36 @@ Documentation taxonomy:
 - `docs/future/`
 - `docs/prompts/`
 
+## Lightweight Watch History Registration
+
+- Feature ID: `PHR-UX-004`
+- Model/calculations: `features/watchlist/WatchHistory.ts`
+- Details: `features/watchlist/WatchDetails.tsx`
+- Sparkline: `features/watchlist/WatchSparkline.tsx`
+- Ownership: watchlist membership only
+- Initial value: first value captured at membership creation/migration
+- Observation append: successful valuation refresh only
+- Retention: latest 32 watch-owned observations
+- Excluded: pre-watch provider history, analytics routes, forecasting, full charts
+
+Rule: Market Since Added compares current valuation with initial watch valuation and never uses target price.
+
+## Capability-Aware Workflows Registration
+
+- Feature ID: `PHR-UX-003`
+- Registry: `lib/capabilities/PlatformCapabilityRegistry.ts`
+- Resolver: `lib/capabilities/PlatformCapabilityResolver.ts`
+- Shared UI: `components/ui/CapabilityCard.tsx`, `components/ui/StatusBadge.tsx`
+- Market Watch lifecycle: Create, View, Edit, Remove, Confirm, Undo
+- Membership scope: `watchlistId`; current default is `default`
+- Removal boundary: WatchlistStorage only
+- Protected data: canonical identity, repository observations, replay fixtures, market history
+- Magic: Identity and Market Operational
+- Lorcana: Identity/Artwork/Printings Operational; Finish Unavailable from provider; Market Pending
+- Acquisition rule: non-operational market capability never invokes refresh
+
+Rule: unknown evidence and unavailable capability are distinct states and must never share misleading presentation.
+
 ## Identity Platform Registration
 
 - Feature ID: `PHR-ARCH-004`

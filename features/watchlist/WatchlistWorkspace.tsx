@@ -7,10 +7,18 @@ import {
 } from "@/components/search/CommandPaletteRouter";
 import WatchlistCard from "@/features/watchlist/WatchlistCard";
 import {
+  defaultWatchlistId,
   loadWatchlistEntries,
+  removeWatchlistEntry,
+  restoreWatchlistEntry,
   saveWatchlistEntries,
   updateWatchlistEntry,
+  type RemovedWatchlistEntry,
 } from "@/features/watchlist/WatchlistStorage";
+import {
+  EditWatchlistEntryDialog,
+  RemoveWatchlistEntryDialog,
+} from "@/features/watchlist/WatchlistEntryDialogs";
 import WatchlistTable from "@/features/watchlist/WatchlistTable";
 import WatchlistToolbar from "@/features/watchlist/WatchlistToolbar";
 import {
@@ -24,6 +32,9 @@ export default function WatchlistWorkspace() {
   const [entries, setEntries] = useState<WatchlistEntry[]>([]);
   const [refreshingEntryId, setRefreshingEntryId] = useState<string | null>(null);
   const [providerRequestsUsed, setProviderRequestsUsed] = useState(0);
+  const [pendingRemoval, setPendingRemoval] = useState<WatchlistEntry>();
+  const [editingEntry, setEditingEntry] = useState<WatchlistEntry>();
+  const [undoRemoval, setUndoRemoval] = useState<RemovedWatchlistEntry>();
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -79,6 +90,7 @@ export default function WatchlistWorkspace() {
             observationSource: "Unavailable",
             refreshStatus: "Idle",
             targetPrice: 0,
+            watchlistId: defaultWatchlistId,
           }),
         ];
         saveWatchlistEntries(next);
@@ -89,6 +101,12 @@ export default function WatchlistWorkspace() {
     window.addEventListener(commandPaletteSelectionEvent, handlePaletteSelection);
     return () => window.removeEventListener(commandPaletteSelectionEvent, handlePaletteSelection);
   }, []);
+
+  useEffect(() => {
+    if (!undoRemoval) return;
+    const timeout = window.setTimeout(() => setUndoRemoval(undefined), 7000);
+    return () => window.clearTimeout(timeout);
+  }, [undoRemoval]);
 
   const sortedEntries = useMemo(
     () =>
@@ -120,15 +138,59 @@ export default function WatchlistWorkspace() {
       entry,
       manual: true,
     });
-    const nextEntries = updateWatchlistEntry(entries, refreshed);
-
     if (refreshed.developerDiagnostics.providerHit) {
       setProviderRequestsUsed((current) => current + 1);
     }
 
+    setEntries((current) => {
+      const membershipStillExists = current.some(
+        (candidate) =>
+          candidate.id === refreshed.id &&
+          candidate.watchlistId === refreshed.watchlistId,
+      );
+      if (!membershipStillExists) return current;
+      const nextEntries = updateWatchlistEntry(current, refreshed);
+      saveWatchlistEntries(nextEntries);
+      return nextEntries;
+    });
+    setRefreshingEntryId((current) => (current === entry.id ? null : current));
+  }
+
+  function handleConfirmRemove() {
+    if (!pendingRemoval) return;
+    const result = removeWatchlistEntry(
+      entries,
+      pendingRemoval.id,
+      pendingRemoval.watchlistId,
+    );
+    if (!result.removed) {
+      setPendingRemoval(undefined);
+      return;
+    }
+
+    setEntries(result.entries);
+    saveWatchlistEntries(result.entries);
+    setUndoRemoval(result.removed);
+    if (refreshingEntryId === pendingRemoval.id) setRefreshingEntryId(null);
+    setPendingRemoval(undefined);
+  }
+
+  function handleUndoRemove() {
+    if (!undoRemoval) return;
+    setEntries((current) => {
+      const restored = restoreWatchlistEntry(current, undoRemoval);
+      saveWatchlistEntries(restored);
+      return restored;
+    });
+    setUndoRemoval(undefined);
+  }
+
+  function handleSaveEdit(updatedEntry: WatchlistEntry) {
+    const updated = calculateWatchlistMetrics(updatedEntry);
+    const nextEntries = updateWatchlistEntry(entries, updated);
     setEntries(nextEntries);
     saveWatchlistEntries(nextEntries);
-    setRefreshingEntryId(null);
+    setEditingEntry(undefined);
   }
 
   return (
@@ -140,12 +202,21 @@ export default function WatchlistWorkspace() {
         providerRequestsUsed={providerRequestsUsed}
       />
 
-      <WatchlistTable
-        developerMode={developerMode}
-        entries={sortedEntries}
-        onRefresh={handleRefresh}
-        refreshingEntryId={refreshingEntryId}
-      />
+      {sortedEntries.length > 0 ? (
+        <WatchlistTable
+          developerMode={developerMode}
+          entries={sortedEntries}
+          onEdit={setEditingEntry}
+          onRefresh={handleRefresh}
+          onRemove={setPendingRemoval}
+          refreshingEntryId={refreshingEntryId}
+        />
+      ) : (
+        <section className="rounded-lg border border-dashed border-zinc-700 bg-zinc-950 px-6 py-14 text-center">
+          <h3 className="font-semibold text-zinc-200">Your Watchlist is empty</h3>
+          <p className="mt-2 text-sm text-zinc-500">Press ⌘K or Ctrl+K to find a collectible and add it.</p>
+        </section>
+      )}
 
       <section className="space-y-3 md:hidden">
         {sortedEntries.map((entry) => (
@@ -154,10 +225,30 @@ export default function WatchlistWorkspace() {
             entry={entry}
             isRefreshing={refreshingEntryId === entry.id}
             key={entry.id}
+            onEdit={setEditingEntry}
             onRefresh={handleRefresh}
+            onRemove={setPendingRemoval}
           />
         ))}
       </section>
+
+      <RemoveWatchlistEntryDialog
+        entry={pendingRemoval}
+        onCancel={() => setPendingRemoval(undefined)}
+        onConfirm={handleConfirmRemove}
+      />
+      <EditWatchlistEntryDialog
+        entry={editingEntry}
+        onCancel={() => setEditingEntry(undefined)}
+        onSave={handleSaveEdit}
+      />
+
+      {undoRemoval ? (
+        <div aria-live="polite" className="fixed bottom-5 right-5 z-40 flex items-center gap-4 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-zinc-200 shadow-xl shadow-black/40" role="status">
+          <span>{undoRemoval.entry.assetIdentity.name} removed from Watchlist.</span>
+          <button className="font-semibold text-cyan-300 hover:text-cyan-200" onClick={handleUndoRemove} type="button">Undo</button>
+        </div>
+      ) : null}
     </div>
   );
 }

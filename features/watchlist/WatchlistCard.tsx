@@ -1,13 +1,19 @@
 "use client";
 
 import CardThumbnail from "@/components/cards/CardThumbnail";
+import CapabilityCard from "@/components/ui/CapabilityCard";
+import WatchlistEntryMenu from "@/features/watchlist/WatchlistEntryMenu";
+import WatchDetails from "@/features/watchlist/WatchDetails";
 import type { WatchlistEntry } from "@/features/watchlist/WatchlistRefreshEngine";
+import { resolveCapability, resolveGameCapabilities } from "@/lib/capabilities/PlatformCapabilityResolver";
 
 type WatchlistCardProps = {
   developerMode: boolean;
   entry: WatchlistEntry;
   isRefreshing: boolean;
   onRefresh: (entry: WatchlistEntry) => void;
+  onEdit: (entry: WatchlistEntry) => void;
+  onRemove: (entry: WatchlistEntry) => void;
 };
 
 const statusStyles: Record<string, string> = {
@@ -15,6 +21,7 @@ const statusStyles: Record<string, string> = {
   "Approaching Target": "border-amber-400/30 bg-amber-400/10 text-amber-300",
   "Recently Refreshed": "border-cyan-400/30 bg-cyan-400/10 text-cyan-300",
   "Refresh Recommended": "border-orange-400/30 bg-orange-400/10 text-orange-300",
+  "Market Data Pending": "border-amber-400/30 bg-amber-400/10 text-amber-300",
   "Stale Observation": "border-red-400/30 bg-red-400/10 text-red-300",
   Waiting: "border-zinc-700 bg-zinc-900 text-zinc-300",
 };
@@ -24,7 +31,13 @@ export default function WatchlistCard({
   entry,
   isRefreshing,
   onRefresh,
+  onEdit,
+  onRemove,
 }: WatchlistCardProps) {
+  const marketCapability = resolveCapability(entry.assetIdentity.game, "marketData");
+  const capabilities = resolveGameCapabilities(entry.assetIdentity.game).capabilities.filter(
+    (capability) => ["identity", "artwork", "marketData"].includes(capability.id),
+  );
   return (
     <article className="rounded-lg border border-zinc-800 bg-zinc-950 p-4 md:hidden">
       <div className="flex items-start justify-between gap-4">
@@ -44,22 +57,25 @@ export default function WatchlistCard({
             {entry.assetIdentity.printing}
           </p>
           <p className="mt-1 text-xs text-zinc-500">
-            #{entry.assetIdentity.collectorNumber ?? "—"} / {entry.assetIdentity.game} / {entry.finish} / {entry.language}
+            #{entry.assetIdentity.collectorNumber ?? "—"} / {entry.assetIdentity.game} / {formatFinish(entry)} / {entry.language}
           </p>
           </div>
         </div>
-        <StatusLabel status={entry.marketStatus} />
+        <div className="flex items-start gap-1">
+          <StatusLabel status={entry.marketStatus} />
+          <WatchlistEntryMenu entry={entry} onEdit={onEdit} onRemove={onRemove} />
+        </div>
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-        <Metric label="Current" value={formatCurrency(entry.currentValuation)} />
-        <Metric label="Target" value={formatCurrency(entry.targetPrice)} />
-        <Metric label="Difference" value={formatCurrency(entry.difference)} />
+        <Metric label="Current" value={formatMarketValue(entry, entry.currentValuation)} />
+        <Metric label="Target" value={formatTarget(entry)} />
+        <Metric label="Difference" value={formatMarketValue(entry, entry.difference)} />
         <Metric
           label="Target Reached"
           value={
             entry.percentToTarget === null
-              ? "Unknown"
+              ? "No Data"
               : `${entry.percentToTarget.toFixed(1)}%`
           }
         />
@@ -67,13 +83,32 @@ export default function WatchlistCard({
 
       {developerMode ? <DeveloperPanel entry={entry} /> : null}
 
+      <details className="mt-4 rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
+        <summary className="cursor-pointer text-sm font-medium text-zinc-300">Watch details</summary>
+        <div className="mt-3"><WatchDetails entry={entry} /></div>
+      </details>
+
+      {marketCapability.status !== "Operational" ? (
+        <div className="mt-4">
+          <CapabilityCard capabilities={capabilities} compact developerMode={developerMode} />
+          <p className="mt-2 text-xs leading-5 text-zinc-500">
+            This game currently supports identity only. Market pricing will become available when a compatible market provider is connected.
+          </p>
+        </div>
+      ) : null}
+
       <button
         className="mt-4 w-full rounded-md border border-cyan-400/40 px-3 py-2 text-sm font-medium text-cyan-200 transition hover:bg-cyan-400/10 disabled:cursor-not-allowed disabled:opacity-60"
-        disabled={isRefreshing}
+        disabled={isRefreshing || marketCapability.status !== "Operational"}
+        title={marketCapability.status === "Operational" ? "Refresh market data" : marketCapability.reason}
         onClick={() => onRefresh(entry)}
         type="button"
       >
-        {isRefreshing ? "Refreshing" : "Refresh"}
+        {marketCapability.status !== "Operational"
+          ? "Market Data Coming Soon"
+          : isRefreshing
+            ? "Refreshing"
+            : "Refresh"}
       </button>
     </article>
   );
@@ -127,7 +162,7 @@ function Metric({ label, value }: { label: string; value: string }) {
 
 export function formatCurrency(value: number | null) {
   if (value === null) {
-    return "Unknown";
+    return "No Data";
   }
 
   return new Intl.NumberFormat("en-US", {
@@ -137,9 +172,30 @@ export function formatCurrency(value: number | null) {
   }).format(value);
 }
 
+export function formatTarget(entry: WatchlistEntry) {
+  return entry.targetPrice > 0 ? formatCurrency(entry.targetPrice) : "Not Set";
+}
+
+export function formatMarketValue(entry: WatchlistEntry, value: number | null) {
+  const capability = resolveCapability(entry.assetIdentity.game, "marketData");
+  if (capability.status !== "Operational") return capability.resolution;
+  return formatCurrency(value);
+}
+
+export function formatFinish(entry: WatchlistEntry) {
+  if (entry.finish.toLowerCase() !== "unknown") return entry.finish;
+  return resolveCapability(entry.assetIdentity.game, "finish").resolution;
+}
+
+export function formatTrend(entry: WatchlistEntry) {
+  const capability = resolveCapability(entry.assetIdentity.game, "marketData");
+  if (capability.status !== "Operational") return "Market Data Coming Soon";
+  return entry.marketTrend === "Unknown" ? "No Data" : entry.marketTrend;
+}
+
 export function formatAge(value: number | null) {
   if (value === null) {
-    return "Unknown";
+    return "No Data";
   }
 
   const minutes = Math.round(value / 60000);

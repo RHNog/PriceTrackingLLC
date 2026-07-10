@@ -1,0 +1,200 @@
+import type {
+  CapabilityStatus,
+  GameCapabilityProfile,
+  PlatformCapability,
+  PlatformCapabilityId,
+} from "@/lib/capabilities/PlatformCapability";
+
+const labels: Record<PlatformCapabilityId, string> = {
+  artwork: "Artwork",
+  condition: "Condition",
+  developerDiagnostics: "Developer Diagnostics",
+  finish: "Finish",
+  identity: "Identity",
+  inventory: "Inventory",
+  marketData: "Market Data",
+  marketIntelligence: "Market Intelligence",
+  portfolio: "Portfolio",
+  printings: "Printings",
+  purchaseEvaluation: "Purchase Evaluation",
+  watchlists: "Watchlists",
+};
+
+function capability(
+  id: PlatformCapabilityId,
+  status: CapabilityStatus,
+  input: Omit<PlatformCapability, "id" | "label" | "status">,
+): PlatformCapability {
+  return { id, label: labels[id], status, ...input };
+}
+
+const sharedOperational = {
+  developerDiagnostics: capability("developerDiagnostics", "Operational", {
+    reason: "Atlas diagnostics are connected for this workflow.",
+    resolution: "Developer diagnostics available.",
+    source: "Project Phronesis",
+  }),
+  watchlists: capability("watchlists", "Operational", {
+    reason: "Market Watch membership storage supports this game.",
+    resolution: "Watchlist membership available.",
+    source: "Market Watch",
+  }),
+};
+
+const futureCapabilities = [
+  capability("portfolio", "Pending", {
+    reason: "Portfolio is not implemented in the current platform release.",
+    resolution: "Coming Soon",
+    source: "Product Roadmap",
+  }),
+  capability("inventory", "Pending", {
+    reason: "Inventory is not implemented in the current platform release.",
+    resolution: "Coming Soon",
+    source: "Product Roadmap",
+  }),
+];
+
+const magicProfile: GameCapabilityProfile = {
+  game: "Magic",
+  capabilities: [
+    capability("identity", "Operational", {
+      provider: "Scryfall",
+      providerSelected: "Scryfall",
+      reason: "The Magic identity provider is connected.",
+      resolution: "Identity provider operational.",
+      source: "Identity Provider Registry",
+    }),
+    capability("artwork", "Operational", {
+      provider: "Scryfall",
+      providerSelected: "Scryfall",
+      reason: "Canonical identity includes provider artwork.",
+      resolution: "Artwork available.",
+      source: "Canonical Identity",
+    }),
+    capability("printings", "Operational", {
+      provider: "Scryfall",
+      providerSelected: "Scryfall",
+      reason: "Individual Magic printings are normalized.",
+      resolution: "Printing selection available.",
+      source: "Canonical Identity",
+    }),
+    capability("finish", "Operational", {
+      provider: "Scryfall",
+      providerSelected: "Scryfall",
+      reason: "The identity provider supplies finish variants.",
+      resolution: "Finish supplied by provider.",
+      source: "Identity Provider Capability",
+    }),
+    capability("condition", "Operational", {
+      reason: "Condition is selected by the user for physical cards.",
+      resolution: "Condition selection available.",
+      source: "Workflow",
+    }),
+    capability("marketData", "Operational", {
+      provider: "JustTCG / Repository",
+      providerSelected: "Repository First",
+      reason: "Compatible Magic market evidence providers are registered.",
+      resolution: "Repository-first market acquisition available.",
+      source: "Market Ontology",
+    }),
+    capability("marketIntelligence", "Operational", {
+      provider: "Market Intelligence Engine",
+      reason: "Market observations can be interpreted for Magic.",
+      resolution: "Market Intelligence available.",
+      source: "Market Intelligence",
+    }),
+    ...futureCapabilities,
+    sharedOperational.watchlists,
+    capability("purchaseEvaluation", "Operational", {
+      reason: "Identity and compatible market evidence are available.",
+      resolution: "Purchase Evaluation available.",
+      source: "Vendor Workflow",
+    }),
+    sharedOperational.developerDiagnostics,
+  ],
+};
+
+const lorcanaProfile: GameCapabilityProfile = {
+  game: "Lorcana",
+  capabilities: [
+    capability("identity", "Operational", {
+      provider: "Lorcast",
+      providerSelected: "Lorcast",
+      reason: "Lorcast is registered as the operational Lorcana identity provider.",
+      resolution: "Identity provider operational.",
+      source: "Identity Provider Registry",
+    }),
+    capability("artwork", "Operational", {
+      provider: "Lorcast",
+      providerSelected: "Lorcast",
+      reason: "Lorcast canonical identities include artwork URIs.",
+      resolution: "Artwork available.",
+      source: "Canonical Identity",
+    }),
+    capability("printings", "Operational", {
+      provider: "Lorcast",
+      providerSelected: "Lorcast",
+      reason: "Lorcast all-print identity search is operational.",
+      resolution: "Printing selection available.",
+      source: "Canonical Identity",
+    }),
+    capability("finish", "Unavailable", {
+      provider: "Lorcast",
+      providerSelected: "Lorcast",
+      reason: "The connected identity provider does not supply finish availability.",
+      resolution: "Provider Does Not Supply Finish",
+      source: "Identity Provider Capability",
+    }),
+    capability("condition", "Operational", {
+      reason: "Condition is selected by the user for a physical card.",
+      resolution: "Condition selection available.",
+      source: "Workflow",
+    }),
+    capability("marketData", "Pending", {
+      futureProvider: "Compatible Lorcana Market Provider",
+      reason: "No compatible Lorcana market provider is connected.",
+      resolution: "Market Provider Not Yet Connected",
+      source: "Market Provider Capability",
+    }),
+    capability("marketIntelligence", "Pending", {
+      futureProvider: "Compatible Lorcana Market Provider",
+      reason: "Market Intelligence requires compatible market observations.",
+      resolution: "Market Data Coming Soon",
+      source: "Market Intelligence Capability",
+    }),
+    ...futureCapabilities,
+    sharedOperational.watchlists,
+    capability("purchaseEvaluation", "Pending", {
+      futureProvider: "Compatible Lorcana Market Provider",
+      reason: "Purchase Evaluation requires compatible market evidence.",
+      resolution: "Market Data Coming Soon",
+      source: "Vendor Workflow Capability",
+    }),
+    sharedOperational.developerDiagnostics,
+  ],
+};
+
+const pendingIdentityProfile = (game: string): GameCapabilityProfile => ({
+  game,
+  capabilities: (Object.keys(labels) as PlatformCapabilityId[]).map((id) =>
+    capability(id, id === "watchlists" || id === "developerDiagnostics" ? "Operational" : "Pending", {
+      futureProvider: id === "identity" ? `Compatible ${game} Identity Provider` : undefined,
+      reason:
+        id === "watchlists"
+          ? "Watchlist membership can retain a canonical identity when available."
+          : id === "developerDiagnostics"
+            ? "Developer diagnostics are platform-owned."
+            : `${labels[id]} is not yet connected for ${game}.`,
+      resolution: id === "watchlists" || id === "developerDiagnostics" ? "Operational" : "Coming Soon",
+      source: id === "identity" ? "Identity Provider Registry" : "Platform Capability Registry",
+    }),
+  ),
+});
+
+export const platformCapabilityProfiles: GameCapabilityProfile[] = [
+  magicProfile,
+  lorcanaProfile,
+  pendingIdentityProfile("Pokemon"),
+  pendingIdentityProfile("One Piece"),
+  pendingIdentityProfile("Flesh and Blood"),
+];

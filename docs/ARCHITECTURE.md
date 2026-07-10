@@ -1,5 +1,19 @@
 # Architecture
 
+## Watch History Boundary (PHR-UX-004)
+
+Watch history belongs to watchlist membership, not canonical identity or the Market Intelligence Repository. `WatchHistoryMetadata` captures membership creation and successful observations acquired while the watch exists. Provider history from before `addedAt` is not copied.
+
+Observation storage is bounded to 32 points and drives lightweight direction presentation only. Target-price math and market-since-added math remain independent.
+
+## Platform Capability Architecture (PHR-UX-003)
+
+Workflow availability is resolved by game through `PlatformCapabilityRegistry` and `PlatformCapabilityResolver`. Capability state is separate from evidence value: Operational, Pending, Unavailable, Not Applicable, and Disabled describe whether a workflow can run, while Repository, Replay, and Provider describe evidence/source presentation.
+
+Market Watch consults the same market capability before formatting or acquisition. A non-operational market capability returns locally with an explanation and cannot call `/api/market/snapshot`.
+
+Watchlist entries are user-owned membership records scoped by `watchlistId`. Editing or removing membership updates `WatchlistStorage` only. Canonical Identity, Market Intelligence Repository, replay fixtures, and market history remain outside the deletion dependency path.
+
 ## Identity Platform (PHR-ARCH-004)
 
 Identity application flows use `IdentityOrchestrator`, never concrete providers. The orchestrator parses game/search context, selects from `IdentityProviderRegistry`, checks lifecycle capability, executes an operational provider, delegates existing canonical/intent resolution, and adapts results into the canonical identity model.

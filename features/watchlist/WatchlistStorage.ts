@@ -5,6 +5,7 @@ import {
 } from "@/features/watchlist/WatchlistRefreshEngine";
 
 const storageKey = "project-phronesis-market-watch-v1";
+export const defaultWatchlistId = "default";
 
 function hoursAgo(hours: number) {
   return new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
@@ -58,6 +59,7 @@ export const seedWatchlistEntries: WatchlistEntry[] = [
     observationSource: "Repository",
     refreshStatus: "Repository Reused",
     targetPrice: 220,
+    watchlistId: defaultWatchlistId,
   }),
   calculateWatchlistMetrics({
     assetIdentity: {
@@ -92,6 +94,7 @@ export const seedWatchlistEntries: WatchlistEntry[] = [
     observationSource: "Repository",
     refreshStatus: "Refresh Skipped",
     targetPrice: 42,
+    watchlistId: defaultWatchlistId,
   }),
   calculateWatchlistMetrics({
     assetIdentity: {
@@ -126,6 +129,7 @@ export const seedWatchlistEntries: WatchlistEntry[] = [
     observationSource: "Repository",
     refreshStatus: "Repository Reused",
     targetPrice: 20,
+    watchlistId: defaultWatchlistId,
   }),
   calculateWatchlistMetrics({
     assetIdentity: {
@@ -158,6 +162,7 @@ export const seedWatchlistEntries: WatchlistEntry[] = [
     observationSource: "Repository",
     refreshStatus: "Refresh Skipped",
     targetPrice: 900,
+    watchlistId: defaultWatchlistId,
   }),
 ];
 
@@ -177,7 +182,18 @@ export function loadWatchlistEntries() {
   try {
     const parsed = JSON.parse(raw) as WatchlistEntry[];
 
-    return parsed.map((entry) => {
+    const hydrated = hydrateWatchlistEntries(parsed);
+    saveWatchlistEntries(hydrated);
+    return hydrated;
+  } catch {
+    saveWatchlistEntries(seedWatchlistEntries);
+
+    return seedWatchlistEntries;
+  }
+}
+
+export function hydrateWatchlistEntries(entries: WatchlistEntry[]) {
+  return entries.map((entry) => {
       const repositorySeed = seedWatchlistEntries.find(
         (seed) => seed.assetIdentity.assetId === entry.assetIdentity.assetId,
       );
@@ -187,13 +203,9 @@ export function loadWatchlistEntries() {
         assetIdentity: repositorySeed
           ? { ...entry.assetIdentity, ...repositorySeed.assetIdentity }
           : entry.assetIdentity,
+        watchlistId: entry.watchlistId ?? defaultWatchlistId,
       });
     });
-  } catch {
-    saveWatchlistEntries(seedWatchlistEntries);
-
-    return seedWatchlistEntries;
-  }
 }
 
 export function saveWatchlistEntries(entries: WatchlistEntry[]) {
@@ -209,6 +221,48 @@ export function updateWatchlistEntry(
   updatedEntry: WatchlistEntry,
 ) {
   return entries.map((entry) =>
-    entry.id === updatedEntry.id ? updatedEntry : entry,
+    entry.id === updatedEntry.id && entry.watchlistId === updatedEntry.watchlistId
+      ? updatedEntry
+      : entry,
   );
+}
+
+export type RemovedWatchlistEntry = {
+  entry: WatchlistEntry;
+  index: number;
+};
+
+export function removeWatchlistEntry(
+  entries: WatchlistEntry[],
+  entryId: string,
+  watchlistId = defaultWatchlistId,
+): { entries: WatchlistEntry[]; removed?: RemovedWatchlistEntry } {
+  const index = entries.findIndex(
+    (entry) => entry.id === entryId && entry.watchlistId === watchlistId,
+  );
+  if (index < 0) return { entries };
+
+  return {
+    entries: entries.filter((_, entryIndex) => entryIndex !== index),
+    removed: { entry: entries[index], index },
+  };
+}
+
+export function restoreWatchlistEntry(
+  entries: WatchlistEntry[],
+  removed: RemovedWatchlistEntry,
+) {
+  if (
+    entries.some(
+      (entry) =>
+        entry.id === removed.entry.id &&
+        entry.watchlistId === removed.entry.watchlistId,
+    )
+  ) {
+    return entries;
+  }
+
+  const next = [...entries];
+  next.splice(Math.min(Math.max(removed.index, 0), next.length), 0, removed.entry);
+  return next;
 }

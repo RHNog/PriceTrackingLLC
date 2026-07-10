@@ -146,6 +146,16 @@ The dashboard prioritizes scan speed: card, printing, current price, target, dif
 
 ## Traceability
 
+### PHR-UX-003 Enhancement
+
+Market Watch entries now support complete membership Create/View/Edit/Remove, confirmation, persisted removal, and undo. Membership is scoped by `watchlistId`. Capability resolution prevents market acquisition for games without an operational market provider and replaces misleading zero/unknown presentation with explicit capability explanations.
+
+Removal never deletes canonical identity, repository observations, replay fixtures, or market history.
+
+### PHR-UX-004 Enhancement
+
+Each membership now stores stable creation metadata and a bounded series of successful observations captured during the watch. Expanded details show watch age, refresh metadata, notes/reason, current observation, market change since addition, and a lightweight sparkline. Target difference remains a separate calculation.
+
 - Originating prompt or work order: Sprint 36 Market Watch workflow.
 - Related implementation prompt: `docs/prompts/PHR-WORKFLOW-001-implementation-prompt.md`
 - Related tests: `docs/testing/PHR-WORKFLOW-001-market-watch-validation.md`

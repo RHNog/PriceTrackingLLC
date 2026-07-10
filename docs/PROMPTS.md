@@ -1,5 +1,21 @@
 # Prompt History
 
+## PHR-UX-004
+
+Purpose: explain how a watched market evolved during the lifecycle of the watch.
+
+Core instruction: store lightweight membership metadata and successful watch-time observations, keep target math separate, and avoid a full history page or chart.
+
+Result: Market Watch now exposes watch age, initial/current observations, signed change, reason/notes, refresh metadata, and a compact sparkline through expandable details.
+
+## PHR-UX-003
+
+Purpose: complete the Market Watch entry lifecycle and make workflows capability-aware.
+
+Core instruction: distinguish unknown, unavailable, unsupported, pending, no-provider, and no-data states; never fabricate certainty; remove only watchlist membership.
+
+Result: reusable capability/status UI and resolution now govern Market Watch formatting and refresh, while membership CRUD supports edit, confirmed remove, persistence, and undo.
+
 ## PHR-ARCH-004
 
 Purpose: transform identity into a provider-agnostic platform.
