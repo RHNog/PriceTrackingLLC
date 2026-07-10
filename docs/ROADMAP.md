@@ -1,5 +1,29 @@
 # Roadmap
 
+## PHR-UX-005 Collector Presentation Rules
+
+- Completed: Treatment and Printing terminology is centralized in the Presentation Layer.
+- Completed: Standard Treatment and Regular/Normal/Nonfoil/provider-unavailable Printing are hidden from production UI.
+- Completed: shared compact identity facts are used by Command Palette, Vendor results, and Watchlist.
+- Completed: developer diagnostics retain hidden canonical values and visibility reasons.
+
+## PHR-ARCH-009 Identity Presentation Layer
+
+- Completed: centralized collector-facing Printing, Treatment, Finish, Market, and Condition vocabulary.
+- Completed: Command Palette, Vendor results, Watchlist, capability labels, and developer translation diagnostics.
+- Completed: Lorcast Cold Foil mapping audit; no incorrect mapping existed and no provider correction was required.
+- Future: locate or restore the referenced PHR-ARCH-008 specification if it contains additional constraints.
+
+## PHR-ARCH-007 Cross-Game Identity Ontology
+
+- Completed: Gameplay, Printing, Physical Variant, and Market Identity are separate canonical contracts.
+- Completed: printing-design facets and physical finish are separate; Lorcast rarity never creates physical finish.
+- Completed: typed provider aliases, TCGplayer Product/SKU mapping, legacy identity migration, watchlist hydration, and replay/repository compatibility.
+
+## PHR-ARCH-006 Identity Fidelity Follow-up
+
+- Keep Lorcast Cold Foil treatment pending until an identity provider supplies an explicit discriminator; price fields must never be identity evidence.
+
 This is the engineering roadmap. Product-facing ideas now live in `docs/PRODUCT_ROADMAP.md`. Business strategy lives in `docs/BUSINESS_STRATEGY.md`. Monetization options live in `docs/MONETIZATION.md`. Unscoped ideas live in `docs/IDEA_LEDGER.md`.
 
 Project Phronesis (Engineering Initiative) is the engineering identity for this roadmap. It does not rename the repository, package, app, or future commercial product.

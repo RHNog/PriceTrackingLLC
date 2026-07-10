@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import CardThumbnail from "@/components/cards/CardThumbnail";
+import CardIdentityFacts from "@/components/cards/CardIdentityFacts";
 import {
   createVendorSelectionUrl,
   dispatchWorkflowSelection,
@@ -17,7 +18,12 @@ import { conditionProfiles, type CardConditionCode } from "@/types/conditionProf
 import type { PrintingVariant } from "@/types/printingVariant";
 import type { SearchResult } from "@/types/searchResult";
 import type { IdentityProviderDiagnostics } from "@/lib/engines/identity/IdentityProviderDiagnostics";
-import { resolveFinishDisplay } from "@/lib/capabilities/PlatformCapabilityResolver";
+import {
+  resolveCanonicalTreatment,
+  resolveVariantPhysicalFinish,
+  treatmentFromFinish,
+} from "@/lib/engines/identity/IdentityTreatmentResolver";
+import { adaptCardPresentation, adaptIdentityPresentation } from "@/lib/engines/identity/IdentityPresentationAdapter";
 
 type CommandPaletteProps = {
   context: CommandPaletteContext;
@@ -28,19 +34,38 @@ type CommandPaletteProps = {
 type PaletteStep = "search" | "printing" | "finish" | "condition";
 
 function getVariants(printing: Card): PrintingVariant[] {
-  if (printing.finishVariants?.length) return printing.finishVariants;
+  if (printing.finishVariants?.length) {
+    return printing.finishVariants.map((variant) => ({
+      ...variant,
+      treatmentDetails:
+        variant.treatmentDetails ?? treatmentFromFinish(variant.finish),
+    }));
+  }
+  if (printing.physicalVariants?.length) {
+    return printing.physicalVariants.map((physicalVariant) => ({
+      finish: physicalVariant.physicalFinish.value,
+      id: physicalVariant.physicalVariantIdentityId,
+      imageUrls: printing.imageUrls,
+      isAvailable: physicalVariant.physicalFinish.evidence.state === "Explicit",
+      physicalFinish: physicalVariant.physicalFinish,
+      physicalVariantIdentityId: physicalVariant.physicalVariantIdentityId,
+      printingId: printing.id,
+      source: physicalVariant.physicalFinish.evidence.providerId,
+    }));
+  }
   const finishes = printing.availableFinishes?.length
     ? printing.availableFinishes
     : [printing.finish];
 
-  const displayFinish = resolveFinishDisplay(printing.game, finishes);
   return finishes.map((finish) => ({
-    finish: finish.toLowerCase() === "unknown" ? displayFinish : finish,
+    finish,
     id: `${printing.id}:${finish.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
     imageUrls: printing.imageUrls,
     isAvailable: true,
     printingId: printing.id,
     source: "Identity",
+    treatmentDetails:
+      printing.treatmentDetails ?? resolveCanonicalTreatment(printing),
   }));
 }
 
@@ -222,7 +247,7 @@ export default function CommandPalette({ context, open, onClose }: CommandPalett
         </div>
 
         <div className="flex items-center justify-between border-b border-zinc-900 px-4 py-2 text-xs text-zinc-500">
-          <span>{step === "search" ? "Collectible" : `${identity?.name ?? "Collectible"} / ${step}`}</span>
+          <span>{step === "search" ? "Collectible" : `${identity?.name ?? "Collectible"} / ${step === "finish" ? "printing" : step}`}</span>
           {process.env.NODE_ENV === "development" ? <button className="hover:text-cyan-300" onClick={() => setDeveloperMode((value) => !value)} type="button">Developer</button> : null}
         </div>
 
@@ -233,18 +258,19 @@ export default function CommandPalette({ context, open, onClose }: CommandPalett
 
           {!loading && step === "search" ? results.map((result, index) => {
             const card = result.item.printings[0];
+            const presentation = adaptCardPresentation(card);
             return (
               <button aria-selected={index === activeIndex} className={`flex w-full items-center gap-3 border-b border-zinc-900 px-4 py-3 text-left ${index === activeIndex ? "bg-cyan-400/10" : "hover:bg-zinc-900"}`} key={result.item.id} onClick={() => { setActiveIndex(index); setIdentity(result.item); setStep("printing"); }} role="option" type="button">
                 <CardThumbnail alt={`${result.item.name}, ${card.set}`} assetKey={card.id} candidates={[{ source: "Provider", urls: card.imageUrls ?? { normal: card.imageUrl } }]} className="w-12" developerMode={developerMode} selected={index === activeIndex} />
-                <span className="min-w-0 flex-1"><span className="block font-medium text-white">{result.item.name}</span><span className="mt-1 block text-xs text-zinc-400">{result.item.game} · {card.set} · #{card.number}</span><span className="mt-1 block text-xs text-zinc-500">{resolveFinishDisplay(card.game, card.availableFinishes ?? [card.finish])}</span></span>
+                <span className="min-w-0 flex-1"><span className="block font-medium text-white">{presentation.cardName.presentationValue}</span><span className="mt-1 block text-xs text-zinc-400">{presentation.printing.label}: {presentation.printing.presentationValue} · {presentation.language.presentationValue}</span><CardIdentityFacts className="mt-1 block text-xs text-zinc-500" presentation={presentation} /></span>
                 <span className="text-xs text-zinc-500">{result.score}%</span>
               </button>
             );
           }) : null}
 
-          {step === "printing" ? identity?.printings.map((card, index) => <button aria-selected={index === activeIndex} className={`flex w-full items-center gap-3 border-b border-zinc-900 px-4 py-3 text-left ${index === activeIndex ? "bg-cyan-400/10" : "hover:bg-zinc-900"}`} key={card.id} onClick={() => { setPrinting(card); setStep("finish"); setActiveIndex(0); }} role="option" type="button"><CardThumbnail alt={`${card.name}, ${card.set}`} assetKey={card.id} candidates={[{ source: "Provider", urls: card.imageUrls ?? { normal: card.imageUrl } }]} className="w-12" selected={index === activeIndex} /><span><span className="block font-medium text-white">{card.set}</span><span className="mt-1 block text-xs text-zinc-400">#{card.number} · {card.language ?? "English"} · {resolveFinishDisplay(card.game, card.availableFinishes ?? [card.finish])}</span></span></button>) : null}
+          {step === "printing" ? identity?.printings.map((card, index) => { const presentation = adaptCardPresentation(card); return <button aria-selected={index === activeIndex} className={`flex w-full items-center gap-3 border-b border-zinc-900 px-4 py-3 text-left ${index === activeIndex ? "bg-cyan-400/10" : "hover:bg-zinc-900"}`} key={card.id} onClick={() => { setPrinting(card); setStep("finish"); setActiveIndex(0); }} role="option" type="button"><CardThumbnail alt={`${card.name}, ${card.set}`} assetKey={card.id} candidates={[{ source: "Provider", urls: card.imageUrls ?? { normal: card.imageUrl } }]} className="w-12" selected={index === activeIndex} /><span><span className="block font-medium text-white">{presentation.printing.presentationValue}</span><span className="mt-1 block text-xs text-zinc-400">{presentation.collectorNumber.presentationValue} · {presentation.language.presentationValue}</span><CardIdentityFacts className="mt-1 block text-xs text-zinc-500" presentation={presentation} /></span></button>; }) : null}
 
-          {step === "finish" && printing ? getVariants(printing).map((item, index) => <button aria-selected={index === activeIndex} className={`flex w-full justify-between border-b border-zinc-900 px-4 py-4 text-left ${index === activeIndex ? "bg-cyan-400/10 text-cyan-100" : "text-zinc-200 hover:bg-zinc-900"}`} key={item.id} onClick={() => { setVariant(item); setStep("condition"); setActiveIndex(0); }} role="option" type="button"><span>{item.finish}</span><span className="text-xs text-zinc-500">Available</span></button>) : null}
+          {step === "finish" && printing ? getVariants(printing).map((item, index) => { const presentation = adaptIdentityPresentation({ cardName: printing.name, physicalFinish: item.physicalFinish }); return <button aria-selected={index === activeIndex} className={`flex w-full justify-between border-b border-zinc-900 px-4 py-4 text-left ${index === activeIndex ? "bg-cyan-400/10 text-cyan-100" : "text-zinc-200 hover:bg-zinc-900"}`} key={item.id} onClick={() => { setVariant(item); setStep("condition"); setActiveIndex(0); }} role="option" type="button"><span>{presentation.finish.visible ? resolveVariantPhysicalFinish(item) : "Continue"}</span><span className="text-xs text-zinc-500">{presentation.finish.visible ? "Printing" : "No printing selection needed"}</span></button>; }) : null}
 
           {step === "condition" ? conditionProfiles.map((item, index) => <button aria-selected={index === activeIndex} className={`flex w-full justify-between border-b border-zinc-900 px-4 py-4 text-left ${index === activeIndex ? "bg-cyan-400/10 text-cyan-100" : "text-zinc-200 hover:bg-zinc-900"}`} key={item.code} onClick={() => { setCondition(item.code); setActiveIndex(index); }} role="option" type="button"><span>{item.label}</span><span className="text-xs text-zinc-500">{item.code}</span></button>) : null}
         </div>

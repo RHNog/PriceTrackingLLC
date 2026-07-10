@@ -1,7 +1,8 @@
 import CardThumbnail from "@/components/cards/CardThumbnail";
+import CardIdentityFacts from "@/components/cards/CardIdentityFacts";
 import type { CardIdentity } from "@/types/cardIdentity";
 import type { SearchResult } from "@/types/searchResult";
-import { resolveFinishDisplay } from "@/lib/capabilities/PlatformCapabilityResolver";
+import { adaptCardPresentation } from "@/lib/engines/identity/IdentityPresentationAdapter";
 
 type SearchResultsProps = {
   highlightedCardId: string;
@@ -26,6 +27,7 @@ export default function SearchResults({
         results.map((result) => {
           const isHighlighted = result.item.id === highlightedCardId;
           const isSelected = result.item.id === selectedCardId;
+          const presentation = adaptCardPresentation(result.item.printings[0]);
 
           return (
             <button
@@ -59,8 +61,9 @@ export default function SearchResults({
                   {result.item.name}
                 </span>
                 <span className="mt-1 block text-xs opacity-75">
-                  {result.item.printings[0].set} / #{result.item.printings[0].number} / {resolveFinishDisplay(result.item.printings[0].game, result.item.printings[0].availableFinishes ?? [result.item.printings[0].finish])} / {result.item.printings[0].language ?? "English"}
+                  {presentation.printing.presentationValue} / {presentation.language.presentationValue}
                 </span>
+                <CardIdentityFacts className="mt-1 block text-xs opacity-75" presentation={presentation} />
                 <span className="mt-1 block text-[11px] font-medium uppercase tracking-wide opacity-70">
                   {isSelected
                     ? "Selected"

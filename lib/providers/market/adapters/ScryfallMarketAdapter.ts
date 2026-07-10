@@ -6,6 +6,7 @@ import type {
 import type { MarketPrice } from "@/types/marketPrice";
 import type { MarketSnapshot } from "@/types/marketSnapshot";
 import type { PrintingVariant } from "@/types/printingVariant";
+import { createCanonicalId } from "@/lib/engines/identity/IdentityOntology";
 
 const PROVIDER_ID = "scryfall-market";
 const SOURCE_LABEL = "Scryfall Daily Market Estimate";
@@ -86,13 +87,32 @@ export function adaptScryfallMarketSnapshot(
       return marketPrice;
     })
     .filter((price): price is MarketPrice => Boolean(price));
+  const observedAt = new Date().toISOString();
+  const marketIdentityId = createCanonicalId(
+    "market",
+    PROVIDER_ID,
+    card.id,
+    variant.id,
+  );
 
   return {
+    canonicalObservation: {
+      currency: marketPrices[0]?.currency ?? matchingFields[0]?.currency ?? "USD",
+      evidence: {
+        priceMissing: marketPrices.length === 0,
+        source: SOURCE_LABEL,
+      },
+      marketIdentityId,
+      marketObservationId: createCanonicalId("observation", marketIdentityId, observedAt),
+      observedAt,
+      price: marketPrices[0]?.price ?? null,
+    },
+    marketIdentityId,
     printingId: card.id ?? "",
     variantId: variant.id,
     prices: marketPrices,
     providerId: PROVIDER_ID,
-    updatedAt: new Date().toISOString(),
+    updatedAt: observedAt,
     sourceLabel: SOURCE_LABEL,
     rawPrices: getRawPrices(card.prices),
     durationMs,

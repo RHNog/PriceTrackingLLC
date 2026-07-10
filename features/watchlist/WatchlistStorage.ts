@@ -3,6 +3,27 @@ import {
   type WatchlistDeveloperDiagnostics,
   type WatchlistEntry,
 } from "@/features/watchlist/WatchlistRefreshEngine";
+import { treatmentFromFinish } from "@/lib/engines/identity/IdentityTreatmentResolver";
+import { explicitEvidence } from "@/lib/engines/identity/IdentityOntology";
+
+function legacyPhysicalFinish(finish: string) {
+  const value = finish.toLowerCase() === "normal" || finish.toLowerCase() === "nonfoil"
+    ? "Normal"
+    : finish.replace(/\b\w/g, (character) => character.toUpperCase());
+  return {
+    evidence: explicitEvidence(
+      "watchlist-migration",
+      "legacy finish",
+      "Migrated from an existing watchlist finish selection without changing membership.",
+      90,
+    ),
+    value,
+  };
+}
+
+function migratePhysicalFinish(entry: WatchlistEntry) {
+  return entry.physicalFinish ?? legacyPhysicalFinish(entry.finish);
+}
 
 const storageKey = "project-phronesis-market-watch-v1";
 export const defaultWatchlistId = "default";
@@ -51,6 +72,7 @@ export const seedWatchlistEntries: WatchlistEntry[] = [
     currentValuation: 182,
     developerDiagnostics: createSeedDiagnostics(2),
     finish: "normal",
+    physicalFinish: legacyPhysicalFinish("normal"),
     id: "mox-opal-som-normal-nm-english",
     language: "English",
     lastObservation: hoursAgo(2),
@@ -59,6 +81,7 @@ export const seedWatchlistEntries: WatchlistEntry[] = [
     observationSource: "Repository",
     refreshStatus: "Repository Reused",
     targetPrice: 220,
+    treatment: treatmentFromFinish("normal"),
     watchlistId: defaultWatchlistId,
   }),
   calculateWatchlistMetrics({
@@ -86,6 +109,7 @@ export const seedWatchlistEntries: WatchlistEntry[] = [
     currentValuation: 38,
     developerDiagnostics: createSeedDiagnostics(9),
     finish: "foil",
+    physicalFinish: legacyPhysicalFinish("foil"),
     id: "lightning-bolt-secret-lair-foil-nm-english",
     language: "English",
     lastObservation: hoursAgo(9),
@@ -94,6 +118,7 @@ export const seedWatchlistEntries: WatchlistEntry[] = [
     observationSource: "Repository",
     refreshStatus: "Refresh Skipped",
     targetPrice: 42,
+    treatment: treatmentFromFinish("foil"),
     watchlistId: defaultWatchlistId,
   }),
   calculateWatchlistMetrics({
@@ -121,6 +146,7 @@ export const seedWatchlistEntries: WatchlistEntry[] = [
     currentValuation: 13.5,
     developerDiagnostics: createSeedDiagnostics(4),
     finish: "normal",
+    physicalFinish: legacyPhysicalFinish("normal"),
     id: "collected-company-dtk-normal-lp-english",
     language: "English",
     lastObservation: hoursAgo(4),
@@ -129,6 +155,7 @@ export const seedWatchlistEntries: WatchlistEntry[] = [
     observationSource: "Repository",
     refreshStatus: "Repository Reused",
     targetPrice: 20,
+    treatment: treatmentFromFinish("normal"),
     watchlistId: defaultWatchlistId,
   }),
   calculateWatchlistMetrics({
@@ -154,6 +181,7 @@ export const seedWatchlistEntries: WatchlistEntry[] = [
     currentValuation: 815,
     developerDiagnostics: createSeedDiagnostics(30),
     finish: "cold foil",
+    physicalFinish: legacyPhysicalFinish("cold foil"),
     id: "elsa-spirit-of-winter-tfc-cold-foil-nm-english",
     language: "English",
     lastObservation: hoursAgo(30),
@@ -162,6 +190,7 @@ export const seedWatchlistEntries: WatchlistEntry[] = [
     observationSource: "Repository",
     refreshStatus: "Refresh Skipped",
     targetPrice: 900,
+    treatment: treatmentFromFinish("cold foil"),
     watchlistId: defaultWatchlistId,
   }),
 ];
@@ -203,6 +232,9 @@ export function hydrateWatchlistEntries(entries: WatchlistEntry[]) {
         assetIdentity: repositorySeed
           ? { ...entry.assetIdentity, ...repositorySeed.assetIdentity }
           : entry.assetIdentity,
+        treatment: entry.treatment ?? treatmentFromFinish(entry.finish),
+        physicalFinish: migratePhysicalFinish(entry),
+        printingDesignFacets: entry.printingDesignFacets ?? [],
         watchlistId: entry.watchlistId ?? defaultWatchlistId,
       });
     });

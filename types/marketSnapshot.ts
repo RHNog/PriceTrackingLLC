@@ -1,4 +1,5 @@
 import type { MarketPrice } from "@/types/marketPrice";
+import type { MarketObservation } from "@/types/identityOntology";
 
 export type MarketTrend = "Increasing" | "Stable" | "Declining" | "Unknown";
 
@@ -80,6 +81,8 @@ export interface MarketSnapshotIdentityEvidence {
 }
 
 export interface MarketSnapshot {
+  canonicalObservation?: MarketObservation;
+  marketIdentityId?: string;
   printingId: string;
   variantId: string;
   prices: MarketPrice[];

@@ -70,7 +70,8 @@ test("normalizes operational provider output into canonical identity", async () 
   const result = await new IdentityOrchestrator(registry).search("Mox Opal");
   assert.equal(result.status, "OPERATIONAL");
   assert.equal(result.results[0].item.providerIdentity.providerId, "fixture-magic");
-  assert.equal(result.results[0].item.canonicalIdentity, "magic:mox opal");
+  assert.equal(result.results[0].item.canonicalIdentity, "gameplay:magic:mox-opal");
+  assert.equal(result.results[0].item.ontologyVersion, "PHR-ARCH-007");
   assert.equal(result.results[0].item.printings[0].number, "179");
   assert.equal(result.results[0].item.artwork?.normal, "https://example.test/mox-opal.jpg");
 });

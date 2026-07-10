@@ -32,6 +32,10 @@ export interface MarketSnapshotRequestContext {
   language?: string;
   printingId: string;
   variantId: string;
+  gameplayIdentityId?: string;
+  marketIdentityId?: string;
+  physicalVariantIdentityId?: string;
+  printingIdentityId?: string;
 }
 
 type StoredRepository = {

@@ -514,3 +514,27 @@ The sprint fixed a zero-valued Offer Ladder failure where an impossible maximum 
 - Added canonical provider-neutral card thumbnails, resolution caching, optimized lazy imagery, fallback handling, and developer provenance.
 - Connected Market Watch and Universal Asset Picker results.
 - Validated repository artwork identities for Mox Opal, Lightning Bolt, Collected Company, and Elsa – Spirit of Winter.
+
+## PHR-ARCH-006
+
+Identity Fidelity and Treatment Model.
+
+Audited the complete documented Lorcast card payload and classified every provider field as mapped, derived, ignored, or reserved. Added provider-neutral Treatment with provenance, resolution state, explanation, and confidence; identity completeness metrics; canonical mapping diagnostics; and treatment-aware Command Palette, vendor, and Watchlist presentation. Lorcast derives only evidence-backed treatments from rarity and never uses market price fields to infer identity. Magic continues to resolve treatment from its existing explicit finish metadata.
+
+## PHR-ARCH-007
+
+Cross-Game Identity Ontology migration.
+
+Replaced the flattened canonical model with linked Gameplay, Printing, Physical Variant, and Market Identity contracts, plus independent Market Observation, Inventory Instance, and OwnershipRelationship. Added typed aliases, mapping repository, completeness, migration utilities, Scryfall/Lorcast mappings, explicit TCGplayer Product/SKU semantics, and compatibility projections that preserve Market Watch, Vendor Workspace, Universal Command Palette, repository observations, and replay fixtures. Lorcast Enchanted is now a Printing Design Facet while Physical Finish reports Provider Does Not Supply.
+
+## PHR-ARCH-009
+
+Identity Presentation Layer.
+
+Introduced pure presentation model, adapter, formatter, and diagnostics modules that translate immutable canonical identity into collector vocabulary. Updated Command Palette, Vendor results, Watchlist, and capability labels to present Printing, Treatment, Finish, Market, and Condition. Developer mode retains Gameplay Identity, Printing Identity, Printing Design Facets, Physical Finish, provider mapping, and canonical-to-presentation diagnostics. Lorcast audit confirmed Cold Foil was not misclassified and required no provider mapping correction.
+
+## PHR-UX-005
+
+Collector Presentation Rules.
+
+Refined presentation terminology so Printing Design Facet appears as Treatment and Physical Finish appears as Printing. Added visibility metadata and centralized rules that hide Standard Treatment plus Regular, Normal, Nonfoil, and provider-unavailable Printing. Introduced shared collector-fact rendering across Command Palette, Vendor results, and Watchlist while developer diagnostics retain canonical values and suppression reasons. Canonical ontology and provider mappings were unchanged.

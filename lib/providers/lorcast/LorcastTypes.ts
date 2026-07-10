@@ -9,11 +9,17 @@ export type LorcastImageUris = {
 export type LorcastCard = {
   classifications?: string[] | null;
   collector_number?: string;
+  cost?: number;
+  flavor_text?: string | null;
   id?: string;
   image_uris?: LorcastImageUris;
   ink?: string | null;
+  inkwell?: boolean;
   lang?: string;
   layout?: string;
+  legalities?: Record<string, string>;
+  lore?: number | null;
+  move_cost?: number | null;
   name?: string;
   prices?: {
     usd?: string | null;
@@ -26,9 +32,13 @@ export type LorcastCard = {
     id?: string;
     name?: string;
   };
+  strength?: number | null;
   tcgplayer_id?: number;
+  text?: string;
   type?: string[];
   version?: string;
+  willpower?: number | null;
+  illustrators?: string[];
 };
 
 export type LorcastSearchResponse = {

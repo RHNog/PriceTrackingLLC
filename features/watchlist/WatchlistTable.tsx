@@ -2,12 +2,13 @@
 
 import { Fragment, useState } from "react";
 import CardThumbnail from "@/components/cards/CardThumbnail";
+import CardIdentityFacts from "@/components/cards/CardIdentityFacts";
 import CapabilityCard from "@/components/ui/CapabilityCard";
 import {
   DeveloperPanel,
   StatusLabel,
   formatAge,
-  formatFinish,
+  createWatchlistPresentation,
   formatMarketValue,
   formatTarget,
   formatTrend,
@@ -62,6 +63,7 @@ export default function WatchlistTable({
             );
             const entryKey = `${entry.watchlistId}:${entry.id}`;
             const expanded = expandedEntryKey === entryKey;
+            const presentation = createWatchlistPresentation(entry);
 
             return (
               <Fragment key={entryKey}>
@@ -93,7 +95,7 @@ export default function WatchlistTable({
                   <p className="mt-1 text-xs text-zinc-500">
                     #{entry.assetIdentity.collectorNumber ?? "No collector number"}
                   </p>
-                  <p className="mt-1 text-xs text-zinc-500">{formatFinish(entry)}</p>
+                  <CardIdentityFacts className="text-xs text-zinc-500" layout="stacked" presentation={presentation} />
                 </td>
                 <td className={`px-4 py-4 font-medium ${marketCapability.status === "Operational" ? "text-white" : "text-xs text-amber-200"}`}>
                   {formatMarketValue(entry, entry.currentValuation)}

@@ -1,5 +1,7 @@
 import type { MarketSnapshot } from "@/types/marketSnapshot";
 import { resolveCapability } from "@/lib/capabilities/PlatformCapabilityResolver";
+import type { IdentityTreatment } from "@/types/identityTreatment";
+import type { PhysicalFinish, PrintingDesignFacet } from "@/types/identityOntology";
 import {
   appendSuccessfulWatchObservation,
   ensureWatchHistory,
@@ -55,6 +57,10 @@ export interface WatchlistAssetIdentity {
   providerVariantIdentifier?: string;
   setCode?: string;
   variantId: string;
+  gameplayIdentityId?: string;
+  marketIdentityId?: string;
+  physicalVariantIdentityId?: string;
+  printingIdentityId?: string;
   image?: {
     source: "Repository" | "Replay" | "Provider";
     urls: {
@@ -85,6 +91,9 @@ export interface WatchlistEntry {
   refreshPriority: WatchlistRefreshPriority;
   refreshStatus: WatchlistRefreshStatus;
   targetPrice: number;
+  physicalFinish?: PhysicalFinish;
+  printingDesignFacets?: PrintingDesignFacet[];
+  treatment?: IdentityTreatment;
   watchlistId: string;
   watchHistory?: WatchHistoryMetadata;
 }

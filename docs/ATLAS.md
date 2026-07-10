@@ -4,6 +4,20 @@ Atlas is the permanent project knowledge base for PriceTrackingLLC and Project P
 
 Project Phronesis is the internal engineering identity for the initiative building an evidence-driven decision intelligence platform for collectible markets. It is not necessarily the future customer-facing product name.
 
+## Cross-Game Identity Ontology
+
+`PHR-ARCH-007` implements four linked identity layers: Gameplay Identity, Printing Identity, Physical Variant Identity, and Market Identity. Market Observation, Inventory Instance, and OwnershipRelationship remain separate state. Lorcast rarity is Printing Identity, Scryfall finishes are Physical Variant availability, and TCGplayer Product/SKU identifiers are Market Identity. Provider field names never determine semantics by themselves.
+
+## Identity Presentation Layer
+
+`PHR-ARCH-009` keeps PHR-ARCH-007 immutable while translating canonical concepts into collector vocabulary. With PHR-UX-005, production surfaces say Set, Treatment, Printing, Market, and Condition. Developer diagnostics show both the canonical source and presentation translation. Lorcast Enchanted presents as Treatment; its provider-unavailable Printing is suppressed. Cold Foil is never inferred from rarity, treatment, or price lanes.
+
+PHR-UX-005 applies collector density rules: Physical Finish is presented as Printing, while published set identity is presented as Set. Standard Treatment and Regular/Normal/Nonfoil/provider-unavailable Printing are hidden. Enchanted remains visible as Treatment; Cold Foil remains visible only as Printing. Hidden values and reasons remain available in developer mode.
+
+## Identity Fidelity and Treatment
+
+`PHR-ARCH-006` established the current Treatment compatibility model and its provenance diagnostics. The later `PHR-ARCH-007` semantic audit identifies a necessary refinement: Lorcast rarity-derived Standard, Enchanted, Promo, and Iconic values describe printing rarity/design, not proven physical finish. Until the proposed migration is implemented, these remain current compatibility projections rather than authoritative Physical Variant Identity. Market fields are never identity evidence.
+
 ## Documentation Index
 
 Planning documents are separated by responsibility:
@@ -110,7 +124,7 @@ Rule: Market Since Added compares current valuation with initial watch valuation
 - Removal boundary: WatchlistStorage only
 - Protected data: canonical identity, repository observations, replay fixtures, market history
 - Magic: Identity and Market Operational
-- Lorcana: Identity/Artwork/Printings Operational; Finish Unavailable from provider; Market Pending
+- Lorcana: Gameplay/Printing/Artwork/Printing Design Operational; Physical Variant Unavailable from provider; Market Pending
 - Acquisition rule: non-operational market capability never invokes refresh
 
 Rule: unknown evidence and unavailable capability are distinct states and must never share misleading presentation.
@@ -121,7 +135,8 @@ Rule: unknown evidence and unavailable capability are distinct states and must n
 - Orchestrator: `lib/engines/identity/IdentityOrchestrator.ts`
 - Registry: `lib/engines/identity/IdentityProviderRegistry.ts`
 - Selection: explicit game → parsed/search context → user preference → Magic fallback.
-- Canonical model: `CanonicalIdentityModel` in `IdentityProviderAdapter.ts`.
+- Canonical model: PHR-ARCH-007 ontology contracts in `types/identityOntology.ts`, composed by `CanonicalIdentityModel` in `IdentityProviderAdapter.ts`.
+- Mapping repository: typed provider aliases in `IdentityMappingRepository.ts`.
 - Operational: Magic → Scryfall; Lorcana → Lorcast.
 - Pending: Pokémon, One Piece, Flesh and Blood.
 - Outcomes: Operational, No Match, Provider Pending, Provider Not Configured, Provider Offline.

@@ -1,6 +1,7 @@
 import CardThumbnail from "@/components/cards/CardThumbnail";
+import CardIdentityFacts from "@/components/cards/CardIdentityFacts";
 import type { PrintingMatchCandidate } from "@/types/printingResolution";
-import { resolveFinishDisplay } from "@/lib/capabilities/PlatformCapabilityResolver";
+import { adaptCardPresentation } from "@/lib/engines/identity/IdentityPresentationAdapter";
 
 type PrintingResultsProps = {
   candidates: PrintingMatchCandidate[];
@@ -9,22 +10,8 @@ type PrintingResultsProps = {
   onSelectPrinting: (printingId: string) => void;
 };
 
-function formatList(values: string[]) {
-  return values.length > 0 ? values.join(", ") : "None";
-}
-
-function getPrintingStyle(candidate: PrintingMatchCandidate) {
-  const printing = candidate.printing;
-  const usefulStyles = [
-    printing.treatment,
-    ...(printing.frameEffects ?? []),
-    ...(printing.promoTypes ?? []),
-  ].filter((value): value is string => Boolean(value));
-
-  return usefulStyles.length > 0 ? formatList(usefulStyles) : "Regular artwork";
-}
-
 function getFinishStatus(candidate: PrintingMatchCandidate) {
+  const presentation = adaptCardPresentation(candidate.printing);
   const finishMatch = candidate.matchedConstraints.find(
     (match) => match.constraint.type === "finish",
   );
@@ -37,9 +24,10 @@ function getFinishStatus(candidate: PrintingMatchCandidate) {
     return "Finish required";
   }
 
-  return candidate.finishVariants[0]
-    ? `Only ${candidate.finishVariants[0].finish}`
-    : "Finish unavailable";
+  const onlyFinish = candidate.finishVariants[0]?.finish;
+  return onlyFinish && onlyFinish.toLowerCase() !== "unknown"
+    ? `Only ${onlyFinish}`
+    : `Finish: ${presentation.finish.presentationValue}`;
 }
 
 export default function PrintingResults({
@@ -63,6 +51,7 @@ export default function PrintingResults({
         const printing = candidate.printing;
         const isSelected = printing.id === selectedPrintingId;
         const isHighlighted = printing.id === highlightedPrintingId;
+        const presentation = adaptCardPresentation(printing);
 
         return (
           <button
@@ -95,12 +84,12 @@ export default function PrintingResults({
                     {printing.setCode ? `(${printing.setCode})` : ""}
                   </p>
                   <p className="mt-1 text-xs opacity-75">
-                    #{printing.number} / {printing.language ?? "English"} /{" "}
-                    {resolveFinishDisplay(printing.game, candidate.availableFinishes)}
+                    {presentation.collectorNumber.presentationValue} / {presentation.language.presentationValue}
                   </p>
                   <p className="mt-1 text-xs opacity-75">
-                    {getPrintingStyle(candidate)} / {printing.releaseYear ?? "Unknown"}
+                    {printing.releaseYear ?? "Release Date Not Supplied"}
                   </p>
+                  <CardIdentityFacts className="text-xs opacity-75" layout="stacked" presentation={presentation} />
                 </div>
               </div>
               <span className="text-right text-xs font-semibold">

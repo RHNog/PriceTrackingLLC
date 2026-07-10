@@ -17,6 +17,8 @@ export type PlatformCapabilityId =
   | "artwork"
   | "printings"
   | "finish"
+  | "treatment"
+  | "physicalVariant"
   | "condition"
   | "marketData"
   | "marketIntelligence"

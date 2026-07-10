@@ -123,7 +123,9 @@ Provider work remains asynchronous and compatible with palette loading skeletons
 
 ## Technical Notes
 
-Lorcast does not expose finish availability as an identity field in the documented card model. The adapter reports finish as `Unknown` rather than inferring it from price fields.
+Under PHR-ARCH-007, Lorcast card `id` identifies Printing Identity and rarity supplies rarity plus printing-design facets such as Enchanted or Promo. Lorcast does not expose physical finish availability in its documented card model, so Physical Finish is explicitly `Provider Does Not Supply`. It is never inferred from price fields.
+
+PHR-ARCH-009 audit result: Cold Foil is not mapped into Lorcast Printing Design Facets or Physical Finish. No provider mapping correction was necessary. Collector UI translates Enchanted to Treatment and the unavailable physical finish state to Finish: Provider Does Not Supply.
 
 ## UI / UX Notes
 

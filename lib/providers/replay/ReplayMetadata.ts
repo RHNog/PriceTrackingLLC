@@ -15,6 +15,12 @@ export type ReplayFixtureMetadata = {
   recordedFrom: ReplayRecordedFrom;
   schemaVersion: number;
   sdkVersion: string;
+  ontologyRefs?: {
+    gameplayIdentityId?: string;
+    marketIdentityId?: string;
+    physicalVariantIdentityId?: string;
+    printingIdentityId?: string;
+  };
 };
 
 export type ReplayFixture<TRaw = unknown, TNormalized = unknown> = {

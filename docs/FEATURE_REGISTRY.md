@@ -18,6 +18,10 @@ The Feature Registry records permanent Project Phronesis feature identifiers and
 | `PHR-API-001` | Lorcast Identity Provider | Completed | API / Technical / Architecture | `docs/api/PHR-API-001-lorcast-identity-provider.md` |
 | `PHR-UX-003` | Capability-Aware Workflows | Completed | UX / UI / Workflow / Technical | `docs/ux/PHR-UX-003-capability-aware-workflows.md` |
 | `PHR-UX-004` | Lightweight Watch History | Completed | UX / UI / Workflow / Technical | `docs/ux/PHR-UX-004-watch-history.md` |
+| `PHR-ARCH-006` | Identity Fidelity and Treatment Model | Completed | Architecture / Technical / API / UX | `docs/architecture/PHR-ARCH-006-identity-fidelity-treatment-model.md` |
+| `PHR-ARCH-007` | Cross-Game Identity Ontology | Completed | Architecture / Technical / API / Research | `docs/architecture/PHR-ARCH-007-cross-game-identity-ontology.md` |
+| `PHR-ARCH-009` | Identity Presentation Layer | Completed | Architecture / Technical / UI / UX | `docs/architecture/PHR-ARCH-009-identity-presentation-layer.md` |
+| `PHR-UX-005` | Collector Presentation Rules | Completed | UX / UI / Presentation | `docs/ux/PHR-UX-005-collector-presentation-rules.md` |
 
 ## Registry Rule
 

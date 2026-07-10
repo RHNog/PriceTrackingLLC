@@ -30,11 +30,18 @@ test("normalizes Lorcast identity and excludes prices", () => {
   assert.equal(card?.version, "Spirit of Winter");
   assert.equal(card?.number, "42");
   assert.equal(card?.imageUrls?.normal, elsa.image_uris.digital.normal);
-  assert.equal(card?.canonicalIdentity, "lorcana:elsa:spirit of winter");
+  assert.match(card?.canonicalIdentity ?? "", /^gameplay:lorcana:elsa:spirit-of-winter/);
   assert.equal(card?.tcgplayerId, 507512);
   assert.equal("prices" in (card ?? {}), false);
   assert.equal(JSON.stringify(card).includes("2.00"), false);
   assert.equal(card?.finish, "Unknown");
+  assert.equal(card?.treatment, "Standard");
+  assert.equal(card?.treatmentDetails?.state, "Derived");
+  assert.equal(card?.treatmentDetails?.source, "rarity");
+  assert.equal(card?.physicalFinish?.value, "Provider Does Not Supply");
+  assert.equal(card?.physicalFinish?.evidence.state, "Provider Does Not Supply");
+  assert.equal(card?.providerSetId, "set_1");
+  assert.equal(card?.identityMappingAudit?.ignoredFields.includes("prices.usd"), true);
 });
 
 test("requests all prints once and caches identical searches", async () => {

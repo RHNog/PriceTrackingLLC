@@ -20,6 +20,45 @@ Identity application flows use `IdentityOrchestrator`, never concrete providers.
 
 Current capability matrix has Magic/Scryfall and Lorcana/Lorcast operational, with Pokémon, One Piece, and Flesh and Blood registered as pending connections. Identity artwork is provider identity data; market providers do not own it. Lorcast prices are explicitly excluded.
 
+## Cross-Game Identity Ontology (PHR-ARCH-007)
+
+The authoritative canonical representation is:
+
+```text
+GameplayIdentity
+  -> PrintingIdentity
+       -> PhysicalVariantIdentity
+            -> MarketIdentity
+                 -> MarketObservation
+            -> InventoryInstance
+                 <- OwnershipRelationship -> Owner
+```
+
+Gameplay Identity owns rules-equivalent meaning. Printing Identity owns publication, set, collector number, language, artwork, rarity, and printing-design facets. Physical Variant Identity owns only explicit manufacturing finish. Market Identity owns marketplace Product/SKU addressability, while Market Observation owns time-varying evidence. Inventory Instance owns copy state; OwnershipRelationship connects a copy to an owner.
+
+`CanonicalIdentityModel` now carries this ontology graph. Existing `CardIdentity`, `Card`, printing, finish, workflow URL, watchlist, market repository, and replay fields remain compatibility projections during migration. Typed provider aliases declare which canonical entity they identify. `IdentityMappingRepository` resolves only validated aliases.
+
+Scryfall mapping: `oracle_id` -> Gameplay, card `id` -> Printing, `finishes` -> Physical Variant, marketplace cross-references -> Market Identity candidates. Lorcast mapping: deterministic rules fingerprint -> Gameplay, card `id` -> Printing, rarity -> Printing Design Facet, physical finish -> Provider Does Not Supply, `tcgplayer_id` -> Market Identity candidate. TCGplayer `printingId`/`variantId` is provider finish segmentation and never canonical Printing Identity.
+
+## Identity Presentation Layer (PHR-ARCH-009)
+
+The PHR-ARCH-007 ontology is immutable and never imports presentation concerns. Collector-facing workflows translate canonical records through a one-way presentation boundary:
+
+```text
+Canonical Ontology
+  -> IdentityPresentationAdapter
+  -> IdentityPresentationModel
+  -> Collector UI
+
+Canonical Ontology + Presentation Model
+  -> IdentityPresentationDiagnostics
+  -> Developer UI
+```
+
+Collector vocabulary maps Printing Identity location to Set, Printing Design Facet to Treatment, Physical Finish to Printing, Market Observation to Market, and Inventory Instance condition to Condition. React components do not own these translations. Meaningful unavailable or pending states precede Unknown.
+
+PHR-UX-005 refines this vocabulary for experienced collectors: Printing Identity location is labeled Set; Physical Finish is labeled Printing. Treatment is visible only when non-standard. Printing is visible only when it distinguishes the physical collectible, so Regular, Normal, Nonfoil, and Provider Does Not Supply are suppressed. `IdentityPresentationField.visible` and `visibilityReason` own this policy; canonical values remain available to developer diagnostics.
+
 Project Phronesis (Engineering Initiative) is the internal engineering identity for this architecture. The commercial product name remains undecided. The architecture reflects practical judgment: observations are separated from reasoning, evidence precedes conclusions, and business decisions remain explainable.
 
 ## Sprint 34: Market Intelligence Engine
@@ -1925,6 +1964,9 @@ Production UI shows user-facing readiness blockers. Atlas Inspector shows System
 - Business engines must not write or mutate history.
 - Dictionaries and config files should evolve before parser logic is rewritten.
 - Finish selection must be resolved by domain data, constraints, and the Variant Resolution Policy, not by UI defaults.
+- Canonical Treatment describes physical collectible identity and remains independent from market value.
+- Derived Treatment carries its provider field source, explanation, state, and confidence; absent evidence remains explicitly unresolved.
+- Provider mapping audits and identity completeness belong to the canonical identity boundary, not UI components.
 - Condition must never affect identity resolution.
 - Card Intelligence must not negotiate or choose BUY / PASS.
 - Intelligence models must not make decisions.

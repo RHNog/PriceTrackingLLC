@@ -519,3 +519,29 @@ Core instruction: inspect Asset Context, Market Snapshot, Business Profile, Cost
 Major files affected: `lib/pipeline/`, `lib/business/`, `lib/engines/evaluation/evaluatePurchase.ts`, `lib/engines/negotiation/`, `features/vendor/components/AtlasInspector.tsx`, `features/vendor/components/VendorWorkspace.tsx`, `features/settings/components/BusinessProfilesSettings.tsx`, `tests/pipeline-integrity.test.ts`, `docs/`.
 
 Result: Pipeline Inspector, explicit business-owned Offer Policy, developer-only Pipeline Trace, first-invalid-stage termination, zero-valued Offer Ladder blocking, Online Marketplace low-dollar policy correction, and regression coverage for a $34.01 market estimate with a $5 seller ask.
+
+## PHR-ARCH-006 Identity Fidelity and Treatment Model
+
+Purpose: separate collectible identity treatment from market value and eliminate ambiguous generic finish labels across providers.
+
+Major files affected: `types/identityTreatment.ts`, `types/identityCompleteness.ts`, `lib/engines/identity/`, `lib/providers/lorcast/`, Command Palette, Vendor results, Watchlist, capability registry, developer diagnostics, tests, and documentation.
+
+Result: audited Lorcast mapping, canonical Treatment provenance, identity completeness, field mapping diagnostics, provider-neutral UI consumption, and conservative Lorcana treatment derivation without market-field inference.
+
+## PHR-ARCH-007 Cross-Game Identity Ontology
+
+Purpose: implement separate Gameplay, Printing, Physical Variant, and Market Identity entities with typed provider aliases and evidence-backed mappings.
+
+Result: ontology migration implemented with typed entities, mappings, compatibility projections, provider normalization, diagnostics, persistence hydration, and regression coverage.
+
+## PHR-ARCH-009 Identity Presentation Layer
+
+Purpose: preserve the canonical ontology while translating its concepts into collector terminology through a reusable presentation boundary.
+
+Result: presentation model, adapter, formatter, diagnostics, production UI adoption, Lorcast mapping audit, and regression validation completed.
+
+## PHR-UX-005 Collector Presentation Rules
+
+Purpose: remove non-distinguishing identity noise and align presentation terminology with experienced collector vocabulary.
+
+Result: Physical Finish presents as Printing, Standard Treatment and regular/unavailable Printing are hidden, shared rendering is connected, and developer visibility is preserved.

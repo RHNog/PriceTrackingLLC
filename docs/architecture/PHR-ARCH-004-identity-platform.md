@@ -36,6 +36,10 @@ The platform cannot distinguish an empty result from a known game whose provider
 
 Introduce an Identity Orchestrator, registry, capability model, provider contract, adapter contract, selection policy, canonical identity model, and diagnostics. Register operational Scryfall for Magic and pending adapters for Lorcana, Pokémon, One Piece, and Flesh and Blood. Application surfaces call only the orchestrator.
 
+PHR-ARCH-007 supersedes the original flattened canonical record internally. Providers now map into Gameplay, Printing, Physical Variant, and Market Identity; `CardIdentity` remains a compatibility projection for existing workflows.
+
+PHR-ARCH-009 owns collector-facing terminology. The Identity Platform and provider adapters emit canonical concepts and do not format Treatment, Finish, Market, or Condition labels.
+
 ## Functional Requirements
 
 - Register identity providers by stable provider ID and supported games.

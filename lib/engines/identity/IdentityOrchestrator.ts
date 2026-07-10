@@ -22,6 +22,7 @@ import { OnePieceIdentityProviderAdapter } from "@/lib/providers/identity/OnePie
 import { PokemonIdentityProviderAdapter } from "@/lib/providers/identity/PokemonIdentityProviderAdapter";
 import { ScryfallIdentityProviderAdapter } from "@/lib/providers/identity/ScryfallIdentityProviderAdapter";
 import type { SearchResult } from "@/types/searchResult";
+import { identityMappingRepository } from "@/lib/engines/identity/IdentityMappingRepository";
 
 export type IdentityOrchestrationResponse = Omit<IdentitySearchResponse, "results"> & {
   message?: string;
@@ -177,6 +178,7 @@ export class IdentityOrchestrator {
       ...result,
       item: provider.adapter.normalizeIdentity(result.item, result.score),
     }));
+    results.forEach((result) => identityMappingRepository.registerCollectible(result.item));
 
     return {
       ...response,

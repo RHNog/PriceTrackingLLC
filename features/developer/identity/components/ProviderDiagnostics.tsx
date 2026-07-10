@@ -1,6 +1,8 @@
 import { adaptScryfallMarketSnapshot } from "@/lib/providers/market/adapters/ScryfallMarketAdapter";
 import type { ScryfallCardResponse } from "@/lib/providers/identity/adapters/ScryfallAdapter";
 import type { IdentityOrchestrationResponse } from "@/lib/engines/identity/IdentityOrchestrator";
+import { adaptCardPresentation } from "@/lib/engines/identity/IdentityPresentationAdapter";
+import { createIdentityPresentationDiagnostics } from "@/lib/engines/identity/IdentityPresentationDiagnostics";
 
 type ProviderDiagnosticsProps = {
   response: IdentityOrchestrationResponse;
@@ -51,6 +53,16 @@ export default function ProviderDiagnostics({
       (candidate) =>
         candidate.identity.id === response.intent.selectedIdentity?.id,
     ) ?? response.intent.identityCandidates[0];
+  const canonicalIdentity =
+    response.results.find(
+      (result) => result.item.id === response.intent.selectedIdentity?.id,
+    )?.item ?? response.results[0]?.item;
+  const completeness = canonicalIdentity?.completeness.metrics
+    .map((metric) => `${metric.field}: ${metric.percent === null ? metric.status : `${metric.percent}%`}`)
+    .join(", ");
+  const presentationDiagnostics = selectedPrinting
+    ? createIdentityPresentationDiagnostics(adaptCardPresentation(selectedPrinting))
+    : [];
 
   return (
     <section className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
@@ -60,6 +72,23 @@ export default function ProviderDiagnostics({
       <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
         <Diagnostic label="Provider Selected" value={response.orchestrationDiagnostics.providerSelected ?? "None"} />
         <Diagnostic label="Provider Confidence" value={String(response.orchestrationDiagnostics.providerConfidence)} />
+        <Diagnostic label="Canonical Provider Confidence" value={String(canonicalIdentity?.providerConfidence ?? 0)} />
+        <Diagnostic label="Gameplay Identity" value={canonicalIdentity?.gameplayIdentity.gameplayIdentityId ?? "Unresolved"} />
+        <Diagnostic label="Printing Identity" value={canonicalIdentity?.printingIdentity.printingIdentityId ?? "Unresolved"} />
+        <Diagnostic label="Physical Variant" value={canonicalIdentity?.physicalVariants.map((variant) => `${variant.physicalVariantIdentityId}: ${variant.physicalFinish.value}`).join(", ") || "Unresolved"} />
+        <Diagnostic label="Market Identity" value={canonicalIdentity?.marketIdentities.map((market) => `${market.marketProviderId}:${market.providerProductId ?? market.providerSkuId ?? "unresolved"} (${market.mappingStatus})`).join(", ") || "Not mapped"} />
+        <Diagnostic label="Ontology Completeness" value={canonicalIdentity ? `Gameplay ${canonicalIdentity.ontologyCompleteness.gameplayIdentity}% · Printing ${canonicalIdentity.ontologyCompleteness.printingIdentity}% · Physical ${canonicalIdentity.ontologyCompleteness.physicalVariantIdentity}% · Market ${canonicalIdentity.ontologyCompleteness.marketIdentity}%` : "None"} />
+        <Diagnostic label="Provider Evidence" value={canonicalIdentity?.physicalVariants.flatMap((variant) => [variant.physicalFinish.evidence, ...variant.marketIdentities.flatMap((market) => market.mappingEvidence)]).map((evidence) => `${evidence.providerId}.${evidence.providerField}: ${evidence.state} (${evidence.confidence})`).join(", ") || "None"} />
+        <Diagnostic label="Printing Design Facets" value={canonicalIdentity?.printingIdentity.printingDesignFacets.map((facet) => facet.value).join(", ") || "None"} />
+        <Diagnostic label="Physical Finish" value={canonicalIdentity ? `${canonicalIdentity.physicalFinish.value} · ${canonicalIdentity.physicalFinish.evidence.state}` : "Unresolved"} />
+        <Diagnostic label="Provider Mapping" value={canonicalIdentity?.printingIdentity.aliases.map((alias) => `${alias.providerId}.${alias.namespace}=${alias.value}`).join(", ") || "None"} />
+        <Diagnostic label="Presentation Translation" value={presentationDiagnostics.filter((item) => ["Set", "Treatment", "Printing"].includes(item.presentationLabel)).map((item) => `${item.canonicalConcept} → ${item.presentationLabel}: ${item.canonicalValue} → ${item.presentationValue} (${item.visible ? "visible" : item.visibilityReason})`).join("; ") || "None"} />
+        <Diagnostic label="Identity Completeness" value={canonicalIdentity ? `${canonicalIdentity.completeness.overallPercent}%` : "0%"} />
+        <Diagnostic label="Completeness by Field" value={completeness || "None"} />
+        <Diagnostic label="Mapped Fields" value={canonicalIdentity?.mappingAudit.mappedFields.join(", ") || "None"} />
+        <Diagnostic label="Derived Fields" value={canonicalIdentity?.mappingAudit.derivedFields.join(", ") || "None"} />
+        <Diagnostic label="Ignored Fields" value={canonicalIdentity?.mappingAudit.ignoredFields.join(", ") || "None"} />
+        <Diagnostic label="Canonical Fields" value={canonicalIdentity?.mappingAudit.canonicalFields.join(", ") || "None"} />
         <Diagnostic label="Normalization Source" value={response.orchestrationDiagnostics.normalizationSource} />
         <Diagnostic label="Canonical Identity" value={response.orchestrationDiagnostics.canonicalIdentities.join(", ") || "None"} />
         <Diagnostic label="Fallback Provider" value={response.orchestrationDiagnostics.fallbackProvider ?? "None"} />

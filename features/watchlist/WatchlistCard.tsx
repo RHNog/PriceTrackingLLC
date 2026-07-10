@@ -1,11 +1,14 @@
 "use client";
 
 import CardThumbnail from "@/components/cards/CardThumbnail";
+import CardIdentityFacts from "@/components/cards/CardIdentityFacts";
 import CapabilityCard from "@/components/ui/CapabilityCard";
 import WatchlistEntryMenu from "@/features/watchlist/WatchlistEntryMenu";
 import WatchDetails from "@/features/watchlist/WatchDetails";
 import type { WatchlistEntry } from "@/features/watchlist/WatchlistRefreshEngine";
 import { resolveCapability, resolveGameCapabilities } from "@/lib/capabilities/PlatformCapabilityResolver";
+import { adaptIdentityPresentation } from "@/lib/engines/identity/IdentityPresentationAdapter";
+import { createIdentityPresentationDiagnostics } from "@/lib/engines/identity/IdentityPresentationDiagnostics";
 
 type WatchlistCardProps = {
   developerMode: boolean;
@@ -38,6 +41,7 @@ export default function WatchlistCard({
   const capabilities = resolveGameCapabilities(entry.assetIdentity.game).capabilities.filter(
     (capability) => ["identity", "artwork", "marketData"].includes(capability.id),
   );
+  const presentation = createWatchlistPresentation(entry);
   return (
     <article className="rounded-lg border border-zinc-800 bg-zinc-950 p-4 md:hidden">
       <div className="flex items-start justify-between gap-4">
@@ -57,8 +61,9 @@ export default function WatchlistCard({
             {entry.assetIdentity.printing}
           </p>
           <p className="mt-1 text-xs text-zinc-500">
-            #{entry.assetIdentity.collectorNumber ?? "—"} / {entry.assetIdentity.game} / {formatFinish(entry)} / {entry.language}
+            {presentation.collectorNumber.presentationValue} / {entry.assetIdentity.game} / {presentation.language.presentationValue}
           </p>
+          <CardIdentityFacts className="mt-1 block text-xs text-zinc-500" presentation={presentation} />
           </div>
         </div>
         <div className="flex items-start gap-1">
@@ -128,6 +133,9 @@ export function StatusLabel({ status }: { status: string }) {
 
 export function DeveloperPanel({ entry }: { entry: WatchlistEntry }) {
   const diagnostics = entry.developerDiagnostics;
+  const presentationDiagnostics = createIdentityPresentationDiagnostics(
+    createWatchlistPresentation(entry),
+  );
 
   return (
     <div className="mt-4 rounded-md border border-zinc-800 bg-zinc-900/70 p-3 text-xs text-zinc-400">
@@ -138,6 +146,10 @@ export function DeveloperPanel({ entry }: { entry: WatchlistEntry }) {
         <p>API Saved: {diagnostics.apiSaved ? "Yes" : "No"}</p>
         <p>Cache Age: {formatAge(diagnostics.cacheAgeMs)}</p>
         <p>Observation Age: {formatAge(diagnostics.observationAgeMs)}</p>
+        <p>Gameplay Identity: {entry.assetIdentity.gameplayIdentityId ?? "Legacy record"}</p>
+        <p>Printing Identity: {entry.assetIdentity.printingIdentityId ?? "Legacy record"}</p>
+        <p>Physical Variant: {entry.assetIdentity.physicalVariantIdentityId ?? "Legacy record"}</p>
+        <p>Market Identity: {entry.assetIdentity.marketIdentityId ?? "Not mapped"}</p>
       </div>
       {diagnostics.providerRequestJustification ? (
         <p className="mt-2 text-zinc-500">
@@ -147,6 +159,16 @@ export function DeveloperPanel({ entry }: { entry: WatchlistEntry }) {
       {diagnostics.errorMessage ? (
         <p className="mt-2 text-red-300">{diagnostics.errorMessage}</p>
       ) : null}
+      <div className="mt-3 border-t border-zinc-800 pt-3">
+        <p className="font-medium text-zinc-300">Presentation Translation</p>
+        {presentationDiagnostics
+          .filter((item) => ["Set", "Treatment", "Printing"].includes(item.presentationLabel))
+          .map((item) => (
+            <p className="mt-1" key={item.canonicalConcept}>
+              {item.canonicalConcept} → {item.presentationLabel}: {item.canonicalValue} → {item.presentationValue} ({item.visible ? "visible" : item.visibilityReason})
+            </p>
+          ))}
+      </div>
     </div>
   );
 }
@@ -182,9 +204,26 @@ export function formatMarketValue(entry: WatchlistEntry, value: number | null) {
   return formatCurrency(value);
 }
 
-export function formatFinish(entry: WatchlistEntry) {
-  if (entry.finish.toLowerCase() !== "unknown") return entry.finish;
-  return resolveCapability(entry.assetIdentity.game, "finish").resolution;
+export function formatPrintingDesign(entry: WatchlistEntry) {
+  return createWatchlistPresentation(entry).treatment.presentationValue;
+}
+
+export function formatPhysicalFinish(entry: WatchlistEntry) {
+  return createWatchlistPresentation(entry).finish.presentationValue;
+}
+
+export function createWatchlistPresentation(entry: WatchlistEntry) {
+  return adaptIdentityPresentation({
+    artwork: entry.assetIdentity.image?.urls,
+    cardName: entry.assetIdentity.name,
+    collectorNumber: entry.assetIdentity.collectorNumber,
+    condition: entry.condition,
+    language: entry.language,
+    market: entry.currentValuation === null ? null : formatCurrency(entry.currentValuation),
+    physicalFinish: entry.physicalFinish,
+    printingDesignFacets: entry.printingDesignFacets,
+    setName: entry.assetIdentity.printing.replace(/\s+#.+$/, ""),
+  });
 }
 
 export function formatTrend(entry: WatchlistEntry) {

@@ -120,6 +120,14 @@ Overflow actions, dialogs, capability summaries, and undo work on desktop and mo
 
 ## Dependencies
 
+Capability refinement from PHR-ARCH-007:
+
+- Printing Design describes facets such as Enchanted, Showcase, Borderless, and Promo.
+- Physical Variant describes explicit finish evidence such as Normal, Foil, Etched, or Cold Foil.
+- Magic supports both through Scryfall.
+- Lorcana supports Printing Design through Lorcast; Physical Variant is Unavailable because the provider does not supply finish availability.
+- Market capability remains independent from both identity capabilities.
+
 - PHR-WORKFLOW-001 Market Watch.
 - PHR-ARCH-004 Identity Platform.
 - PHR-API-001 Lorcast Identity Provider.

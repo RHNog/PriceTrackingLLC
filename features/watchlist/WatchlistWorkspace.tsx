@@ -26,6 +26,7 @@ import {
   refreshWatchlistEntry,
   type WatchlistEntry,
 } from "@/features/watchlist/WatchlistRefreshEngine";
+import { resolveCanonicalTreatment } from "@/lib/engines/identity/IdentityTreatmentResolver";
 
 export default function WatchlistWorkspace() {
   const [developerMode, setDeveloperMode] = useState(false);
@@ -69,6 +70,12 @@ export default function WatchlistWorkspace() {
               printingId: selection.printing.id,
               setCode: selection.printing.setCode,
               variantId: selection.variant.id,
+              gameplayIdentityId: selection.printing.gameplayIdentityId,
+              marketIdentityId: selection.printing.marketIdentities?.[0]?.marketIdentityId,
+              physicalVariantIdentityId:
+                selection.variant.physicalVariantIdentityId ??
+                selection.printing.physicalVariants?.[0]?.physicalVariantIdentityId,
+              printingIdentityId: selection.printing.printingIdentity?.printingIdentityId,
             },
             condition: selection.condition,
             currentValuation: null,
@@ -90,6 +97,13 @@ export default function WatchlistWorkspace() {
             observationSource: "Unavailable",
             refreshStatus: "Idle",
             targetPrice: 0,
+            physicalFinish:
+              selection.variant.physicalFinish ?? selection.printing.physicalFinish,
+            printingDesignFacets: selection.printing.printingDesignFacets ?? [],
+            treatment:
+              selection.variant.treatmentDetails ??
+              selection.printing.treatmentDetails ??
+              resolveCanonicalTreatment(selection.printing),
             watchlistId: defaultWatchlistId,
           }),
         ];
