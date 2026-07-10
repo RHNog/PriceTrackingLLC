@@ -1,5 +1,29 @@
 # Prompt History
 
+## PHR-ARCH-004
+
+Purpose: transform identity into a provider-agnostic platform.
+
+Core instruction: UI and workflows consume the Identity Engine; orchestration owns registry selection, adapter normalization, provider lifecycle, canonical identity, and diagnostics.
+
+Result: Scryfall is an operational Magic registration, four future games are pending registrations, and known provider gaps no longer appear as false empty searches.
+
+## PHR-UX-002
+
+Purpose: make the global command palette the canonical platform interaction entry point.
+
+Core instruction: orchestrate the existing Universal Asset Picker and route completed selections without creating search or business logic.
+
+Result: a Cards-mode palette now supports debounced identity-only search, eligibility, artwork, printing, finish, condition, keyboard navigation, and context actions.
+
+## PHR-UI-001
+
+Purpose: make artwork a canonical part of asset identity across Project Phronesis.
+
+Core instruction: reuse provider identity, remain provider-agnostic, cache images, never show broken images, and design the hierarchy for future previews, actions, and overlays.
+
+Result: `CardThumbnail` now anchors Market Watch and Universal Asset Picker results through a shared image cache and fallback system.
+
 This file summarizes major prompts and architectural instructions. It intentionally avoids copying every prompt in full.
 
 ## PHR-TECH-001

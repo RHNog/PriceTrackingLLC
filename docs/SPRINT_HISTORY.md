@@ -1,5 +1,18 @@
 # Sprint History
 
+## Epic 2 — PHR-ARCH-004 Identity Platform
+
+- Moved provider selection behind Identity Orchestrator and Registry.
+- Registered Magic/Scryfall operationally and four named pending game adapters.
+- Added canonical provider metadata, capability matrix, selection diagnostics, and distinct lifecycle errors.
+- Migrated identity API, Vendor Workspace initialization, and Identity Explorer away from direct Scryfall construction.
+
+## PHR-UX-002 Global Command Palette
+
+- Replaced passive shell search with a debounced, keyboard-first Cards palette.
+- Reused Identity, Eligibility, printing variants, condition profiles, and canonical artwork.
+- Routed completed selections to workflow-owned Market Watch and Vendor Workspace boundaries without market acquisition during search.
+
 This file records logical product milestones. Sprint numbers may not perfectly match commit history.
 
 ## Sprint 36
@@ -474,3 +487,8 @@ Introduced `lib/pipeline/` with Pipeline Inspector, Pipeline Stage, Pipeline Rep
 Business Profiles now own Offer Policy, which contains minimum ROI, minimum profit, desired margin, negotiation aggressiveness, and maximum capital exposure. Offer Ladder consumes that policy directly.
 
 The sprint fixed a zero-valued Offer Ladder failure where an impossible maximum buy price was rounded into `0`. Pipeline Integrity now blocks Decision Resolver execution when a ladder output becomes zero unexpectedly and Atlas Inspector shows the first invalid stage in developer mode only.
+# PHR-UI-001 Asset Visual Identity
+
+- Added canonical provider-neutral card thumbnails, resolution caching, optimized lazy imagery, fallback handling, and developer provenance.
+- Connected Market Watch and Universal Asset Picker results.
+- Validated repository artwork identities for Mox Opal, Lightning Bolt, Collected Company, and Elsa – Spirit of Winter.

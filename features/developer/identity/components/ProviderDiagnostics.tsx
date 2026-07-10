@@ -1,9 +1,9 @@
 import { adaptScryfallMarketSnapshot } from "@/lib/providers/market/adapters/ScryfallMarketAdapter";
 import type { ScryfallCardResponse } from "@/lib/providers/identity/adapters/ScryfallAdapter";
-import type { IdentitySearchResponse } from "@/lib/engines/search/searchIdentityCards";
+import type { IdentityOrchestrationResponse } from "@/lib/engines/identity/IdentityOrchestrator";
 
 type ProviderDiagnosticsProps = {
-  response: IdentitySearchResponse;
+  response: IdentityOrchestrationResponse;
 };
 
 const pipelineStages = [
@@ -58,6 +58,14 @@ export default function ProviderDiagnostics({
         Provider Diagnostics
       </h3>
       <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+        <Diagnostic label="Provider Selected" value={response.orchestrationDiagnostics.providerSelected ?? "None"} />
+        <Diagnostic label="Provider Confidence" value={String(response.orchestrationDiagnostics.providerConfidence)} />
+        <Diagnostic label="Normalization Source" value={response.orchestrationDiagnostics.normalizationSource} />
+        <Diagnostic label="Canonical Identity" value={response.orchestrationDiagnostics.canonicalIdentities.join(", ") || "None"} />
+        <Diagnostic label="Fallback Provider" value={response.orchestrationDiagnostics.fallbackProvider ?? "None"} />
+        <Diagnostic label="Search Latency" value={`${response.orchestrationDiagnostics.searchLatencyMs}ms`} />
+        <Diagnostic label="Provider Lifecycle" value={response.orchestrationDiagnostics.lifecycle} />
+        <Diagnostic label="Orchestration Status" value={response.status} />
         <Diagnostic label="Identity Provider" value={diagnostics.providerName} />
         <Diagnostic label="Original Query" value={response.query.raw || "-"} />
         <Diagnostic label="Normalized Query" value={response.query.normalized} />

@@ -48,6 +48,14 @@ export interface WatchlistAssetIdentity {
   providerVariantIdentifier?: string;
   setCode?: string;
   variantId: string;
+  image?: {
+    source: "Repository" | "Replay" | "Provider";
+    urls: {
+      small?: string;
+      normal?: string;
+      large?: string;
+    };
+  };
 }
 
 export interface WatchlistEntry {

@@ -6,6 +6,21 @@ Project Phronesis (Engineering Initiative) is the engineering identity for this 
 
 ## Current Sprint: Sprint 36
 
+### PHR-ARCH-004 Identity Platform
+
+- Provider-agnostic orchestration, registry, selection, canonical normalization, diagnostics, and lifecycle-aware errors are complete.
+- Magic/Scryfall is operational. Four future games are registered but intentionally pending connection.
+
+### PHR-UX-002 Global Command Palette
+
+- Connected the global shell to the existing Universal Asset Picker and context-aware Market Watch/Vendor Workspace actions.
+- Current Cards mode is complete; Watchlists, Collections, Inventory, Commands, and Settings remain future modes.
+
+### PHR-UI-001 Asset Visual Identity
+
+- Canonical card imagery is complete for Market Watch and Universal Asset Picker surfaces.
+- Future modules must reuse `CardThumbnail`; hover preview content and durable offline caching remain future work.
+
 Market Watch MVP introduces the first production-ready workflow intended for daily use.
 
 - Connected: `/watchlists` Market Watch workspace, watchlist storage, target price tracking, target progress math, refresh priority, developer diagnostics, and single-entry manual refresh.

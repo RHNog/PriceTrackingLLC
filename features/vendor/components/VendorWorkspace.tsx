@@ -45,6 +45,12 @@ type VendorWorkspaceProps = {
   defaultStrategyId: string;
   strategies: Strategy[];
   strategyProfiles: StrategyProfile[];
+  initialSelection?: {
+    condition?: string;
+    printingId?: string;
+    search?: string;
+    variantId?: string;
+  };
 };
 
 function findById<T extends { id: string }>(items: T[], id: string) {
@@ -192,8 +198,9 @@ export default function VendorWorkspace({
   defaultStrategyId,
   strategies,
   strategyProfiles,
+  initialSelection,
 }: VendorWorkspaceProps) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialSelection?.search ?? "");
   const [printingQuery, setPrintingQuery] = useState("");
   const [activePrintingFilters, setActivePrintingFilters] = useState<string[]>([]);
   const [searchFocusKey, setSearchFocusKey] = useState(0);
@@ -235,6 +242,18 @@ export default function VendorWorkspace({
   const selectedVariantId = workflowContext.selectedVariantId;
   const selectedCondition = workflowContext.selectedCondition as CardConditionCode;
   const strategyId = workflowContext.selectedStrategyId;
+
+  useEffect(() => {
+    if (!initialSelection?.printingId || selectedCardId || searchResults.length === 0) return;
+    const matchingIdentity = searchResults.find((result) =>
+      result.item.printings.some((candidate) => candidate.id === initialSelection.printingId),
+    )?.item;
+    if (!matchingIdentity) return;
+    const timeout = window.setTimeout(() => handleSelectCard(matchingIdentity), 0);
+    return () => window.clearTimeout(timeout);
+    // Initial URL intent is intentionally consumed once as an external workflow command.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSelection?.printingId, searchResults, selectedCardId]);
 
   function dispatchCommand(
     command: Parameters<typeof processWorkflowCommand>[1],
@@ -559,6 +578,32 @@ export default function VendorWorkspace({
       }),
     );
   }
+
+  useEffect(() => {
+    if (!initialSelection?.printingId || !selectedIdentity || selectedPrintingId) return;
+    if (selectedIdentity.printings.some((candidate) => candidate.id === initialSelection.printingId)) {
+      const timeout = window.setTimeout(() => handleSelectPrinting(initialSelection.printingId!), 0);
+      return () => window.clearTimeout(timeout);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSelection?.printingId, selectedIdentity, selectedPrintingId]);
+
+  useEffect(() => {
+    if (!selectedCard || !initialSelection?.variantId || selectedVariantId) return;
+    if (getVariants(selectedCard).some((candidate) => candidate.id === initialSelection.variantId)) {
+      const timeout = window.setTimeout(() => dispatchCommand(createWorkflowCommand("SelectVariant", { variantId: initialSelection.variantId! })), 0);
+      return () => window.clearTimeout(timeout);
+    }
+  }, [initialSelection?.variantId, selectedCard, selectedVariantId]);
+
+  useEffect(() => {
+    const requestedCondition = initialSelection?.condition as CardConditionCode | undefined;
+    if (!requestedCondition || selectedCondition === requestedCondition) return;
+    if (["NM", "LP", "MP", "HP", "DMG"].includes(requestedCondition)) {
+      const timeout = window.setTimeout(() => dispatchCommand(createWorkflowCommand("SelectCondition", { condition: requestedCondition })), 0);
+      return () => window.clearTimeout(timeout);
+    }
+  }, [initialSelection?.condition, selectedCondition]);
 
   function handleStrategyChange(nextStrategyId: string) {
     dispatchCommand(

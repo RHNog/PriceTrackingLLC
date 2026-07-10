@@ -1,4 +1,4 @@
-import CardImage from "@/components/ui/CardImage";
+import CardThumbnail from "@/components/cards/CardThumbnail";
 import type { CardIdentity } from "@/types/cardIdentity";
 import type { SearchResult } from "@/types/searchResult";
 
@@ -31,10 +31,15 @@ export default function IdentityResults({
               }`}
             >
               {result.item.printings[0] ? (
-                <CardImage
-                  card={result.item.printings[0]}
-                  detail={`${result.item.printings[0].set} ${result.item.printings[0].finish}`}
-                  size="printing"
+                <CardThumbnail
+                  alt={`${result.item.name}, ${result.item.printings[0].set}`}
+                  assetKey={result.item.printings[0].id}
+                  candidates={[{
+                    source: "Provider",
+                    urls: result.item.printings[0].imageUrls ?? { normal: result.item.printings[0].imageUrl },
+                  }]}
+                  className="w-14"
+                  selected={result.item.id === selectedCardId}
                 />
               ) : null}
               <span className="min-w-0 text-sm">

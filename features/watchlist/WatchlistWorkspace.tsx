@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import {
+  commandPaletteSelectionEvent,
+  type CommandPaletteAssetSelection,
+} from "@/components/search/CommandPaletteRouter";
 import WatchlistCard from "@/features/watchlist/WatchlistCard";
 import {
   loadWatchlistEntries,
@@ -10,6 +14,7 @@ import {
 import WatchlistTable from "@/features/watchlist/WatchlistTable";
 import WatchlistToolbar from "@/features/watchlist/WatchlistToolbar";
 import {
+  calculateWatchlistMetrics,
   refreshWatchlistEntry,
   type WatchlistEntry,
 } from "@/features/watchlist/WatchlistRefreshEngine";
@@ -26,6 +31,63 @@ export default function WatchlistWorkspace() {
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
+  }, []);
+
+  useEffect(() => {
+    function handlePaletteSelection(event: Event) {
+      const selection = (event as CustomEvent<CommandPaletteAssetSelection>).detail;
+      const id = `${selection.printing.id}:${selection.variant.id}:${selection.condition}`;
+
+      setEntries((current) => {
+        if (current.some((entry) => entry.id === id)) return current;
+        const next = [
+          ...current,
+          calculateWatchlistMetrics({
+            assetIdentity: {
+              assetId: selection.identityId,
+              collectorNumber: selection.printing.number,
+              game: selection.printing.game.toLowerCase(),
+              image: {
+                source: "Provider",
+                urls: selection.variant.imageUrls ?? selection.printing.imageUrls ?? {
+                  normal: selection.printing.imageUrl,
+                },
+              },
+              name: selection.printing.name,
+              printing: `${selection.printing.set} #${selection.printing.number}`,
+              printingId: selection.printing.id,
+              setCode: selection.printing.setCode,
+              variantId: selection.variant.id,
+            },
+            condition: selection.condition,
+            currentValuation: null,
+            developerDiagnostics: {
+              apiSaved: true,
+              cacheAgeMs: null,
+              observationAgeMs: null,
+              providerHit: false,
+              replay: false,
+              repositoryHit: false,
+              repositorySource: "Awaiting explicit refresh",
+            },
+            finish: selection.variant.finish,
+            id,
+            language: selection.printing.language ?? "English",
+            lastObservation: null,
+            lastRefresh: null,
+            marketTrend: "Unknown",
+            observationSource: "Unavailable",
+            refreshStatus: "Idle",
+            targetPrice: 0,
+          }),
+        ];
+        saveWatchlistEntries(next);
+        return next;
+      });
+    }
+
+    window.addEventListener(commandPaletteSelectionEvent, handlePaletteSelection);
+    return () => window.removeEventListener(commandPaletteSelectionEvent, handlePaletteSelection);
   }, []);
 
   const sortedEntries = useMemo(

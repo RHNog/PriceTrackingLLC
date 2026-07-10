@@ -1,4 +1,4 @@
-import CardImage from "@/components/ui/CardImage";
+import CardThumbnail from "@/components/cards/CardThumbnail";
 import type { PrintingMatchCandidate } from "@/types/printingResolution";
 
 type PrintingResultsProps = {
@@ -78,10 +78,15 @@ export default function PrintingResults({
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex min-w-0 gap-2">
-                <CardImage
-                  card={printing}
-                  detail={`${printing.set} ${printing.finish}`}
-                  size="printing"
+                <CardThumbnail
+                  alt={`${printing.name}, ${printing.set}, ${printing.finish}`}
+                  assetKey={printing.id}
+                  candidates={[{
+                    source: "Provider",
+                    urls: printing.imageUrls ?? { normal: printing.imageUrl },
+                  }]}
+                  className="w-14"
+                  selected={isSelected}
                 />
                 <div className="min-w-0">
                   <p className="text-sm font-semibold">

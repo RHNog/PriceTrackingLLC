@@ -1,5 +1,7 @@
 "use client";
 
+import CardThumbnail from "@/components/cards/CardThumbnail";
+
 import {
   DeveloperPanel,
   StatusLabel,
@@ -26,7 +28,7 @@ export default function WatchlistTable({
       <table className="w-full table-fixed text-left text-sm">
         <thead className="border-b border-zinc-800 bg-zinc-900/70 text-xs uppercase tracking-wide text-zinc-500">
           <tr>
-            <th className="w-[22%] px-4 py-3 font-medium">Card</th>
+            <th className="w-[24%] px-4 py-3 font-medium">Card</th>
             <th className="w-[18%] px-4 py-3 font-medium">Printing</th>
             <th className="w-[10%] px-4 py-3 font-medium">Current</th>
             <th className="w-[10%] px-4 py-3 font-medium">Target</th>
@@ -44,11 +46,19 @@ export default function WatchlistTable({
             return (
               <tr key={entry.id} className="align-top">
                 <td className="px-4 py-4">
-                  <p className="font-medium text-white">{entry.assetIdentity.name}</p>
-                  <p className="mt-1 text-xs text-zinc-500">
-                    {entry.assetIdentity.game} / {entry.finish} / {entry.condition} /{" "}
-                    {entry.language}
-                  </p>
+                  <div className="flex gap-3">
+                    <CardThumbnail
+                      alt={`${entry.assetIdentity.name}, ${entry.assetIdentity.printing}`}
+                      assetKey={entry.assetIdentity.variantId}
+                      candidates={entry.assetIdentity.image ? [entry.assetIdentity.image] : []}
+                      className="w-14"
+                      developerMode={developerMode}
+                    />
+                    <div className="min-w-0">
+                      <p className="font-medium text-white">{entry.assetIdentity.name}</p>
+                      <p className="mt-1 text-xs capitalize text-zinc-500">{entry.assetIdentity.game}</p>
+                    </div>
+                  </div>
                   {developerMode ? <DeveloperPanel entry={entry} /> : null}
                 </td>
                 <td className="px-4 py-4 text-zinc-300">

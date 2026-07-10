@@ -37,6 +37,14 @@ export const seedWatchlistEntries: WatchlistEntry[] = [
       providerVariantIdentifier: "mox-opal-som-normal-nm-english",
       setCode: "SOM",
       variantId: "scars-of-mirrodin-179-normal",
+      image: {
+        source: "Repository",
+        urls: {
+          small: "https://cards.scryfall.io/small/front/6/b/6be9b1d5-9ab8-4adb-ba54-2c0117e842fa.jpg?1782715284",
+          normal: "https://cards.scryfall.io/normal/front/6/b/6be9b1d5-9ab8-4adb-ba54-2c0117e842fa.jpg?1782715284",
+          large: "https://cards.scryfall.io/large/front/6/b/6be9b1d5-9ab8-4adb-ba54-2c0117e842fa.jpg?1782715284",
+        },
+      },
     },
     condition: "NM",
     currentValuation: 182,
@@ -54,15 +62,23 @@ export const seedWatchlistEntries: WatchlistEntry[] = [
   calculateWatchlistMetrics({
     assetIdentity: {
       assetId: "magic:lightning-bolt",
-      collectorNumber: "150",
+      collectorNumber: "149",
       game: "magic",
       name: "Lightning Bolt",
-      printing: "Secret Lair #150",
-      printingId: "secret-lair-lightning-bolt-150",
+      printing: "Magic 2011 #149",
+      printingId: "magic-2011-lightning-bolt-149",
       providerProductIdentifier: "lightning-bolt",
       providerVariantIdentifier: "lightning-bolt-secret-lair-foil-nm-english",
-      setCode: "SLD",
-      variantId: "secret-lair-lightning-bolt-150-foil",
+      setCode: "M11",
+      variantId: "magic-2011-lightning-bolt-149-foil",
+      image: {
+        source: "Repository",
+        urls: {
+          small: "https://cards.scryfall.io/small/front/e/7/e768c957-3a1f-42f5-853a-96942f645df5.jpg?1782715389",
+          normal: "https://cards.scryfall.io/normal/front/e/7/e768c957-3a1f-42f5-853a-96942f645df5.jpg?1782715389",
+          large: "https://cards.scryfall.io/large/front/e/7/e768c957-3a1f-42f5-853a-96942f645df5.jpg?1782715389",
+        },
+      },
     },
     condition: "NM",
     currentValuation: 38,
@@ -89,6 +105,14 @@ export const seedWatchlistEntries: WatchlistEntry[] = [
       providerVariantIdentifier: "collected-company-dtk-normal-lp-english",
       setCode: "DTK",
       variantId: "dragons-of-tarkir-177-normal",
+      image: {
+        source: "Repository",
+        urls: {
+          small: "https://cards.scryfall.io/small/front/c/f/cfa7b456-7e83-4587-a875-9b35fde318c2.jpg?1782712709",
+          normal: "https://cards.scryfall.io/normal/front/c/f/cfa7b456-7e83-4587-a875-9b35fde318c2.jpg?1782712709",
+          large: "https://cards.scryfall.io/large/front/c/f/cfa7b456-7e83-4587-a875-9b35fde318c2.jpg?1782712709",
+        },
+      },
     },
     condition: "LP",
     currentValuation: 13.5,
@@ -113,6 +137,14 @@ export const seedWatchlistEntries: WatchlistEntry[] = [
       printingId: "lorcana-first-chapter-42",
       setCode: "TFC",
       variantId: "lorcana-first-chapter-42-cold-foil",
+      image: {
+        source: "Repository",
+        urls: {
+          small: "https://cards.lorcast.io/card/digital/small/crd_04bca46a8e2d4e9ba0fbdbfc6c99e51e.avif?1709690747",
+          normal: "https://cards.lorcast.io/card/digital/normal/crd_04bca46a8e2d4e9ba0fbdbfc6c99e51e.avif?1709690747",
+          large: "https://cards.lorcast.io/card/digital/large/crd_04bca46a8e2d4e9ba0fbdbfc6c99e51e.avif?1709690747",
+        },
+      },
     },
     condition: "NM",
     currentValuation: 815,
@@ -145,7 +177,18 @@ export function loadWatchlistEntries() {
   try {
     const parsed = JSON.parse(raw) as WatchlistEntry[];
 
-    return parsed.map((entry) => calculateWatchlistMetrics(entry));
+    return parsed.map((entry) => {
+      const repositorySeed = seedWatchlistEntries.find(
+        (seed) => seed.assetIdentity.assetId === entry.assetIdentity.assetId,
+      );
+
+      return calculateWatchlistMetrics({
+        ...entry,
+        assetIdentity: repositorySeed
+          ? { ...entry.assetIdentity, ...repositorySeed.assetIdentity }
+          : entry.assetIdentity,
+      });
+    });
   } catch {
     saveWatchlistEntries(seedWatchlistEntries);
 

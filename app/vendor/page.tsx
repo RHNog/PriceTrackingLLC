@@ -6,20 +6,30 @@ import {
   seedStrategyProfiles,
 } from "@/data/seedStrategies";
 import VendorWorkspace from "@/features/vendor/components/VendorWorkspace";
-import { ScryfallProvider } from "@/lib/providers/identity/ScryfallProvider";
+import { IdentityOrchestrator } from "@/lib/engines/identity/IdentityOrchestrator";
 
 async function getIdentityCards() {
-  const identityProvider = new ScryfallProvider();
-  const cards = await identityProvider.searchCards("urza saga textless");
+  const response = await new IdentityOrchestrator().search("urza saga textless");
+  const cards = response.results.flatMap((result) => result.item.printings);
 
   return cards.length > 0 ? cards : mockCards;
 }
 
-export default async function VendorPage() {
+type VendorPageProps = {
+  searchParams: Promise<{
+    condition?: string;
+    printingId?: string;
+    search?: string;
+    variantId?: string;
+  }>;
+};
+
+export default async function VendorPage({ searchParams }: VendorPageProps) {
+  const selectionIntent = await searchParams;
   const cards = await getIdentityCards();
 
   return (
-    <AppShell selectedNavItem="Vendor Workspace">
+    <AppShell commandPaletteContext="VendorWorkspace" selectedNavItem="Vendor Workspace">
       <div className="w-full space-y-6">
         <header>
           <h2 className="text-3xl font-semibold tracking-tight text-white">
@@ -35,6 +45,7 @@ export default async function VendorPage() {
           defaultStrategyId={defaultStrategyId}
           strategies={seedStrategies}
           strategyProfiles={seedStrategyProfiles}
+          initialSelection={selectionIntent}
         />
       </div>
     </AppShell>

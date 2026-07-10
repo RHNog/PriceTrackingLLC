@@ -16,7 +16,7 @@ export interface CardFaceImage {
 export interface Card {
   id: string;
   name: string;
-  game: "Magic" | "Pokemon" | "One Piece" | "Lorcana";
+  game: "Magic" | "Pokemon" | "One Piece" | "Lorcana" | "Flesh and Blood";
   set: string;
   setCode?: string;
   number: string;

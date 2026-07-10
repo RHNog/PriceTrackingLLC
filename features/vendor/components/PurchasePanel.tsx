@@ -1,6 +1,6 @@
 "use client";
 
-import CardImage from "@/components/ui/CardImage";
+import CardThumbnail from "@/components/cards/CardThumbnail";
 import CardProfilePanel from "@/features/vendor/components/CardProfilePanel";
 import EvaluationSummary from "@/features/vendor/components/EvaluationSummary";
 import type { BusinessProfile } from "@/lib/business/BusinessProfileEngine";
@@ -224,10 +224,15 @@ export default function PurchasePanel({
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 shadow-lg shadow-black/10">
         <div className="flex flex-col gap-4">
           <div className="flex gap-3">
-            <CardImage
-              card={card}
-              detail={`${card.set} ${card.finish}`}
-              size="printing"
+            <CardThumbnail
+              alt={`${card.name}, ${card.set}, ${card.finish}`}
+              assetKey={card.id}
+              candidates={[{
+                source: "Provider",
+                urls: card.imageUrls ?? { normal: card.imageUrl },
+              }]}
+              className="w-14"
+              selected
             />
             <div className="min-w-0">
               <p className="text-xs text-zinc-500">Selected Card</p>

@@ -1,4 +1,4 @@
-import CardImage from "@/components/ui/CardImage";
+import CardThumbnail from "@/components/cards/CardThumbnail";
 import type { CardIdentity } from "@/types/cardIdentity";
 import type { SearchResult } from "@/types/searchResult";
 
@@ -42,10 +42,15 @@ export default function SearchResults({
               }`}
             >
               {result.item.printings[0] ? (
-                <CardImage
-                  card={result.item.printings[0]}
-                  detail={`${result.item.printings[0].set} ${result.item.printings[0].finish}`}
-                  size="identity"
+                <CardThumbnail
+                  alt={`${result.item.name}, ${result.item.printings[0].set}`}
+                  assetKey={result.item.printings[0].id}
+                  candidates={[{
+                    source: "Provider",
+                    urls: result.item.printings[0].imageUrls ?? { normal: result.item.printings[0].imageUrl },
+                  }]}
+                  className="w-12"
+                  selected={isSelected}
                 />
               ) : null}
               <span className="min-w-0 flex-1">
@@ -53,7 +58,7 @@ export default function SearchResults({
                   {result.item.name}
                 </span>
                 <span className="mt-1 block text-xs opacity-75">
-                  {result.item.game} / {result.item.printings.length} printings
+                  {result.item.printings[0].set} / #{result.item.printings[0].number} / {result.item.printings[0].finish} / {result.item.printings[0].language ?? "English"}
                 </span>
                 <span className="mt-1 block text-[11px] font-medium uppercase tracking-wide opacity-70">
                   {isSelected

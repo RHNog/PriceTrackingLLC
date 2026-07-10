@@ -27,11 +27,6 @@ export class ScryfallProvider implements IdentityProvider {
   readonly name = "Scryfall";
 
   async searchCards(query: string) {
-    // TODO: Pokemon Identity Provider.
-    // TODO: One Piece Identity Provider.
-    // TODO: Lorcana Identity Provider.
-    // TODO: Flesh and Blood Identity Provider.
-    // TODO: Multi-provider identity aggregation.
     // TODO: Offline identity cache and Redis-backed cache.
     const diagnostics = await this.searchCardsWithDiagnostics(query);
 

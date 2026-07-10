@@ -3,7 +3,7 @@ import WatchlistWorkspace from "@/features/watchlist/WatchlistWorkspace";
 
 export default function WatchlistsPage() {
   return (
-    <AppShell selectedNavItem="Watchlists">
+    <AppShell commandPaletteContext="MarketWatch" selectedNavItem="Watchlists">
       <WatchlistWorkspace />
     </AppShell>
   );

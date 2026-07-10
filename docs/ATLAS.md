@@ -85,6 +85,46 @@ Documentation taxonomy:
 - `docs/future/`
 - `docs/prompts/`
 
+## Identity Platform Registration
+
+- Feature ID: `PHR-ARCH-004`
+- Orchestrator: `lib/engines/identity/IdentityOrchestrator.ts`
+- Registry: `lib/engines/identity/IdentityProviderRegistry.ts`
+- Selection: explicit game → parsed/search context → user preference → Magic fallback.
+- Canonical model: `CanonicalIdentityModel` in `IdentityProviderAdapter.ts`.
+- Operational: Magic → Scryfall.
+- Pending: Lorcana, Pokémon, One Piece, Flesh and Blood.
+- Outcomes: Operational, No Match, Provider Pending, Provider Not Configured, Provider Offline.
+- Boundary: identity never requests prices, valuations, observations, or market evidence.
+
+Rule: application and UI layers consume Identity Orchestrator output and never import a concrete identity provider.
+
+## Global Command Palette Registration
+
+- Feature ID: `PHR-UX-002`
+- Shell entry: `components/ui/Topbar.tsx`
+- Orchestrator: `components/search/CommandPalette.tsx`
+- Routing boundary: `components/search/CommandPaletteRouter.ts`
+- Current mode: Cards
+- Search flow: Identity API → Eligibility Engine → identity → printing → finish → condition.
+- Context actions: Market Watch owns entry creation; Vendor Workspace owns purchase-evaluation continuation.
+- Request economy: palette search never calls market snapshots or JustTCG.
+
+Rule: the command palette routes typed selections and never owns workflow business logic.
+
+## Asset Visual Identity Registration
+
+- Feature ID: `PHR-UI-001`
+- Canonical component: `components/cards/CardThumbnail.tsx`
+- Image presentation: `components/cards/CardImage.tsx`
+- Resolution cache: `components/cards/CardImageCache.ts`
+- Fallback: `components/cards/CardImagePlaceholder.tsx`
+- Source order: Repository, Replay, Provider, then Placeholder; repeated resolutions report Cached.
+- Performance boundary: UI resolution cache owns URL selection; Next.js and browser HTTP caches own image bytes.
+- Extension boundary: hover previews, contextual overlays, and quick actions attach to existing image slots.
+
+Rule: product modules must not independently render or select card artwork.
+
 ## Market Watch MVP Registration
 
 Registered workflow:

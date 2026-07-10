@@ -1,5 +1,6 @@
 "use client";
 
+import CardThumbnail from "@/components/cards/CardThumbnail";
 import type { WatchlistEntry } from "@/features/watchlist/WatchlistRefreshEngine";
 
 type WatchlistCardProps = {
@@ -27,7 +28,15 @@ export default function WatchlistCard({
   return (
     <article className="rounded-lg border border-zinc-800 bg-zinc-950 p-4 md:hidden">
       <div className="flex items-start justify-between gap-4">
-        <div>
+        <div className="flex gap-3">
+          <CardThumbnail
+            alt={`${entry.assetIdentity.name}, ${entry.assetIdentity.printing}`}
+            assetKey={entry.assetIdentity.variantId}
+            candidates={entry.assetIdentity.image ? [entry.assetIdentity.image] : []}
+            className="w-16"
+            developerMode={developerMode}
+          />
+          <div>
           <h3 className="text-base font-semibold text-white">
             {entry.assetIdentity.name}
           </h3>
@@ -35,8 +44,9 @@ export default function WatchlistCard({
             {entry.assetIdentity.printing}
           </p>
           <p className="mt-1 text-xs text-zinc-500">
-            {entry.finish} / {entry.condition} / {entry.language}
+            #{entry.assetIdentity.collectorNumber ?? "—"} / {entry.assetIdentity.game} / {entry.finish} / {entry.language}
           </p>
+          </div>
         </div>
         <StatusLabel status={entry.marketStatus} />
       </div>

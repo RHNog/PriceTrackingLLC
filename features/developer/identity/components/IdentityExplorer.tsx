@@ -3,10 +3,10 @@ import IdentitySearchPanel from "@/features/developer/identity/components/Identi
 import NormalizedCardView from "@/features/developer/identity/components/NormalizedCardView";
 import ProviderDiagnostics from "@/features/developer/identity/components/ProviderDiagnostics";
 import RawResponseView from "@/features/developer/identity/components/RawResponseView";
-import type { IdentitySearchResponse } from "@/lib/engines/search/searchIdentityCards";
+import type { IdentityOrchestrationResponse } from "@/lib/engines/identity/IdentityOrchestrator";
 
 type IdentityExplorerProps = {
-  response: IdentitySearchResponse;
+  response: IdentityOrchestrationResponse;
   selectedCardId?: string;
 };
 
