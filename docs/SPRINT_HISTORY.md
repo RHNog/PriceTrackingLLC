@@ -3,9 +3,16 @@
 ## Epic 2 — PHR-ARCH-004 Identity Platform
 
 - Moved provider selection behind Identity Orchestrator and Registry.
-- Registered Magic/Scryfall operationally and four named pending game adapters.
+- Registered Magic/Scryfall operationally and initially established four pending game slots.
 - Added canonical provider metadata, capability matrix, selection diagnostics, and distinct lifecycle errors.
 - Migrated identity API, Vendor Workspace initialization, and Identity Explorer away from direct Scryfall construction.
+
+## PHR-API-001 — Lorcast Identity Provider
+
+- Promoted Lorcana from pending to operational through the Identity Provider Registry.
+- Added Lorcast transport, raw types, normalization, canonical adapter, diagnostics, 24-hour cache, request coalescing, and pacing.
+- Used all-print search and API-returned artwork while excluding Lorcast prices.
+- Live-validated Elsa, Mulan, Mickey Mouse, Belle, Maleficent, and unchanged Mox Opal/Scryfall routing.
 
 ## PHR-UX-002 Global Command Palette
 

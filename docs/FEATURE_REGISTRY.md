@@ -15,6 +15,7 @@ The Feature Registry records permanent Project Phronesis feature identifiers and
 | `PHR-UI-001` | Asset Visual Identity | Completed | UI / UX / Technical | `docs/ui/PHR-UI-001-asset-visual-identity.md` |
 | `PHR-UX-002` | Global Command Palette | Completed | UX / UI / Workflow | `docs/ux/PHR-UX-002-global-command-palette.md` |
 | `PHR-ARCH-004` | Provider-Agnostic Identity Platform | Completed | Architecture / Technical / API | `docs/architecture/PHR-ARCH-004-identity-platform.md` |
+| `PHR-API-001` | Lorcast Identity Provider | Completed | API / Technical / Architecture | `docs/api/PHR-API-001-lorcast-identity-provider.md` |
 
 ## Registry Rule
 

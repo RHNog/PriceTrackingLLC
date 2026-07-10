@@ -9,7 +9,12 @@ Project Phronesis (Engineering Initiative) is the engineering identity for this 
 ### PHR-ARCH-004 Identity Platform
 
 - Provider-agnostic orchestration, registry, selection, canonical normalization, diagnostics, and lifecycle-aware errors are complete.
-- Magic/Scryfall is operational. Four future games are registered but intentionally pending connection.
+- Magic/Scryfall and Lorcana/Lorcast are operational. Pokémon, One Piece, and Flesh and Blood remain pending.
+
+### PHR-API-001 Lorcast Identity Provider
+
+- Real Lorcana identity, printing, artwork, collector, language, ink/type, and canonical metadata are connected.
+- Durable offline identity repository synchronization remains future work.
 
 ### PHR-UX-002 Global Command Palette
 

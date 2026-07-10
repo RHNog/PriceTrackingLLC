@@ -89,14 +89,14 @@ No additional synchronous UI work is introduced.
 ## User Stories
 
 - As a workflow, I request identity without knowing which provider owns a game.
-- As a user, I see that Lorcana exists but its provider is pending instead of receiving a false no-match result.
+- As a user, I receive operational Lorcana identities through Lorcast without provider-specific UI logic.
 - As a developer, I inspect selection, normalization, capability, and latency.
 
 ## Acceptance Criteria
 
 - Magic selects operational Scryfall.
 - “Mox Opal” defaults to Magic and executes Scryfall.
-- “Mulan” selects the pending Lorcana adapter and reports “Lorcana provider not yet connected.”
+- “Mulan” selects operational Lorcast and returns canonical Lorcana identities.
 - Explicit Pokémon, One Piece, and Flesh and Blood queries report their pending providers.
 - API routes, Command Palette, Vendor Workspace page, and Identity Explorer do not construct Scryfall.
 - No market API or market provider is referenced by the identity platform.
@@ -116,7 +116,7 @@ No additional synchronous UI work is introduced.
 
 ## Future Enhancements
 
-- Connect official/approved Lorcana, Pokémon, One Piece, and Flesh and Blood providers.
+- Connect approved Pokémon, One Piece, and Flesh and Blood providers.
 - Add user provider preferences, multi-provider aggregation, repository identity index, and replay.
 
 ## Technical Notes
@@ -144,4 +144,4 @@ Unavailable-provider messaging replaces the generic empty state only when the re
 - Related tests: `tests/identity-platform.test.ts`.
 - Related release notes: `docs/release-notes/PHR-ARCH-004.md`.
 - Last modified: 2026-07-09.
-- Modification reason: Initial Epic 2 implementation.
+- Modification reason: PHR-API-001 made Lorcast operational for Lorcana.

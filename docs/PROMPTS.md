@@ -6,7 +6,15 @@ Purpose: transform identity into a provider-agnostic platform.
 
 Core instruction: UI and workflows consume the Identity Engine; orchestration owns registry selection, adapter normalization, provider lifecycle, canonical identity, and diagnostics.
 
-Result: Scryfall is an operational Magic registration, four future games are pending registrations, and known provider gaps no longer appear as false empty searches.
+Result: Scryfall is an operational Magic registration; PHR-API-001 subsequently made Lorcast operational for Lorcana; three future games remain pending.
+
+## PHR-API-001
+
+Purpose: connect the first non-Magic Identity Provider.
+
+Core instruction: treat Lorcast strictly as identity, request all printings, normalize canonical metadata and artwork, cache responsibly, and discard provider prices.
+
+Result: Lorcast now supplies operational Lorcana identities through the existing registry and orchestrator with no UI or workflow redesign.
 
 ## PHR-UX-002
 

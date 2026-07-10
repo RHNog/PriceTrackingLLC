@@ -92,12 +92,24 @@ Documentation taxonomy:
 - Registry: `lib/engines/identity/IdentityProviderRegistry.ts`
 - Selection: explicit game → parsed/search context → user preference → Magic fallback.
 - Canonical model: `CanonicalIdentityModel` in `IdentityProviderAdapter.ts`.
-- Operational: Magic → Scryfall.
-- Pending: Lorcana, Pokémon, One Piece, Flesh and Blood.
+- Operational: Magic → Scryfall; Lorcana → Lorcast.
+- Pending: Pokémon, One Piece, Flesh and Blood.
 - Outcomes: Operational, No Match, Provider Pending, Provider Not Configured, Provider Offline.
 - Boundary: identity never requests prices, valuations, observations, or market evidence.
 
 Rule: application and UI layers consume Identity Orchestrator output and never import a concrete identity provider.
+
+### Lorcast Capability
+
+- Feature ID: `PHR-API-001`
+- Domain: Identity only
+- Endpoint: `GET /v0/cards/search`
+- Search mode: `unique=prints`
+- Cache: 24-hour in-memory query cache with in-flight coalescing
+- Request pacing: 75ms minimum spacing
+- Artwork: API-returned digital small/normal/large URIs
+- Excluded: `prices.usd`, `prices.usd_foil`, valuation, market evidence
+- Errors: no match, malformed query, rate limited, provider offline, network failure
 
 ## Global Command Palette Registration
 

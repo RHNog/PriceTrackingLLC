@@ -31,12 +31,13 @@ export class CanonicalCardIdentityAdapter implements IdentityProviderAdapter {
     return {
       ...identity,
       artwork: first?.imageUrls ?? (first?.imageUrl ? { normal: first.imageUrl } : undefined),
-      canonicalIdentity: `${identity.game}:${identity.name}`.toLowerCase(),
+      canonicalIdentity:
+        first?.canonicalIdentity ?? `${identity.game}:${identity.name}`.toLowerCase(),
       conditionAvailability: ["NM", "LP", "MP", "HP", "DMG"],
       normalizationSource: this.normalizationSource,
-      providerConfidence: confidence,
+      providerConfidence: first?.providerConfidence ?? confidence,
       providerIdentity: {
-        providerId: this.providerId,
+        providerId: first?.providerIdentity?.providerId ?? this.providerId,
         providerRecordIds: identity.printings.map((printing) => printing.id),
       },
     };

@@ -17,7 +17,7 @@ import {
   type IdentitySearchContext,
 } from "@/lib/engines/identity/IdentityProviderSelection";
 import { FleshAndBloodIdentityProviderAdapter } from "@/lib/providers/identity/FleshAndBloodIdentityProviderAdapter";
-import { LorcanaIdentityProviderAdapter } from "@/lib/providers/identity/LorcanaIdentityProviderAdapter";
+import { LorcastProvider } from "@/lib/providers/lorcast/LorcastProvider";
 import { OnePieceIdentityProviderAdapter } from "@/lib/providers/identity/OnePieceIdentityProviderAdapter";
 import { PokemonIdentityProviderAdapter } from "@/lib/providers/identity/PokemonIdentityProviderAdapter";
 import { ScryfallIdentityProviderAdapter } from "@/lib/providers/identity/ScryfallIdentityProviderAdapter";
@@ -33,7 +33,7 @@ export type IdentityOrchestrationResponse = Omit<IdentitySearchResponse, "result
 export function createIdentityProviderRegistry() {
   return new IdentityProviderRegistry()
     .register(new ScryfallIdentityProviderAdapter())
-    .register(new LorcanaIdentityProviderAdapter())
+    .register(new LorcastProvider())
     .register(new PokemonIdentityProviderAdapter())
     .register(new OnePieceIdentityProviderAdapter())
     .register(new FleshAndBloodIdentityProviderAdapter());
@@ -64,6 +64,9 @@ function createEmptyIdentityResponse(raw: string, providerName: string): Identit
 }
 
 function providerMessage(status: IdentityOrchestrationStatus, game: string) {
+  if (status === "RATE_LIMITED") return `${game} identity provider is rate limited. Please try again shortly.`;
+  if (status === "MALFORMED_QUERY") return "The identity search query is malformed.";
+  if (status === "NETWORK_FAILURE") return `${game} identity provider could not be reached.`;
   if (status === "PROVIDER_PENDING") return `${game} provider not yet connected.`;
   if (status === "PROVIDER_NOT_CONFIGURED") return `${game} provider is not configured.`;
   if (status === "PROVIDER_OFFLINE") return `${game} identity provider is temporarily offline.`;
@@ -158,12 +161,18 @@ export class IdentityOrchestrator {
         status,
       };
     }
-    const offline = Boolean(response.diagnostics.errorMessage);
-    const status: IdentityOrchestrationStatus = offline
-      ? "PROVIDER_OFFLINE"
-      : response.results.length
-        ? "OPERATIONAL"
-        : "NO_MATCH";
+    const providerErrorKind = response.diagnostics.providerErrorKind;
+    const status: IdentityOrchestrationStatus = providerErrorKind === "RATE_LIMITED"
+      ? "RATE_LIMITED"
+      : providerErrorKind === "MALFORMED_QUERY"
+        ? "MALFORMED_QUERY"
+        : providerErrorKind === "NETWORK_FAILURE"
+          ? "NETWORK_FAILURE"
+          : providerErrorKind === "PROVIDER_OFFLINE"
+            ? "PROVIDER_OFFLINE"
+            : response.results.length
+              ? "OPERATIONAL"
+              : "NO_MATCH";
     const results = response.results.map((result) => ({
       ...result,
       item: provider.adapter.normalizeIdentity(result.item, result.score),
@@ -173,10 +182,16 @@ export class IdentityOrchestrator {
       ...response,
       message: providerMessage(status, selection.game),
       orchestrationDiagnostics: {
+        cacheStatus: response.diagnostics.cacheStatus,
         canonicalIdentities: results.map((result) => result.item.canonicalIdentity),
         fallbackProvider: selection.fallbackProvider,
         game: selection.game,
-        lifecycle: offline ? "TEMPORARILY_OFFLINE" : provider.capability.lifecycle,
+        lifecycle:
+          status === "PROVIDER_OFFLINE" ||
+          status === "NETWORK_FAILURE" ||
+          status === "RATE_LIMITED"
+            ? "TEMPORARILY_OFFLINE"
+            : provider.capability.lifecycle,
         normalizationSource: provider.adapter.normalizationSource,
         providerConfidence: results[0]?.item.providerConfidence ?? 0,
         providerId: provider.id,

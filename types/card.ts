@@ -23,6 +23,8 @@ export interface Card {
   rarity: string;
   finish: string;
   availableFinishes?: string[];
+  canonicalIdentity?: string;
+  cardTypes?: string[];
   frame?: string;
   frameEffects?: string[];
   cardFaces?: CardFaceImage[];
@@ -32,16 +34,24 @@ export interface Card {
   imageUrl: string;
   imageUrls?: CardImageUrls;
   identityRelationship?: IdentityRelationship;
+  ink?: string;
   language?: string;
   layout?: string;
   legalities?: Record<string, string>;
   productFamily?: string;
+  providerConfidence?: number;
+  providerIdentity?: {
+    providerId: string;
+    providerRecordId: string;
+  };
   promoTypes?: string[];
   releaseYear?: string;
   selectedFinish?: string;
   sourceGames?: string[];
   treatment?: string;
+  tcgplayerId?: number;
   typeLine?: string;
+  version?: string;
   component?: string;
   finishVariants?: PrintingVariant[];
 }

@@ -19,6 +19,12 @@ export type IdentitySearchDiagnostics = {
   identityResolutionTimeMs: number;
   printingResolutionTimeMs: number;
   providerName: string;
+  providerErrorKind?:
+    | "MALFORMED_QUERY"
+    | "NETWORK_FAILURE"
+    | "NO_MATCH"
+    | "PROVIDER_OFFLINE"
+    | "RATE_LIMITED";
   rawResponses: unknown[];
   resolutionTimeMs: number;
 };
@@ -39,6 +45,7 @@ type DiagnosticIdentityProvider = IdentityProvider & {
     cards: Card[];
     durationMs: number;
     errorMessage?: string;
+    errorKind?: IdentitySearchDiagnostics["providerErrorKind"];
     rawResponses: unknown[];
   }>;
 };
@@ -78,7 +85,7 @@ function groupPrintings(cards: Card[]) {
   const groups = new Map<string, Card[]>();
 
   cards.forEach((card) => {
-    const key = card.name.toLowerCase();
+    const key = [card.name, card.version].filter(Boolean).join("::").toLowerCase();
     const printings = groups.get(key) ?? [];
 
     groups.set(key, [...printings, card]);
@@ -89,7 +96,9 @@ function groupPrintings(cards: Card[]) {
 
     return {
       id,
-      name: firstPrinting.name,
+      name: [firstPrinting.name, firstPrinting.version]
+        .filter(Boolean)
+        .join(" — "),
       game: firstPrinting.game,
       printings,
     };
@@ -161,6 +170,7 @@ export async function searchIdentityCardsWithDiagnostics(
       errorMessage: providerResponse.errorMessage,
       identityResolutionTimeMs: resolutionTimeMs,
       providerName: provider.name,
+      providerErrorKind: providerResponse.errorKind,
       printingResolutionTimeMs: intent.printingCandidates.length
         ? resolutionTimeMs
         : 0,

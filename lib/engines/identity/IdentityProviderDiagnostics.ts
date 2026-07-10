@@ -2,13 +2,17 @@ import type { Card } from "@/types/card";
 import type { IdentityProviderLifecycle } from "@/lib/engines/identity/IdentityProviderCapability";
 
 export type IdentityOrchestrationStatus =
+  | "MALFORMED_QUERY"
+  | "NETWORK_FAILURE"
   | "OPERATIONAL"
   | "NO_MATCH"
   | "PROVIDER_PENDING"
   | "PROVIDER_NOT_CONFIGURED"
-  | "PROVIDER_OFFLINE";
+  | "PROVIDER_OFFLINE"
+  | "RATE_LIMITED";
 
 export type IdentityProviderDiagnostics = {
+  cacheStatus?: "HIT" | "MISS";
   canonicalIdentities: string[];
   fallbackProvider?: string;
   game: Card["game"] | "Unknown";

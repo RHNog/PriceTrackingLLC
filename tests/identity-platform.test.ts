@@ -3,15 +3,16 @@ import test from "node:test";
 import { CanonicalCardIdentityAdapter } from "../lib/engines/identity/IdentityProviderAdapter.ts";
 import { IdentityOrchestrator, createIdentityProviderRegistry } from "../lib/engines/identity/IdentityOrchestrator.ts";
 import { IdentityProviderRegistry } from "../lib/engines/identity/IdentityProviderRegistry.ts";
+import { selectIdentityProvider } from "../lib/engines/identity/IdentityProviderSelection.ts";
 import type { IdentityProvider } from "../lib/engines/identity/IdentityProvider.ts";
 
-test("registers one operational game and four pending games", () => {
+test("registers Magic and Lorcana operationally with three pending games", () => {
   const matrix = createIdentityProviderRegistry().getCapabilityMatrix();
   assert.deepEqual(
     matrix.map((item) => [item.games[0], item.lifecycle]),
     [
       ["Magic", "OPERATIONAL"],
-      ["Lorcana", "PENDING_CONNECTION"],
+      ["Lorcana", "OPERATIONAL"],
       ["Pokemon", "PENDING_CONNECTION"],
       ["One Piece", "PENDING_CONNECTION"],
       ["Flesh and Blood", "PENDING_CONNECTION"],
@@ -19,12 +20,11 @@ test("registers one operational game and four pending games", () => {
   );
 });
 
-test("recognizes Mulan as Lorcana and does not execute the pending adapter", async () => {
-  const result = await new IdentityOrchestrator(createIdentityProviderRegistry()).search("Mulan");
-  assert.equal(result.status, "PROVIDER_PENDING");
-  assert.equal(result.message, "Lorcana provider not yet connected.");
-  assert.equal(result.orchestrationDiagnostics.providerSelected, "Lorcana");
-  assert.equal(result.results.length, 0);
+test("recognizes Mulan as Lorcana and selects Lorcast", () => {
+  const selection = selectIdentityProvider(createIdentityProviderRegistry(), { query: "Mulan" });
+  assert.equal(selection.game, "Lorcana");
+  assert.equal(selection.provider?.name, "Lorcast");
+  assert.equal(selection.provider?.capability.lifecycle, "OPERATIONAL");
 });
 
 test("reports the other known pending games distinctly", async () => {

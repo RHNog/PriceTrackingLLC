@@ -22,7 +22,7 @@ Implement the provider-agnostic Identity Platform defined in `docs/architecture/
 ## Implementation Requirements
 
 - Create all seven requested identity-engine modules.
-- Register Scryfall operationally and four named pending adapters.
+- Register Scryfall operationally and initially establish four named provider slots; PHR-API-001 subsequently makes Lorcast operational for Lorcana.
 - Produce canonical identity results and typed lifecycle outcomes.
 - Route identity API, Vendor Workspace initialization, and Identity Explorer through the orchestrator.
 - Surface pending-provider messages and orchestration diagnostics in the Command Palette.
@@ -40,7 +40,7 @@ Application → Identity Orchestrator → selection policy → identity registry
 
 ## Testing Expectations
 
-- Validate operational Magic, four pending games, no-match, unconfigured, and offline contracts.
+- Validate operational Magic and Lorcana, three pending games, no-match, unconfigured, and offline contracts.
 - Run ESLint, focused tests, existing identity tests, and production build.
 
 ## Documentation Updates

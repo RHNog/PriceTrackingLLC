@@ -4,7 +4,7 @@
 
 Identity application flows use `IdentityOrchestrator`, never concrete providers. The orchestrator parses game/search context, selects from `IdentityProviderRegistry`, checks lifecycle capability, executes an operational provider, delegates existing canonical/intent resolution, and adapts results into the canonical identity model.
 
-Current capability matrix is Magic/Scryfall operational with Lorcana, Pokémon, One Piece, and Flesh and Blood registered as pending connections. Identity artwork is provider identity data; market providers do not own it.
+Current capability matrix has Magic/Scryfall and Lorcana/Lorcast operational, with Pokémon, One Piece, and Flesh and Blood registered as pending connections. Identity artwork is provider identity data; market providers do not own it. Lorcast prices are explicitly excluded.
 
 Project Phronesis (Engineering Initiative) is the internal engineering identity for this architecture. The commercial product name remains undecided. The architecture reflects practical judgment: observations are separated from reasoning, evidence precedes conclusions, and business decisions remain explainable.
 
