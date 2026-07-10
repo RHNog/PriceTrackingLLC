@@ -8,6 +8,27 @@ Project Phronesis is the internal engineering identity for the initiative buildi
 
 Planning documents are separated by responsibility:
 
+- Documentation-first development system: `docs/DOCUMENTATION_FIRST_DEVELOPMENT.md`
+- Feature registry: `docs/FEATURE_REGISTRY.md`
+- Feature specification template: `docs/templates/FeatureSpecificationTemplate.md`
+- Implementation prompt template: `docs/templates/ImplementationPromptTemplate.md`
+- PHR-TECH-001 specification: `docs/technical/PHR-TECH-001-documentation-first-development-system.md`
+- PHR-TECH-001 implementation prompt: `docs/prompts/PHR-TECH-001-implementation-prompt.md`
+- Project Phronesis founding charter: `docs/PROJECT_PHRONESIS_FOUNDING_CHARTER.md`
+- PHR-ARCH-001 founding charter specification: `docs/architecture/PHR-ARCH-001-founding-charter.md`
+- Foundation index: `FOUNDATION/FOUNDATION_INDEX.md`
+- Foundation engineering philosophy: `FOUNDATION/ENGINEERING_PHILOSOPHY.md`
+- Foundation product philosophy: `FOUNDATION/PRODUCT_PHILOSOPHY.md`
+- Foundation business philosophy: `FOUNDATION/BUSINESS_PHILOSOPHY.md`
+- Foundation decision principles: `FOUNDATION/DECISION_PRINCIPLES.md`
+- Foundation communication principles: `FOUNDATION/COMMUNICATION_PRINCIPLES.md`
+- PHR-ARCH-002 foundation governance specification: `docs/architecture/PHR-ARCH-002-foundation-governance.md`
+- Corporate Foundation organization: `docs/architecture/PHR-ARCH-003-corporate-foundation-organization.md`
+- Brand production brief: `FOUNDATION/02_Brand/Brand_Production_Brief_v1.0.md`
+- Partnership submission package: `FOUNDATION/PARTNERSHIP_SUBMISSION_PACKAGE/README.md`
+- PHR-UX-001 executive partnership deck: `docs/ux/PHR-UX-001-executive-partnership-deck.md`
+- PHR-WORKFLOW-001 Market Watch MVP: `docs/workflows/PHR-WORKFLOW-001-market-watch-mvp.md`
+- TCGplayer executive partnership deck source: `docs/business/TCGPLAYER_EXECUTIVE_PARTNERSHIP_DECK.md`
 - Project Phronesis: `docs/PROJECT_PHRONESIS.md`
 - Brand philosophy: `docs/BRAND_PHILOSOPHY.md`
 - Engineering roadmap: `docs/ROADMAP.md`
@@ -29,6 +50,77 @@ Rule:
 
 Engineering, product, and business planning should evolve independently. Product ideas should not be promoted into engineering work until they are scoped into an engineering roadmap item or work order.
 
+Documentation-first rule:
+
+Every meaningful change must be classified, documented with a permanent Feature ID, and kept traceable through specifications, prompts, implementation notes, release notes, and dependent documentation. Implementation follows documentation. The initial system record is `PHR-TECH-001`.
+
+## Documentation-First Development Registration
+
+Registered system:
+
+- Feature ID: `PHR-TECH-001`
+- Name: Documentation-First Development System
+- Status: Completed
+- Source of truth: `docs/DOCUMENTATION_FIRST_DEVELOPMENT.md`
+- Specification: `docs/technical/PHR-TECH-001-documentation-first-development-system.md`
+- Implementation prompt: `docs/prompts/PHR-TECH-001-implementation-prompt.md`
+- Templates: `docs/templates/FeatureSpecificationTemplate.md` and `docs/templates/ImplementationPromptTemplate.md`
+- Agent rule: `AGENTS.md`
+
+Documentation taxonomy:
+
+- `docs/backlog/`
+- `docs/prd/`
+- `docs/architecture/`
+- `docs/technical/`
+- `docs/database/`
+- `docs/api/`
+- `docs/ui/`
+- `docs/ux/`
+- `docs/workflows/`
+- `docs/business-rules/`
+- `docs/testing/`
+- `docs/roadmap/`
+- `docs/release-notes/`
+- `docs/future/`
+- `docs/prompts/`
+
+## Market Watch MVP Registration
+
+Registered workflow:
+
+- Feature ID: `PHR-WORKFLOW-001`
+- Name: Market Watch MVP
+- Status: Completed
+- Workflow specification: `docs/workflows/PHR-WORKFLOW-001-market-watch-mvp.md`
+- Implementation prompt: `docs/prompts/PHR-WORKFLOW-001-implementation-prompt.md`
+- Validation: `docs/testing/PHR-WORKFLOW-001-market-watch-validation.md`
+- Release note: `docs/release-notes/PHR-WORKFLOW-001.md`
+- Feature registry: `docs/FEATURE_REGISTRY.md`
+
+Request economy rule:
+
+Market Watch is a repository-first workflow. Initial load must not call providers. Manual refresh targets one entry and delegates repository/provider selection to the existing Market Refresh Scheduler. Developer diagnostics must explain repository hit, provider hit, replay, cache age, observation age, API saved, and provider-request justification.
+
+## Executive Partnership Deck Registration
+
+Registered artifact:
+
+- Feature ID: `PHR-UX-001`
+- Name: TCGplayer Executive Partnership Deck
+- Status: Completed
+- Source proposal: `docs/business/TCGPLAYER_ECOSYSTEM_PARTNERSHIP_PROPOSAL.md`
+- Deck source: `docs/business/TCGPLAYER_EXECUTIVE_PARTNERSHIP_DECK.md`
+- PPTX: `docs/business/TCGPLAYER_EXECUTIVE_PARTNERSHIP_DECK.pptx`
+- Google Slides compatible PPTX: `docs/business/TCGPLAYER_EXECUTIVE_PARTNERSHIP_DECK.google-slides-compatible.pptx`
+- DOCX: `docs/business/TCGPLAYER_EXECUTIVE_PARTNERSHIP_DECK.docx`
+- PDF: `docs/business/TCGPLAYER_EXECUTIVE_PARTNERSHIP_DECK.pdf`
+- Validation: `docs/testing/PHR-UX-001-deck-validation.md`
+
+Communication rule:
+
+The executive deck should remove obstacles between the reader and the core message. Design exists to improve comprehension, not to decorate the proposal.
+
 ## Project Phronesis Registration
 
 Registered identity:
@@ -39,6 +131,64 @@ Registered identity:
 - Philosophy: practical judgment, evidence before conclusions, explainable intelligence, observations separated from reasoning, and transparent business decisions
 - Brand rule: not the selected commercial product name
 - Partnership language: the internal engineering initiative responsible for building an evidence-driven decision intelligence platform for collectible markets
+
+## Founding Charter Registration
+
+Registered charter:
+
+- Feature ID: `PHR-ARCH-001`
+- Name: Project Phronesis Founding Charter
+- Status: Completed
+- Charter: `docs/PROJECT_PHRONESIS_FOUNDING_CHARTER.md`
+- Specification: `docs/architecture/PHR-ARCH-001-founding-charter.md`
+- Release note: `docs/release-notes/PHR-ARCH-001.md`
+
+Charter rule:
+
+The charter is the durable philosophy and operating standard for Project Phronesis. Future contributors should use it to make decisions consistent with the engineering organization when founders are not present.
+
+## Foundation Governance Registration
+
+Registered governing foundation:
+
+- Feature ID: `PHR-ARCH-002`
+- Name: Project Phronesis Foundation Governance System
+- Status: Completed
+- Foundation index: `FOUNDATION/FOUNDATION_INDEX.md`
+- Founding charter: `FOUNDATION/PROJECT_PHRONESIS_FOUNDING_CHARTER.md`
+- Engineering philosophy: `FOUNDATION/ENGINEERING_PHILOSOPHY.md`
+- Product philosophy: `FOUNDATION/PRODUCT_PHILOSOPHY.md`
+- Business philosophy: `FOUNDATION/BUSINESS_PHILOSOPHY.md`
+- Decision principles: `FOUNDATION/DECISION_PRINCIPLES.md`
+- Communication principles: `FOUNDATION/COMMUNICATION_PRINCIPLES.md`
+- Specification: `docs/architecture/PHR-ARCH-002-foundation-governance.md`
+- Release note: `docs/release-notes/PHR-ARCH-002.md`
+
+Foundation rule:
+
+Every future work order begins with Foundation Check, then Architecture Check, then Implementation. The Foundation governs engineering, product, business, partnership, brand, and communication decisions.
+
+## Corporate Foundation Organization Registration
+
+Registered organization:
+
+- Feature ID: `PHR-ARCH-003`
+- Name: Corporate Foundation Organization
+- Status: Completed
+- Foundation root: `FOUNDATION/`
+- Founding documents: `FOUNDATION/01_Founding/`
+- Brand documents: `FOUNDATION/02_Brand/`
+- Business documents: `FOUNDATION/03_Business/`
+- Partnership documents: `FOUNDATION/04_Partnerships/`
+- Templates: `FOUNDATION/05_Templates/`
+- Presentations: `FOUNDATION/06_Presentations/`
+- Submission package: `FOUNDATION/PARTNERSHIP_SUBMISSION_PACKAGE/`
+- Specification: `docs/architecture/PHR-ARCH-003-corporate-foundation-organization.md`
+- Validation: `docs/testing/PHR-ARCH-003-foundation-organization-validation.md`
+
+No duplicate maintenance rule:
+
+Canonical documents should be updated first. The partnership submission package contains copies and should be refreshed by copying from canonical documents before use.
 
 ## Partnership Documentation Registration
 

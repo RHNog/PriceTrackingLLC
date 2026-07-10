@@ -1,5 +1,20 @@
 # Decisions
 
+## PHR-TECH-001: Documentation Is Part Of Implementation
+
+Decision: establish a repository-wide Documentation-First Development System.
+
+Rationale:
+
+- Project Phronesis is a long-term AI-assisted engineering effort.
+- Future work must remain understandable, traceable, and reusable by humans and AI coding agents.
+- Implementation-grade documentation reduces duplicated decisions, stale assumptions, and architecture drift.
+- Permanent Feature IDs create traceability from idea to specification, implementation prompt, tests, release notes, and future enhancements.
+
+Constraint: this decision is documentation-only. It does not modify application runtime behavior.
+
+Rule: every meaningful change must be classified, documented with a permanent Feature ID, and kept current in dependent documentation. Implementation follows documentation, not the other way around.
+
 ## Sprint 33: Development Replays Certified Provider Observations
 
 Decision: introduce Provider Replay as a provider implementation detail under `lib/providers/replay/`.

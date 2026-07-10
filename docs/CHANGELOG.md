@@ -4,6 +4,21 @@
 
 ### Added
 
+- PHR-TECH-001 Documentation-First Development System.
+- Repository-wide documentation-first workflow in `docs/DOCUMENTATION_FIRST_DEVELOPMENT.md`.
+- Feature specification template and implementation prompt template.
+- Permanent documentation taxonomy under `docs/backlog`, `docs/prd`, `docs/architecture`, `docs/technical`, `docs/database`, `docs/api`, `docs/ui`, `docs/ux`, `docs/workflows`, `docs/business-rules`, `docs/testing`, `docs/roadmap`, `docs/release-notes`, `docs/future`, and `docs/prompts`.
+- Repository-level AI instructions requiring documentation-first behavior for meaningful changes.
+- PHR-ARCH-001 Project Phronesis Founding Charter.
+- Founding charter guidance for philosophy, culture, engineering discipline, visual identity, communication standards, AI-assisted development, long-term vision, and founder-absent decision making.
+- PHR-ARCH-002 Project Phronesis Foundation Governance System.
+- Root `FOUNDATION/` layer governing engineering, product, business, partnership, brand, communication, and future work order checks.
+- PHR-ARCH-003 Corporate Foundation Organization.
+- Brand Production Brief in Markdown, DOCX, and PDF.
+- Brand Board PNG.
+- Partnership Submission Package for reusable partner proposal generation with external AI systems.
+- PHR-UX-001 Executive Partnership Deck for the TCGplayer ecosystem partnership proposal.
+- Editable PPTX, Google Slides compatible PPTX, DOCX, PDF, and Markdown deck source for the TCGplayer executive partnership deck.
 - Sprint 33 Provider Replay & Fixture Infrastructure documentation.
 - Sprint 33.1 fixture identity model documentation for exact replay lookup by asset, printing, collector number, finish, condition, language, provider product identifier, and provider variant identifier.
 - Replay lifecycle, fixture format, development workflow, and provider certification workflow documentation.

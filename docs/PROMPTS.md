@@ -2,6 +2,16 @@
 
 This file summarizes major prompts and architectural instructions. It intentionally avoids copying every prompt in full.
 
+## PHR-TECH-001
+
+Purpose: establish the Documentation-First Development System.
+
+Core instruction: documentation is part of implementation. Every meaningful change must be classified, assigned or linked to a permanent Feature ID, documented through an implementation-grade specification, and paired with an AI-ready implementation prompt when implementation work is required.
+
+Major files affected: `AGENTS.md`, `docs/DOCUMENTATION_FIRST_DEVELOPMENT.md`, `docs/templates/FeatureSpecificationTemplate.md`, `docs/templates/ImplementationPromptTemplate.md`, `docs/technical/PHR-TECH-001-documentation-first-development-system.md`, `docs/prompts/PHR-TECH-001-implementation-prompt.md`, and documentation taxonomy folders under `docs/`.
+
+Result: future AI-assisted engineering work has a repository-level process for documentation, classification, traceability, and reusable implementation prompts.
+
 ## Sprint 33
 
 Purpose: introduce Provider Replay & Fixture Infrastructure.

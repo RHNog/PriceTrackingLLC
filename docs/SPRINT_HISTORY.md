@@ -2,6 +2,18 @@
 
 This file records logical product milestones. Sprint numbers may not perfectly match commit history.
 
+## Sprint 36
+
+Introduced Market Watch MVP as the first production-ready daily workflow.
+
+- Added `features/watchlist/` with workspace, table, card, toolbar, storage, and refresh engine modules.
+- Replaced the `/watchlists` surface with an information-dense Market Watch dashboard.
+- Added target selling price math, difference, percent to target, market status, refresh status, observation source, and refresh priority.
+- Preserved repository-first behavior by routing manual single-entry refreshes through the existing market snapshot API and `MarketRefreshScheduler`.
+- Added request economy diagnostics for repository hit, provider hit, replay, cache age, observation age, API saved, and provider-request justification.
+- Seeded daily-use examples for Mox Opal, Lightning Bolt, Collected Company, and a Lorcana asset.
+- Preserved Repository, Replay, Market Intelligence, Assessment, Strategy, Negotiation, Decision, notifications, charts, and automation boundaries.
+
 ## Sprint 34
 
 Introduced the first Market Intelligence Engine.

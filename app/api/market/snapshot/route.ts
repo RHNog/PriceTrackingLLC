@@ -77,6 +77,7 @@ function createPrices(snapshot: MarketIntelligenceRepositorySnapshot): MarketPri
 
 function toApiMarketSnapshot(
   snapshot: MarketIntelligenceRepositorySnapshot,
+  source?: MarketRepositoryReadResult["source"],
   diagnostics?: MarketRepositoryReadResult["diagnostics"],
 ): MarketSnapshot {
   const prices = createPrices(snapshot);
@@ -154,6 +155,7 @@ function toApiMarketSnapshot(
       requestedCondition: snapshot.identity.condition,
       requestedUiField:
         selectedEvidence?.projection?.requestedUiField ?? selectedEvidence?.field ?? null,
+      repositorySource: source,
       resolvedEvidenceDomain:
         selectedEvidence?.projection?.resolvedEvidenceDomain ?? null,
       selectedProvider: selectedEvidence?.selectedProvider ?? null,
@@ -194,6 +196,6 @@ export async function GET(request: Request) {
   });
 
   return NextResponse.json(
-    toApiMarketSnapshot(result.repositorySnapshot, result.diagnostics),
+    toApiMarketSnapshot(result.repositorySnapshot, result.source, result.diagnostics),
   );
 }

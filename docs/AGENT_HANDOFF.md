@@ -1,5 +1,21 @@
 # Agent Handoff
 
+## Documentation-First Development Handoff
+
+Documentation is part of implementation.
+
+Source of truth: `docs/DOCUMENTATION_FIRST_DEVELOPMENT.md`.
+
+Initial feature record: `PHR-TECH-001` in `docs/technical/PHR-TECH-001-documentation-first-development-system.md`.
+
+Before or alongside meaningful implementation work, classify the change and create or update a feature specification using `docs/templates/FeatureSpecificationTemplate.md`. If implementation work is required, create or update an AI-ready prompt using `docs/templates/ImplementationPromptTemplate.md`.
+
+Preserve permanent Feature IDs. If an existing feature changes, update the existing specification, record the modification date and reason, and update dependent documentation.
+
+Use category folders under `docs/` for implementation-grade specifications: backlog, prd, architecture, technical, database, api, ui, ux, workflows, business-rules, testing, roadmap, release-notes, future, and prompts.
+
+Do not treat improvement suggestions as approved scope. Present them separately for approval.
+
 ## Sprint 33 Handoff
 
 Provider Replay lives in `lib/providers/replay/`.

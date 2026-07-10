@@ -4,7 +4,18 @@ This is the engineering roadmap. Product-facing ideas now live in `docs/PRODUCT_
 
 Project Phronesis (Engineering Initiative) is the engineering identity for this roadmap. It does not rename the repository, package, app, or future commercial product.
 
-## Current Sprint: Sprint 34
+## Current Sprint: Sprint 36
+
+Market Watch MVP introduces the first production-ready workflow intended for daily use.
+
+- Connected: `/watchlists` Market Watch workspace, watchlist storage, target price tracking, target progress math, refresh priority, developer diagnostics, and single-entry manual refresh.
+- Request economy: initial load uses repository/local observations and performs zero provider requests; manual refresh is the only refresh action.
+- Repository-first philosophy: refreshes use the existing market snapshot API and scheduler, so fresh repository evidence is reused before any provider request is considered.
+- Verified: seeded Mox Opal, Lightning Bolt, Collected Company, and Lorcana example entries load in the workspace.
+- Deferred: notifications, alerts, charts, automation, bulk refresh, and server-side watchlist persistence.
+- Compatibility: Repository, Replay, Market Intelligence, Assessment, Strategy, Negotiation, and Decision behavior remain unchanged.
+
+## Recently Completed: Sprint 34
 
 Market Intelligence now interprets provider observations into explainable market profiles.
 

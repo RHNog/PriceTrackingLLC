@@ -63,6 +63,7 @@ export interface MarketEvidenceDiagnostics {
   projectionUsed: boolean;
   requestedCondition: string;
   requestedUiField: string | null;
+  repositorySource?: string;
   resolvedEvidenceDomain: string | null;
   selectedProvider: string | null;
 }
